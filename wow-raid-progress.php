@@ -23,6 +23,12 @@ define('WOW_RAID_PROGRESS_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 // Load text domain for translations
 add_action('plugins_loaded', 'wow_raid_progress_load_textdomain');
+
+/**
+ * Load plugin text domain for internationalization.
+ *
+ * @return void
+ */
 function wow_raid_progress_load_textdomain() {
     load_plugin_textdomain('wow-raid-progress', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
@@ -34,6 +40,12 @@ require_once WOW_RAID_PROGRESS_PLUGIN_DIR . 'includes/class-wow-raid-progress-ap
 require_once WOW_RAID_PROGRESS_PLUGIN_DIR . 'includes/class-wow-raid-progress-widget.php';
 
 // Initialize the plugin
+
+/**
+ * Bootstraps the core plugin functionality.
+ *
+ * @return void
+ */
 function wow_raid_progress_init() {
     $plugin = new WoWRaidProgress();
     $plugin->run();
@@ -42,6 +54,13 @@ add_action('plugins_loaded', 'wow_raid_progress_init');
 
 // Activation hook
 register_activation_hook(__FILE__, 'wow_raid_progress_activate');
+
+/**
+ * Runs during plugin activation.
+ * Sets up default options and required database structures.
+ *
+ * @return void
+ */
 function wow_raid_progress_activate() {
     // Set default options
     $defaults = wow_raid_progress_get_default_options();
@@ -50,28 +69,44 @@ function wow_raid_progress_activate() {
             add_option($option_name, $default_value);
         }
     }
-    
+
     // Create database table for cached raids if needed
     wow_raid_progress_create_cache_table();
-    
+
     // Flush rewrite rules
     flush_rewrite_rules();
 }
 
 // Deactivation hook
 register_deactivation_hook(__FILE__, 'wow_raid_progress_deactivate');
+
+/**
+ * Runs on plugin deactivation.
+ * Cleans up cached data and scheduled events.
+ *
+ * @return void
+ */
 function wow_raid_progress_deactivate() {
-    // Clear all transients
-    global $wpdb;
-    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wow_raid_%' OR option_name LIKE '_transient_timeout_wow_raid_%'");
-    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wow_blizzard_%' OR option_name LIKE '_transient_timeout_wow_blizzard_%'");
-    
+    wow_raid_progress_clear_transients([
+        '_transient_wow_raid_%',
+        '_transient_timeout_wow_raid_%',
+        '_transient_wow_blizzard_%',
+        '_transient_timeout_wow_blizzard_%'
+    ]);
+
     // Clear scheduled events if any
     wp_clear_scheduled_hook('wow_raid_progress_cron');
 }
 
 // Uninstall hook
 register_uninstall_hook(__FILE__, 'wow_raid_progress_uninstall');
+
+/**
+ * Runs on plugin uninstall.
+ * Removes stored options and cached transients.
+ *
+ * @return void
+ */
 function wow_raid_progress_uninstall() {
     // Remove all options
     $options = [
@@ -92,18 +127,24 @@ function wow_raid_progress_uninstall() {
         'wow_raid_progress_blizzard_region',
         'wow_raid_progress_cached_raids'
     ];
-    
+
     foreach ($options as $option) {
         delete_option($option);
     }
-    
-    // Remove all transients
-    global $wpdb;
-    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wow_%'");
-    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_wow_%'");
+
+    wow_raid_progress_clear_transients([
+        '_transient_wow_%',
+        '_transient_timeout_wow_%'
+    ]);
 }
 
 // Helper function to get default options
+
+/**
+ * Retrieve plugin default option values.
+ *
+ * @return array
+ */
 function wow_raid_progress_get_default_options() {
     return [
         'wow_raid_progress_api_key' => '',
@@ -126,11 +167,17 @@ function wow_raid_progress_get_default_options() {
 }
 
 // Create cache table for raids
+
+/**
+ * Create database table used for caching raid information.
+ *
+ * @return void
+ */
 function wow_raid_progress_create_cache_table() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'wow_raid_cache';
     $charset_collate = $wpdb->get_charset_collate();
-    
+
     $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         expansion_id int(11) NOT NULL,
@@ -139,7 +186,25 @@ function wow_raid_progress_create_cache_table() {
         PRIMARY KEY (id),
         KEY expansion_id (expansion_id)
     ) $charset_collate;";
-    
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
+}
+
+/**
+ * Remove plugin transients matching the provided patterns.
+ *
+ * @param array $patterns Array of SQL LIKE patterns.
+ * @return void
+ */
+function wow_raid_progress_clear_transients(array $patterns) {
+    global $wpdb;
+    foreach ($patterns as $pattern) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+                $pattern
+            )
+        );
+    }
 }

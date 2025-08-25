@@ -70,7 +70,7 @@ class WoWRaidProgressWidget {
 		$raid_slug = sanitize_text_field($atts['raid']);
 		$difficulty = $this->validate_difficulty($atts['difficulty']);
 		$region = sanitize_text_field($atts['region']);
-		$realm  = $this->api->sanitize_realm($atts['realm']);
+		$realm	= $this->api->sanitize_realm($atts['realm']);
 		$guilds = $this->api->sanitize_guilds($atts['guilds']);
 		$cache_minutes = absint($atts['cache']);
 		$show_icons = filter_var($atts['show_icons'], FILTER_VALIDATE_BOOLEAN);
@@ -182,7 +182,10 @@ class WoWRaidProgressWidget {
 		// Try to get journal background image
 		$bg_image_url = '';
 		if ($show_raid_icon && $use_blizzard_icons) {
-			$bg_image_url = $this->api->get_journal_instance_image($raid_slug, $expansion_id);
+			$bg_image_id = $this->api->get_journal_instance_image_id($raid_slug, $expansion_id);
+			if ($bg_image_id) {
+				$bg_image_url = wp_get_attachment_image_url($bg_image_id, 'full');
+			}
 		}
 
 		$output = '<div class="wow-raid-header-container">';
@@ -227,7 +230,10 @@ class WoWRaidProgressWidget {
 		// Get background image if needed
 		$bg_image_url = '';
 		if ($show_raid_icon && $use_blizzard_icons) {
-			$bg_image_url = $this->api->get_journal_instance_image($raid_slug, $expansion_id);
+			$bg_image_id = $this->api->get_journal_instance_image_id($raid_slug, $expansion_id);
+			if ($bg_image_id) {
+				$bg_image_url = wp_get_attachment_image_url($bg_image_id, 'full');
+			}
 		}
 
 		$output = '<div class="wow-raid-progress">';
@@ -259,7 +265,7 @@ class WoWRaidProgressWidget {
 			];
 
 			$target = $this->find_highest_progress_difficulty($all, $raid_info);
-			$data   = isset($all[$target]) ? $all[$target] : ['raidRankings' => []];
+			$data	= isset($all[$target]) ? $all[$target] : ['raidRankings' => []];
 
 			if (is_wp_error($data)) {
 				if (!$this->is_rate_limit_error($data)) {
@@ -421,18 +427,17 @@ class WoWRaidProgressWidget {
 			$data = $all_difficulties_data[$diff] ?? null;
 
 			if (is_wp_error($data)) {
-				if (!$this->is_rate_limit_error($data)) {
-					$output .= $this->render_error_inline(
-						sprintf(
-							__('Error loading %s data for guild %s: %s', 'wow-raid-progress'),
-							ucfirst($diff),
-							$guild_id,
-							$data->get_error_message()
-						)
-					);
-				}
-				continue;
-			}
+			$this->api->debug_log('Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message());
+			$output .= $this->render_error_inline(
+			sprintf(
+			__('Error loading %s data for guild %s: %s', 'wow-raid-progress'),
+			ucfirst($diff),
+			$guild_id,
+			$data->get_error_message()
+			)
+			);
+			continue;
+}
 
 			if (empty($data) || empty($data['raidRankings'])) {
 				// Render the requested tier's boss grid (even if 0/8)
@@ -450,18 +455,22 @@ class WoWRaidProgressWidget {
 			}
 
 			$output .= $this->render_difficulty_section(
-				$data,
-				$diff,
-				$raid_info,
-				$all_difficulties_data,
-				$show_icons,
-				$show_killed,
-				$use_blizzard_icons,
-				$expansion_id
+			$data,
+			$diff,
+			$raid_info,
+			$all_difficulties_data,
+			$show_icons,
+			$show_killed,
+			$use_blizzard_icons,
+			$expansion_id
 			);
+}
+
+		if ($output === '') {
+		$output = $this->render_error_inline(__('No raid data available for this guild.', 'wow-raid-progress'));
 		}
 
-		return $output;
+return $output;
 	}
 
 	/**
@@ -487,7 +496,7 @@ class WoWRaidProgressWidget {
 
 		// Rank panel fields (prefer current tier, fallback to lower)
 		$guild_info = $ranking_entry['guild'] ?? null;
-		$rank       = $ranking_entry['rank'] ?? null;
+		$rank	    = $ranking_entry['rank'] ?? null;
 		$world_rank = $data['worldRanking'] ?? null;
 
 		// Pull just the rank/name/realm/region from a lower tier if missing
@@ -495,9 +504,9 @@ class WoWRaidProgressWidget {
 			$source_data = $this->find_fallback_data($all_difficulties_data, $difficulty);
 			if ($source_data && !is_wp_error($source_data) && !empty($source_data['raidRankings'][0])) {
 				$src = $source_data['raidRankings'][0];
-				if (empty($guild_info))   $guild_info = $src['guild'] ?? null;
-				if (!is_numeric($rank))   $rank = $src['rank'] ?? null;
-				if (empty($world_rank))   $world_rank = $source_data['worldRanking'] ?? null;
+				if (empty($guild_info))	  $guild_info = $src['guild'] ?? null;
+				if (!is_numeric($rank))	  $rank = $src['rank'] ?? null;
+				if (empty($world_rank))	  $world_rank = $source_data['worldRanking'] ?? null;
 			}
 		}
 
