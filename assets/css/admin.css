@@ -1,0 +1,631 @@
+/**
+ * WoW Raid Progress - Admin Styles
+ * Version: 5.0.1
+ */
+
+/* Admin Container */
+.wow-raid-progress-admin {
+	max-width: 1200px;
+	margin: 20px 0;
+}
+
+/* Tabs Navigation */
+.wow-raid-tabs {
+	margin-bottom: 20px;
+}
+
+.wow-raid-tabs .nav-tab-wrapper {
+	border-bottom: 1px solid #ccc;
+	margin: 0;
+	padding: 0;
+}
+
+.wow-raid-tabs .nav-tab {
+	margin-left: 0;
+	margin-right: 0.5em;
+	cursor: pointer;
+	background: #fff;
+	border: 1px solid #ccc;
+	border-bottom: none;
+	padding: 10px 20px;
+	font-size: 14px;
+	transition: all 0.2s ease;
+}
+
+.wow-raid-tabs .nav-tab:hover {
+	background: #f7f7f7;
+}
+
+.wow-raid-tabs .nav-tab-active {
+	background: #f1f1f1;
+	border-bottom: 1px solid #f1f1f1;
+	font-weight: 600;
+}
+
+/* Tab Content */
+.tab-content {
+	display: none;
+	animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+	display: block;
+}
+
+/* Hide WordPress settings-updated notice when we have our own */
+body.settings_page_wow-raid-progress .notice-success#setting-error-settings_updated {
+	display: none !important;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Settings Sections */
+.wow-raid-settings-section {
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	border-radius: 4px;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.wow-raid-settings-section h2 {
+	margin-top: 0;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #e5e5e5;
+	color: #23282d;
+	font-size: 18px;
+}
+
+.wow-raid-settings-section h3 {
+	margin-top: 0;
+	margin-bottom: 15px;
+	color: #23282d;
+	font-size: 16px;
+}
+
+/* Form Tables */
+.wow-raid-settings-section .form-table {
+	margin-top: 0;
+}
+
+.wow-raid-settings-section .form-table th {
+	padding-left: 0;
+	font-weight: 600;
+	color: #23282d;
+}
+
+.wow-raid-settings-section .form-table td {
+	padding-right: 0;
+}
+
+/* Raid Selection Row - Fix Button Alignment */
+.wow-raid-settings-section .form-table td select#wow_raid_progress_raid {
+	margin-right: 10px;
+}
+
+#refresh-raids-btn {
+	vertical-align: middle !important;
+	margin-top: -2px;
+}
+
+/* Description Text */
+.wow-raid-settings-section .description {
+	font-size: 13px;
+	color: #666;
+	margin-top: 5px;
+	line-height: 1.5;
+}
+
+.wow-raid-settings-section .description a {
+	color: #0073aa;
+	text-decoration: none;
+}
+
+.wow-raid-settings-section .description a:hover {
+	color: #00a0d2;
+	text-decoration: underline;
+}
+
+/* Tool Cards */
+.wow-raid-tool-card {
+	background: #f9f9f9;
+	border: 1px solid #e5e5e5;
+	border-radius: 4px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.wow-raid-tool-card h3 {
+	margin-top: 0;
+	margin-bottom: 10px;
+	color: #23282d;
+	font-size: 15px;
+}
+
+.wow-raid-tool-card p {
+	color: #666;
+	margin-bottom: 15px;
+	line-height: 1.6;
+}
+
+.wow-raid-tool-card .button {
+	margin-right: 10px;
+}
+
+/* Warning styles for destructive actions */
+.wow-raid-tool-card.warning {
+	background: #fff3cd;
+	border-color: #ffc107;
+}
+
+.wow-raid-tool-card.warning h3 {
+	color: #856404;
+}
+
+.wow-raid-tool-card.warning .button-danger {
+	background: #dc3545;
+	border-color: #dc3545;
+	color: #fff;
+}
+
+.wow-raid-tool-card.warning .button-danger:hover {
+	background: #c82333;
+	border-color: #bd2130;
+}
+
+/* Status Messages */
+#import-status,
+#cache-clear-message,
+#delete-icons-message {
+	margin-top: 15px;
+	padding: 12px;
+	border-radius: 4px;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+#import-status {
+	background: #f7f7f7;
+	border: 1px solid #ccc;
+}
+
+#import-status.notice-success {
+	background: #d4edda;
+	border-color: #c3e6cb;
+	color: #155724;
+}
+
+#import-status.notice-error {
+	background: #f8d7da;
+	border-color: #f5c6cb;
+	color: #721c24;
+}
+
+#cache-clear-message,
+#delete-icons-message {
+	display: inline-block;
+	padding: 8px 12px;
+	margin-left: 10px;
+	font-size: 13px;
+}
+
+/* Documentation Section */
+.wow-raid-doc-section {
+	margin-bottom: 30px;
+}
+
+.wow-raid-doc-section h3 {
+	color: #23282d;
+	margin-bottom: 15px;
+	font-size: 16px;
+}
+
+.wow-raid-doc-section h4 {
+	color: #555;
+	margin-top: 20px;
+	margin-bottom: 10px;
+	font-size: 14px;
+}
+
+.wow-raid-doc-section p {
+	color: #666;
+	line-height: 1.6;
+	margin-bottom: 10px;
+}
+
+/* Shortcode Examples */
+.shortcode-example {
+	display: block;
+	background: #f4f4f4;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 10px 15px;
+	margin: 10px 0;
+	font-family: 'Courier New', monospace;
+	font-size: 13px;
+	color: #333;
+	word-break: break-all;
+	white-space: pre-wrap;
+}
+
+/* Documentation Table */
+.wow-raid-doc-section table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 20px 0;
+}
+
+.wow-raid-doc-section table th {
+	background: #f1f1f1;
+	font-weight: 600;
+	text-align: left;
+	padding: 10px;
+	border: 1px solid #ddd;
+}
+
+.wow-raid-doc-section table td {
+	padding: 10px;
+	border: 1px solid #ddd;
+}
+
+.wow-raid-doc-section table code {
+	background: #f4f4f4;
+	padding: 2px 5px;
+	border-radius: 3px;
+	font-size: 12px;
+}
+
+/* Buttons */
+.wow-raid-progress-admin .button {
+	transition: all 0.2s ease;
+}
+
+.wow-raid-progress-admin .button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.wow-raid-progress-admin .button-primary:hover:not(:disabled) {
+	background: #005a87;
+	border-color: #005a87;
+}
+
+/* Select and Input Fields */
+.wow-raid-progress-admin select,
+.wow-raid-progress-admin input[type="text"],
+.wow-raid-progress-admin input[type="password"],
+.wow-raid-progress-admin input[type="number"] {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 5px 8px;
+	transition: border-color 0.2s ease;
+}
+
+.wow-raid-progress-admin select:focus,
+.wow-raid-progress-admin input[type="text"]:focus,
+.wow-raid-progress-admin input[type="password"]:focus,
+.wow-raid-progress-admin input[type="number"]:focus {
+	border-color: #5b9dd9;
+	outline: none;
+	box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
+}
+
+/* Loading State */
+.wow-raid-loading {
+	display: inline-block;
+	margin-left: 10px;
+	color: #666;
+}
+
+.wow-raid-loading::after {
+	content: '...';
+	display: inline-block;
+	animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+	0% {
+		content: '.';
+	}
+
+	33% {
+		content: '..';
+	}
+
+	66% {
+		content: '...';
+	}
+}
+
+/* Inline form elements */
+.inline-form-elements {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+/* Icon stats */
+.icon-stats {
+	display: inline-block;
+	margin-left: 10px;
+	padding: 5px 10px;
+	background: #f0f0f1;
+	border-radius: 3px;
+	font-size: 12px;
+	color: #666;
+}
+
+/* Hide WordPress default success message if our plugin message exists */
+body.settings_page_wow-raid-progress .notice#setting-error-settings_updated {
+	display: none !important;
+}
+
+/* Realm Selector */
+.wow-realm-selector {
+	position: relative;
+	max-width: 400px;
+}
+
+.wow-realm-dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	margin-top: 2px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+}
+
+.wow-realm-list {
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.wow-realm-item {
+	padding: 8px 12px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #f0f0f0;
+	transition: background-color 0.2s;
+}
+
+.wow-realm-item:last-child {
+	border-bottom: none;
+}
+
+.wow-realm-item:hover,
+.wow-realm-item.active {
+	background-color: #f0f0f1;
+}
+
+.wow-realm-item .realm-name {
+	font-weight: 500;
+	color: #23282d;
+}
+
+.wow-realm-item .realm-slug {
+	font-size: 11px;
+	color: #666;
+	font-style: italic;
+}
+
+.wow-realm-loading,
+.wow-realm-error,
+.wow-realm-empty,
+.wow-realm-no-results {
+	padding: 12px;
+	text-align: center;
+	color: #666;
+}
+
+.wow-realm-error {
+	color: #d63638;
+}
+
+/* Shortcode Copy */
+.shortcode-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 10px 0;
+}
+
+.shortcode-example {
+	flex: 1;
+	cursor: pointer;
+	user-select: all;
+}
+
+.shortcode-example:hover {
+	background-color: #f0f0f1;
+}
+
+.copy-shortcode {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	vertical-align: middle;
+}
+
+.copy-shortcode .dashicons::before {
+	vertical-align: middle;
+	line-height: 1;
+}
+
+.copy-shortcode .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	line-height: 16px;
+}
+
+.copy-shortcode.success {
+	background-color: #00a32a;
+	border-color: #00a32a;
+	color: #fff;
+}
+
+.copy-shortcode.success .dashicons::before {
+	content: "\f147";
+	/* Checkmark */
+}
+
+/* Scrollbar styling for realm list */
+.wow-realm-list::-webkit-scrollbar {
+	width: 8px;
+}
+
+.wow-realm-list::-webkit-scrollbar-track {
+	background: #f1f1f1;
+}
+
+.wow-realm-list::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 4px;
+}
+
+.wow-realm-list::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+	.wow-raid-progress-admin {
+		margin: 10px;
+	}
+
+	.wow-raid-tabs .nav-tab {
+		display: block;
+		margin: 0 0 5px 0;
+		width: 100%;
+	}
+
+	.wow-raid-settings-section {
+		padding: 15px;
+	}
+
+	.wow-raid-settings-section .form-table th {
+		display: block;
+		width: 100%;
+		padding-bottom: 5px;
+	}
+
+	.wow-raid-settings-section .form-table td {
+		display: block;
+		width: 100%;
+		padding-left: 0;
+	}
+
+	.wow-raid-doc-section table {
+		font-size: 12px;
+	}
+
+	.shortcode-example {
+		font-size: 11px;
+		overflow-x: auto;
+	}
+
+	.inline-form-elements {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	#refresh-raids-btn {
+		margin-top: 10px;
+	}
+}
+
+/* WordPress Admin Compatibility */
+.wow-raid-progress-admin .notice {
+	margin: 15px 0;
+}
+
+.wow-raid-progress-admin .wp-list-table {
+	margin-top: 0;
+}
+
+/* Submit Button Container */
+.wow-raid-progress-admin .submit {
+	padding: 20px 0 0;
+	margin: 20px 0 0;
+	border-top: 1px solid #e5e5e5;
+}
+
+/* Icon Import Status */
+#import-status strong {
+	display: block;
+	margin-bottom: 10px;
+	font-size: 14px;
+}
+
+#import-status .log-entry {
+	padding: 5px 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+	font-size: 12px;
+}
+
+#import-status .log-entry:last-child {
+	border-bottom: none;
+}
+
+#import-status .log-success {
+	color: #155724;
+}
+
+#import-status .log-info {
+	color: #004085;
+}
+
+#import-status .log-error {
+	color: #721c24;
+}
+
+/* Settings Updated Message - Custom */
+.wow-raid-success-message {
+	background: #d4edda;
+	border: 1px solid #c3e6cb;
+	border-left: 4px solid #28a745;
+	color: #155724;
+	padding: 12px;
+	margin: 15px 0;
+	border-radius: 4px;
+}
+
+/* Help Text */
+.wow-raid-help {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #666;
+	color: #fff;
+	text-align: center;
+	line-height: 16px;
+	font-size: 12px;
+	margin-left: 5px;
+	cursor: help;
+}
+
+.wow-raid-help:hover {
+	background: #0073aa;
+}

@@ -1,0 +1,526 @@
+# Copyright (C) 2024 Your Name
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WoW Raid Progress Tracker 5.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wow-raid-progress\n"
+"POT-Creation-Date: 2024-01-01 00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: includes/class-wow-raid-progress-admin.php:45
+msgid "WoW Raid Progress Settings"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:46
+msgid "WoW Raid Progress"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:258
+msgid "General Settings"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:259
+msgid "Display Settings"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:260
+msgid "Blizzard API"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:261
+msgid "Tools"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:262
+msgid "Documentation"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:272
+msgid "API Configuration"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:277
+msgid "Raider.io API Key"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:286
+msgid "Get your API key from"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:294
+msgid "Default Guild Settings"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:299
+msgid "Guild IDs"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:308
+msgid "Comma-separated Raider.io guild IDs. Leave empty to show realm rankings."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:314
+msgid "Default Region"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:328
+msgid "Default Realm"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:337
+msgid "Optional. Leave empty for region-wide rankings."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:344
+msgid "Default Raid Settings"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:349
+msgid "Expansion"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:363
+msgid "Default Raid"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:368
+msgid "Loading raids..."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:371
+msgid "Refresh Raids"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:374
+msgid "Select a raid from the chosen expansion"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:380
+msgid "Default Difficulty"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:386
+msgid "Highest Progress"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:389
+msgid "All Difficulties"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:392
+msgid "Normal"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:395
+msgid "Heroic"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:398
+msgid "Mythic"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:409
+msgid "Display Options"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:414
+msgid "Show Boss Icons"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:421
+#: includes/class-wow-raid-progress-admin.php:435
+#: includes/class-wow-raid-progress-admin.php:451
+msgid "Yes"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:424
+#: includes/class-wow-raid-progress-admin.php:438
+#: includes/class-wow-raid-progress-admin.php:454
+msgid "No"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:431
+msgid "Show Defeated Bosses"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:442
+msgid "When set to No, defeated bosses will be hidden from the list"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:448
+msgid "Use Blizzard Icons"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:458
+msgid "Download and display official Blizzard achievement icons"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:464
+msgid "Results Limit"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:474
+msgid "Maximum number of guilds to display (1-100)"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:480
+msgid "Cache Duration"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:491
+msgid "minutes"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:493
+msgid "How long to cache API data (0 to disable caching)"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:503
+msgid "Blizzard API Configuration"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:505
+msgid "Required for downloading boss achievement icons. Get your credentials from"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:511
+msgid "Blizzard Region"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:525
+msgid "Client ID"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:537
+msgid "Client Secret"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:557
+msgid "Icon Management"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:559
+msgid "Import Boss Icons"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:560
+msgid "Download and import boss achievement icons for the selected raid from Blizzard API."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:562
+msgid "Import Icons"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:569
+msgid "Cache Management"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:571
+msgid "Clear All Cache"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:572
+msgid "Remove all cached API data and force fresh data retrieval."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:574
+msgid "Clear Cache"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:577
+msgid "Cache cleared successfully!"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:585
+msgid "Shortcode Documentation"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:588
+msgid "Basic Usage"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:589
+msgid "Use the following shortcode to display raid progress:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:591
+msgid "This will use all default settings configured above."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:595
+msgid "Shortcode Parameters"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:599
+msgid "Parameter"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:600
+msgid "Description"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:601
+msgid "Default"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:602
+msgid "Example"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:608
+msgid "Raid slug (e.g., nerub-ar-palace)"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:609
+#: includes/class-wow-raid-progress-admin.php:615
+#: includes/class-wow-raid-progress-admin.php:621
+#: includes/class-wow-raid-progress-admin.php:627
+#: includes/class-wow-raid-progress-admin.php:633
+#: includes/class-wow-raid-progress-admin.php:639
+#: includes/class-wow-raid-progress-admin.php:645
+#: includes/class-wow-raid-progress-admin.php:651
+#: includes/class-wow-raid-progress-admin.php:657
+#: includes/class-wow-raid-progress-admin.php:663
+msgid "From settings"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:614
+msgid "Difficulty to display: highest, all, normal, heroic, or mythic"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:620
+msgid "Region: us, eu, kr, or tw"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:626
+msgid "Specific realm name"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:632
+msgid "Comma-separated guild IDs"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:638
+msgid "Cache duration in minutes"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:644
+msgid "Show boss icons: true or false"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:650
+msgid "Show defeated bosses: true or false"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:656
+msgid "Use Blizzard icons: true or false"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:662
+msgid "Maximum number of guilds to display"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:668
+msgid "Page number for pagination"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:676
+msgid "Example Shortcodes"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:678
+msgid "Display specific guild progress:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:681
+msgid "Display multiple guilds:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:684
+msgid "Display realm rankings:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:687
+msgid "Display highest progress only:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:157
+msgid "Bosses"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:178
+msgid "Defeated"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:181
+msgid "Pulls:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:185
+msgid "Best:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:189
+msgid "Not Started"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:206
+msgid "Boss artwork © Blizzard Entertainment"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:302
+msgid "Realm:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:304
+msgid "World:"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:426
+msgid "Rank"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:427
+msgid "Guild"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:428
+msgid "Realm"
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:429
+msgid "Progress"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:42
+msgid "Raid name is required."
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:46
+msgid "Invalid difficulty specified."
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:50
+msgid "Invalid region specified."
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:64
+msgid "Raider.io API key not configured. Please configure it in the plugin settings."
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:123
+msgid "No guild data found for the specified parameters. Please check your guild ID, realm, and region settings."
+msgstr ""
+
+#: includes/class-wow-raid-progress-widget.php:XXX
+msgid "Raid icon"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Start typing to filter..."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Select a realm or leave empty for region-wide rankings."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Security check failed"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Could not fetch realms. Check Blizzard API settings."
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "API authentication failed. Please check your API key. Details: %s"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "Invalid or expired API key"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "Access forbidden. Please verify API key permissions. Details: %s"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "Insufficient permissions"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "Resource not found. Please check raid name and parameters. Details: %s"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "The requested raid or guild was not found"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "API rate limit exceeded. Please try again in a few minutes."
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "API server error. The service may be temporarily unavailable. Details: %s"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "Please try again later"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "API Error (HTTP %d): %s"
+msgstr ""
+
+#: includes/class-wow-raid-progress-api.php:XXX
+msgid "Unknown error occurred"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Type to search realms..."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Could not load realms. You can still type a realm name manually."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "No realms found for this region."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "No realms match your search."
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Copy to clipboard"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Copy"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Copied!"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Press Ctrl+C to copy"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Blizzard API (Optional)"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "Required for boss icons and realm list. Get credentials from"
+msgstr ""
+
+#: includes/class-wow-raid-progress-admin.php:XXX
+msgid "For KR/TW regions, you may need to enter the realm name manually."
+msgstr ""
