@@ -36,8 +36,9 @@ class WoWRaidProgress {
 
 		// AJAX hooks
 		add_action('wp_ajax_wow_raid_clear_cache', [$this->admin, 'ajax_clear_cache']);
-		add_action('wp_ajax_wow_raid_import_icons', [$this->admin, 'ajax_import_icons']);
-		add_action('wp_ajax_wow_raid_get_raids', [$this->admin, 'ajax_get_raids']);
+                add_action('wp_ajax_wow_raid_import_icons', [$this->admin, 'ajax_import_icons']);
+                add_action('wp_ajax_wow_raid_delete_icons', [$this->admin, 'ajax_delete_icons']);
+                add_action('wp_ajax_wow_raid_get_raids', [$this->admin, 'ajax_get_raids']);
 		add_action('wp_ajax_wow_raid_refresh_raids', [$this->admin, 'ajax_refresh_raids']);
 		add_action('wp_ajax_wow_raid_get_realms', [$this->admin, 'ajax_get_realms']);
 		add_action('wp_ajax_wow_raid_get_debug_log', [$this->admin, 'ajax_get_debug_log']);

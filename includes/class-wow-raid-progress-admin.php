@@ -217,19 +217,18 @@ class WoWRaidProgressAdmin {
 	/**
 	 * Enqueue admin assets
 	 */
-	public function enqueue_admin_assets($hook) {
-		// This condition might be too restrictive
-		if ($hook !== 'settings_page_wow-raid-progress') {
-			return;
-		}
+        public function enqueue_admin_assets($hook) {
+                // Only load assets on the plugin settings page
+                if ($hook !== 'settings_page_wow-raid-progress') {
+                        return;
+                }
 
-		// Make sure the path is correct
-		wp_enqueue_style(
-			'wow-raid-progress-admin',
-			WOW_RAID_PROGRESS_PLUGIN_URL . 'assets/css/admin.css',
-			[],
-			$this->version
-		);
+                wp_enqueue_style(
+                        'wow-raid-progress-admin',
+                        WOW_RAID_PROGRESS_PLUGIN_URL . 'assets/css/admin.css',
+                        [],
+                        $this->version
+                );
 
 		wp_enqueue_script(
 			'wow-raid-progress-admin',
@@ -1104,13 +1103,25 @@ class WoWRaidProgressAdmin {
 		$this->ajax_get_raids();
 	}
 
-	public function sanitize_realm($value) {
-		return $this->api->sanitize_realm($value);
-	}
+        /**
+         * Sanitize realm value from settings input.
+         *
+         * @param string $value Raw realm value.
+         * @return string Sanitized realm string.
+         */
+        public function sanitize_realm($value) {
+                return $this->api->sanitize_realm($value);
+        }
 
-	public function sanitize_guilds($value) {
-		return $this->api->sanitize_guilds($value);
-	}
+        /**
+         * Sanitize comma separated guild IDs from settings input.
+         *
+         * @param string $value Raw guild IDs string.
+         * @return string Sanitized guild IDs.
+         */
+        public function sanitize_guilds($value) {
+                return $this->api->sanitize_guilds($value);
+        }
 
 	/**
 	 * Get available realms from Blizzard API
