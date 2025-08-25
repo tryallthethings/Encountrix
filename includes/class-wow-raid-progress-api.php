@@ -1,6 +1,6 @@
 <?php
 
-	/**
+/**
  * API handler class
  */
 
@@ -52,7 +52,7 @@ class WoWRaidProgressAPI {
 	];
 
 	private $boss_name_overrides = [
-		'Dimensius' => 'Dimensius the All-Devouring'
+		'Dimensius' => 'Dimensius, the All-Devouring'
 	];
 
 	/**
@@ -451,7 +451,8 @@ class WoWRaidProgressAPI {
 			$achievement_map = [];
 			foreach ($raid_info['encounters'] as $boss) {
 				$boss_name = $boss['name'];
-				$lookup_name = $this->boss_name_overrides[$boss_name] ?? $boss_name;
+				$lookup_key  = strtolower($boss_name);
+				$lookup_name = $this->boss_name_overrides[$lookup_key] ?? $boss_name;
 
 				foreach ($all_mythic_achievements as $ach) {
 					if (strcasecmp($lookup_name, $ach['boss_name']) === 0) {
@@ -557,159 +558,159 @@ class WoWRaidProgressAPI {
 	 * @param int|null $expansion_id Expansion ID for auto-download
 	 * @return int|false Attachment ID or false if not found
 	 */
-       function get_boss_icon_id($boss_slug, $raid_slug, $boss_name = null, $expansion_id = null) {
-       $boss_slug = sanitize_key($boss_slug);
-       $raid_slug = sanitize_key($raid_slug);
-       $cache_key = $this->blizzard_cache_prefix . 'attach_id_' . $raid_slug . '_' . $boss_slug;
+	function get_boss_icon_id($boss_slug, $raid_slug, $boss_name = null, $expansion_id = null) {
+		$boss_slug = sanitize_key($boss_slug);
+		$raid_slug = sanitize_key($raid_slug);
+		$cache_key = $this->blizzard_cache_prefix . 'attach_id_' . $raid_slug . '_' . $boss_slug;
 
-       // Return cached attachment ID when available
-       $attachment_id = get_transient($cache_key);
-       if ($attachment_id && get_post($attachment_id)) {
-               return $attachment_id;
-       }
+		// Return cached attachment ID when available
+		$attachment_id = get_transient($cache_key);
+		if ($attachment_id && get_post($attachment_id)) {
+			return $attachment_id;
+		}
 
-       // Search for an existing attachment via plugin metadata
-       $q = new WP_Query([
-               'post_type'      => 'attachment',
-               'post_status'    => 'any',
-               'posts_per_page' => 1,
-               'meta_query'     => [
-                       [
-                               'key'   => '_wow_raid_progress_boss',
-                               'value' => $boss_slug,
-                       ],
-                       [
-                               'key'   => '_wow_raid_progress_raid',
-                               'value' => $raid_slug,
-                       ],
-               ],
-               'fields'         => 'ids',
-               'no_found_rows'  => true,
-       ]);
+		// Search for an existing attachment via plugin metadata
+		$q = new WP_Query([
+			'post_type'      => 'attachment',
+			'post_status'    => 'any',
+			'posts_per_page' => 1,
+			'meta_query'     => [
+				[
+					'key'   => '_wow_raid_progress_boss',
+					'value' => $boss_slug,
+				],
+				[
+					'key'   => '_wow_raid_progress_raid',
+					'value' => $raid_slug,
+				],
+			],
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		]);
 
-       if (!empty($q->posts)) {
-               $attachment_id = (int) $q->posts[0];
-               if (get_post($attachment_id)) {
-                       set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-                       $this->debug_log(sprintf(__('Reused boss icon for %s', 'wow-raid-progress'), $boss_slug));
-                       return $attachment_id;
-               }
-       }
+		if (!empty($q->posts)) {
+			$attachment_id = (int) $q->posts[0];
+			if (get_post($attachment_id)) {
+				set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+				$this->debug_log(sprintf(__('Reused boss icon for %s', 'wow-raid-progress'), $boss_slug));
+				return $attachment_id;
+			}
+		}
 
-       // Attempt to locate by filename in case metadata is missing
-       $filename      = sanitize_file_name("{$raid_slug}_{$boss_slug}.jpg");
-       $attachment_id = $this->find_attachment_by_filename($filename, [
-               '_wow_raid_progress_icon' => 'boss',
-               '_wow_raid_progress_raid' => $raid_slug,
-               '_wow_raid_progress_boss' => $boss_slug,
-       ]);
-       if ($attachment_id) {
-               set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-               $this->debug_log(sprintf(__('Found boss icon by filename for %s', 'wow-raid-progress'), $boss_slug));
-               return $attachment_id;
-       }
+		// Attempt to locate by filename in case metadata is missing
+		$filename      = sanitize_file_name("{$raid_slug}_{$boss_slug}.jpg");
+		$attachment_id = $this->find_attachment_by_filename($filename, [
+			'_wow_raid_progress_icon' => 'boss',
+			'_wow_raid_progress_raid' => $raid_slug,
+			'_wow_raid_progress_boss' => $boss_slug,
+		]);
+		if ($attachment_id) {
+			set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+			$this->debug_log(sprintf(__('Found boss icon by filename for %s', 'wow-raid-progress'), $boss_slug));
+			return $attachment_id;
+		}
 
-       // Attempt download when enough data and credentials are present
-       if ($boss_name && $expansion_id) {
-               $client_id     = get_option('wow_raid_progress_blizzard_client_id');
-               $client_secret = get_option('wow_raid_progress_blizzard_client_secret');
+		// Attempt download when enough data and credentials are present
+		if ($boss_name && $expansion_id) {
+			$client_id     = get_option('wow_raid_progress_blizzard_client_id');
+			$client_secret = get_option('wow_raid_progress_blizzard_client_secret');
 
-               if (!empty($client_id) && !empty($client_secret)) {
-                       $this->debug_log(sprintf(__('Downloading boss icon for %s', 'wow-raid-progress'), $boss_slug));
-                       $result = $this->import_single_boss_icon($boss_slug, $boss_name, $raid_slug, $expansion_id);
-                       if ($result) {
-                               set_transient($cache_key, $result, 30 * DAY_IN_SECONDS);
-                               $this->debug_log(sprintf(__('Boss icon saved for %s', 'wow-raid-progress'), $boss_slug));
-                               return $result;
-                       }
-                       $this->debug_log(sprintf(__('Boss icon download failed for %s', 'wow-raid-progress'), $boss_slug));
-               } else {
-                       $this->debug_log(sprintf(__('Blizzard credentials missing; cannot download boss icon for %s', 'wow-raid-progress'), $boss_slug));
-               }
-       } else {
-               $this->debug_log(sprintf(__('Insufficient data to download boss icon for %s', 'wow-raid-progress'), $boss_slug));
-       }
+			if (!empty($client_id) && !empty($client_secret)) {
+				$this->debug_log(sprintf(__('Downloading boss icon for %s', 'wow-raid-progress'), $boss_slug));
+				$result = $this->import_single_boss_icon($boss_slug, $boss_name, $raid_slug, $expansion_id);
+				if ($result) {
+					set_transient($cache_key, $result, 30 * DAY_IN_SECONDS);
+					$this->debug_log(sprintf(__('Boss icon saved for %s', 'wow-raid-progress'), $boss_slug));
+					return $result;
+				}
+				$this->debug_log(sprintf(__('Boss icon download failed for %s', 'wow-raid-progress'), $boss_slug));
+			} else {
+				$this->debug_log(sprintf(__('Blizzard credentials missing; cannot download boss icon for %s', 'wow-raid-progress'), $boss_slug));
+			}
+		} else {
+			$this->debug_log(sprintf(__('Insufficient data to download boss icon for %s', 'wow-raid-progress'), $boss_slug));
+		}
 
-       return false;
-}
+		return false;
+	}
 
 	/**
 	 * Get raid icon attachment ID with auto-download
 	 */
-       function get_raid_icon_id($raid_slug, $expansion_id) {
-       $raid_slug = sanitize_key($raid_slug);
-       $cache_key = $this->blizzard_cache_prefix . 'raid_icon_' . $raid_slug;
+	function get_raid_icon_id($raid_slug, $expansion_id) {
+		$raid_slug = sanitize_key($raid_slug);
+		$cache_key = $this->blizzard_cache_prefix . 'raid_icon_' . $raid_slug;
 
-       // Return cached attachment ID when valid
-       $attachment_id = get_transient($cache_key);
-       if ($attachment_id && get_post($attachment_id)) {
-               return $attachment_id;
-       }
+		// Return cached attachment ID when valid
+		$attachment_id = get_transient($cache_key);
+		if ($attachment_id && get_post($attachment_id)) {
+			return $attachment_id;
+		}
 
-       // Discover existing attachment via plugin metadata
-       $q = new WP_Query([
-               'post_type'      => 'attachment',
-               'post_status'    => 'any',
-               'posts_per_page' => 1,
-               'meta_query'     => [
-                       [
-                               'key'   => '_wow_raid_progress_icon',
-                               'value' => 'raid',
-                       ],
-                       [
-                               'key'   => '_wow_raid_progress_raid',
-                               'value' => $raid_slug,
-                       ],
-               ],
-               'fields'         => 'ids',
-               'no_found_rows'  => true,
-       ]);
+		// Discover existing attachment via plugin metadata
+		$q = new WP_Query([
+			'post_type'      => 'attachment',
+			'post_status'    => 'any',
+			'posts_per_page' => 1,
+			'meta_query'     => [
+				[
+					'key'   => '_wow_raid_progress_icon',
+					'value' => 'raid',
+				],
+				[
+					'key'   => '_wow_raid_progress_raid',
+					'value' => $raid_slug,
+				],
+			],
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		]);
 
-       if (!empty($q->posts)) {
-               $attachment_id = (int) $q->posts[0];
-               if (get_post($attachment_id)) {
-                       set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-                       $this->debug_log(sprintf(__('Reused raid icon for %s', 'wow-raid-progress'), $raid_slug));
-                       return $attachment_id;
-               }
-       }
+		if (!empty($q->posts)) {
+			$attachment_id = (int) $q->posts[0];
+			if (get_post($attachment_id)) {
+				set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+				$this->debug_log(sprintf(__('Reused raid icon for %s', 'wow-raid-progress'), $raid_slug));
+				return $attachment_id;
+			}
+		}
 
-       // Locate by filename when metadata is missing
-       $filename      = sanitize_file_name("raid_{$raid_slug}.jpg");
-       $attachment_id = $this->find_attachment_by_filename($filename, [
-               '_wow_raid_progress_icon' => 'raid',
-               '_wow_raid_progress_raid' => $raid_slug,
-       ]);
-       if ($attachment_id) {
-               set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-               $this->debug_log(sprintf(__('Found raid icon by filename for %s', 'wow-raid-progress'), $raid_slug));
-               return $attachment_id;
-       }
+		// Locate by filename when metadata is missing
+		$filename      = sanitize_file_name("raid_{$raid_slug}.jpg");
+		$attachment_id = $this->find_attachment_by_filename($filename, [
+			'_wow_raid_progress_icon' => 'raid',
+			'_wow_raid_progress_raid' => $raid_slug,
+		]);
+		if ($attachment_id) {
+			set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+			$this->debug_log(sprintf(__('Found raid icon by filename for %s', 'wow-raid-progress'), $raid_slug));
+			return $attachment_id;
+		}
 
-       // Attempt to download the icon using Blizzard API
-       $client_id     = get_option('wow_raid_progress_blizzard_client_id');
-       $client_secret = get_option('wow_raid_progress_blizzard_client_secret');
+		// Attempt to download the icon using Blizzard API
+		$client_id     = get_option('wow_raid_progress_blizzard_client_id');
+		$client_secret = get_option('wow_raid_progress_blizzard_client_secret');
 
-       if (!empty($client_id) && !empty($client_secret)) {
-               $achievement_id = $this->get_raid_achievement_id($raid_slug, $expansion_id);
-               if ($achievement_id) {
-                       $this->debug_log(sprintf(__('Downloading raid icon for %s', 'wow-raid-progress'), $raid_slug));
-                       $result = $this->download_raid_icon($raid_slug, $achievement_id, $expansion_id);
-                       if ($result) {
-                               set_transient($cache_key, $result, 30 * DAY_IN_SECONDS);
-                               $this->debug_log(sprintf(__('Raid icon saved for %s', 'wow-raid-progress'), $raid_slug));
-                               return $result;
-                       }
-                       $this->debug_log(sprintf(__('Raid icon download failed for %s', 'wow-raid-progress'), $raid_slug));
-               } else {
-                       $this->debug_log(sprintf(__('No achievement ID found for raid %s', 'wow-raid-progress'), $raid_slug));
-               }
-       } else {
-               $this->debug_log(sprintf(__('Blizzard credentials missing; cannot download raid icon for %s', 'wow-raid-progress'), $raid_slug));
-       }
+		if (!empty($client_id) && !empty($client_secret)) {
+			$achievement_id = $this->get_raid_achievement_id($raid_slug, $expansion_id);
+			if ($achievement_id) {
+				$this->debug_log(sprintf(__('Downloading raid icon for %s', 'wow-raid-progress'), $raid_slug));
+				$result = $this->download_raid_icon($raid_slug, $achievement_id, $expansion_id);
+				if ($result) {
+					set_transient($cache_key, $result, 30 * DAY_IN_SECONDS);
+					$this->debug_log(sprintf(__('Raid icon saved for %s', 'wow-raid-progress'), $raid_slug));
+					return $result;
+				}
+				$this->debug_log(sprintf(__('Raid icon download failed for %s', 'wow-raid-progress'), $raid_slug));
+			} else {
+				$this->debug_log(sprintf(__('No achievement ID found for raid %s', 'wow-raid-progress'), $raid_slug));
+			}
+		} else {
+			$this->debug_log(sprintf(__('Blizzard credentials missing; cannot download raid icon for %s', 'wow-raid-progress'), $raid_slug));
+		}
 
-       return false;
-}
+		return false;
+	}
 
 	/**
 	 * Download raid icon
@@ -801,125 +802,125 @@ class WoWRaidProgressAPI {
 	/**
 	 * Import single boss icon
 	 */
-       public function import_single_boss_icon($boss_slug, $boss_name, $raid_slug, $expansion_id) {
-       try {
-               $boss_slug = sanitize_key($boss_slug);
-               $raid_slug = sanitize_key($raid_slug);
-               $cache_key = $this->blizzard_cache_prefix . 'attach_id_' . $raid_slug . '_' . $boss_slug;
-               $cached_attachment_id = get_transient($cache_key);
-               if ($cached_attachment_id && get_post($cached_attachment_id)) {
-                       return $cached_attachment_id;
-               }
-
-		$q = new WP_Query([
-			'post_type'      => 'attachment',
-			'post_status'    => 'any',
-			'posts_per_page' => 1,
-			'meta_query'     => [
-				[
-					'key'   => '_wow_raid_progress_boss',
-					'value' => $boss_slug,
-				],
-				[
-					'key'   => '_wow_raid_progress_raid',
-					'value' => $raid_slug,
-				],
-			],
-			'fields'                   => 'ids',
-			'no_found_rows'            => true,
-			'update_post_meta_cache'   => false,
-			'update_post_term_cache'   => false,
-		]);
-		if (!empty($q->posts)) {
-			$attachment_id = (int) $q->posts[0];
-			if ($attachment_id && get_post($attachment_id)) {
-				set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-				return $attachment_id;
+	public function import_single_boss_icon($boss_slug, $boss_name, $raid_slug, $expansion_id) {
+		try {
+			$boss_slug = sanitize_key($boss_slug);
+			$raid_slug = sanitize_key($raid_slug);
+			$cache_key = $this->blizzard_cache_prefix . 'attach_id_' . $raid_slug . '_' . $boss_slug;
+			$cached_attachment_id = get_transient($cache_key);
+			if ($cached_attachment_id && get_post($cached_attachment_id)) {
+				return $cached_attachment_id;
 			}
+
+			$q = new WP_Query([
+				'post_type'      => 'attachment',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'meta_query'     => [
+					[
+						'key'   => '_wow_raid_progress_boss',
+						'value' => $boss_slug,
+					],
+					[
+						'key'   => '_wow_raid_progress_raid',
+						'value' => $raid_slug,
+					],
+				],
+				'fields'                   => 'ids',
+				'no_found_rows'            => true,
+				'update_post_meta_cache'   => false,
+				'update_post_term_cache'   => false,
+			]);
+			if (!empty($q->posts)) {
+				$attachment_id = (int) $q->posts[0];
+				if ($attachment_id && get_post($attachment_id)) {
+					set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+					return $attachment_id;
+				}
+			}
+
+			$achievement_map = $this->get_achievement_map($raid_slug, $expansion_id);
+			if (empty($achievement_map) || !isset($achievement_map[$boss_slug])) {
+				$this->debug_log(sprintf(__('No achievement ID for boss %s', 'wow-raid-progress'), $boss_slug));
+				return false;
+			}
+
+			$achievement_id = $achievement_map[$boss_slug];
+			$region         = get_option('wow_raid_progress_blizzard_region', 'eu');
+			$token          = $this->get_blizzard_token($region);
+			if (!$token) {
+				$this->debug_log(sprintf(__('Could not get Blizzard token for %s', 'wow-raid-progress'), $boss_slug));
+				return false;
+			}
+
+			$api_base = $this->regional_endpoints[$region]['api'];
+			$media_url = add_query_arg([
+				'namespace' => 'static-' . $region,
+				'locale'    => 'en_US',
+			], "{$api_base}/data/wow/media/achievement/{$achievement_id}");
+
+			$response = wp_remote_get($media_url, [
+				'timeout' => $this->http_timeout,
+				'headers' => array_merge($this->base_headers(), [
+					'Authorization' => 'Bearer ' . $token,
+				]),
+			]);
+
+			if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+				$this->debug_log(sprintf(__('API call failed for boss %s', 'wow-raid-progress'), $boss_slug));
+				return false;
+			}
+
+			$data          = json_decode(wp_remote_retrieve_body($response), true);
+			$icon_asset_url = null;
+			if (isset($data['assets'])) {
+				foreach ($data['assets'] as $asset) {
+					if ($asset['key'] === 'icon') {
+						$icon_asset_url = $asset['value'];
+						break;
+					}
+				}
+			}
+
+			if (!$icon_asset_url) {
+				$this->debug_log(sprintf(__('Icon asset missing for %s', 'wow-raid-progress'), $boss_slug));
+				return false;
+			}
+
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+
+			$tmp = download_url($icon_asset_url);
+			if (is_wp_error($tmp)) {
+				$this->debug_log(sprintf(__('Download failed for %1$s: %2$s', 'wow-raid-progress'), $boss_slug, $tmp->get_error_message()));
+				return false;
+			}
+
+			$file_array = [
+				'name'     => sanitize_file_name("{$raid_slug}_{$boss_slug}.jpg"),
+				'tmp_name' => $tmp,
+			];
+
+			$attachment_id = media_handle_sideload($file_array, 0, $boss_name);
+			@unlink($tmp);
+
+			if (is_wp_error($attachment_id)) {
+				$this->debug_log(sprintf(__('Media import failed for %1$s: %2$s', 'wow-raid-progress'), $boss_slug, $attachment_id->get_error_message()));
+				return false;
+			}
+
+			update_post_meta($attachment_id, '_wow_raid_progress_icon', 'boss');
+			update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
+			update_post_meta($attachment_id, '_wow_raid_progress_boss', $boss_slug);
+
+			set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+			return $attachment_id;
+		} catch (Exception $e) {
+			$this->debug_log('Boss icon exception: ' . $e->getMessage());
+			return false;
 		}
-
-		$achievement_map = $this->get_achievement_map($raid_slug, $expansion_id);
-               if (empty($achievement_map) || !isset($achievement_map[$boss_slug])) {
-                       $this->debug_log(sprintf(__('No achievement ID for boss %s', 'wow-raid-progress'), $boss_slug));
-                       return false;
-               }
-
-               $achievement_id = $achievement_map[$boss_slug];
-               $region         = get_option('wow_raid_progress_blizzard_region', 'eu');
-               $token          = $this->get_blizzard_token($region);
-               if (!$token) {
-                       $this->debug_log(sprintf(__('Could not get Blizzard token for %s', 'wow-raid-progress'), $boss_slug));
-                       return false;
-               }
-
-               $api_base = $this->regional_endpoints[$region]['api'];
-               $media_url = add_query_arg([
-                       'namespace' => 'static-' . $region,
-                       'locale'    => 'en_US',
-               ], "{$api_base}/data/wow/media/achievement/{$achievement_id}");
-
-               $response = wp_remote_get($media_url, [
-                       'timeout' => $this->http_timeout,
-                       'headers' => array_merge($this->base_headers(), [
-                               'Authorization' => 'Bearer ' . $token,
-                       ]),
-               ]);
-
-               if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-                       $this->debug_log(sprintf(__('API call failed for boss %s', 'wow-raid-progress'), $boss_slug));
-                       return false;
-               }
-
-               $data          = json_decode(wp_remote_retrieve_body($response), true);
-               $icon_asset_url = null;
-               if (isset($data['assets'])) {
-                       foreach ($data['assets'] as $asset) {
-                               if ($asset['key'] === 'icon') {
-                                       $icon_asset_url = $asset['value'];
-                                       break;
-                               }
-                       }
-               }
-
-               if (!$icon_asset_url) {
-                       $this->debug_log(sprintf(__('Icon asset missing for %s', 'wow-raid-progress'), $boss_slug));
-                       return false;
-               }
-
-               require_once ABSPATH . 'wp-admin/includes/media.php';
-               require_once ABSPATH . 'wp-admin/includes/file.php';
-               require_once ABSPATH . 'wp-admin/includes/image.php';
-
-               $tmp = download_url($icon_asset_url);
-               if (is_wp_error($tmp)) {
-                       $this->debug_log(sprintf(__('Download failed for %1$s: %2$s', 'wow-raid-progress'), $boss_slug, $tmp->get_error_message()));
-                       return false;
-               }
-
-               $file_array = [
-                       'name'     => sanitize_file_name("{$raid_slug}_{$boss_slug}.jpg"),
-                       'tmp_name' => $tmp,
-               ];
-
-               $attachment_id = media_handle_sideload($file_array, 0, $boss_name);
-               @unlink($tmp);
-
-               if (is_wp_error($attachment_id)) {
-                       $this->debug_log(sprintf(__('Media import failed for %1$s: %2$s', 'wow-raid-progress'), $boss_slug, $attachment_id->get_error_message()));
-                       return false;
-               }
-
-               update_post_meta($attachment_id, '_wow_raid_progress_icon', 'boss');
-               update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
-               update_post_meta($attachment_id, '_wow_raid_progress_boss', $boss_slug);
-
-               set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-               return $attachment_id;
-       } catch (Exception $e) {
-               $this->debug_log('Boss icon exception: ' . $e->getMessage());
-               return false;
-       }
-}
+	}
 
 	/**
 	 * Delete all plugin-imported icons
@@ -1243,215 +1244,217 @@ class WoWRaidProgressAPI {
 	}
 
 	/**
-	* Get raid background image attachment ID with auto-download
-	*
-	* @param string $raid_slug     Raid identifier
-	* @param int	$expansion_id  Expansion ID
-	* @return int|false Attachment ID or false if unavailable
-	*/
-       public function get_journal_instance_image_id($raid_slug, $expansion_id) {
-       try {
-               $raid_slug = sanitize_key($raid_slug);
-               $cache_key = $this->blizzard_cache_prefix . 'journal_img_' . $raid_slug;
+	 * Get raid background image attachment ID with auto-download
+	 *
+	 * @param string $raid_slug     Raid identifier
+	 * @param int	$expansion_id  Expansion ID
+	 * @return int|false Attachment ID or false if unavailable
+	 */
+	public function get_journal_instance_image_id($raid_slug, $expansion_id) {
+		try {
+			$raid_slug = sanitize_key($raid_slug);
+			$cache_key = $this->blizzard_cache_prefix . 'journal_img_' . $raid_slug;
 
-               // Return cached attachment ID when available
-               $attachment_id = get_transient($cache_key);
-               if ($attachment_id && get_post($attachment_id)) {
-                       return $attachment_id;
-               }
+			// Return cached attachment ID when available
+			$attachment_id = get_transient($cache_key);
+			if ($attachment_id && get_post($attachment_id)) {
+				return $attachment_id;
+			}
 
-               // Search for existing attachment via plugin metadata
-               $q = new WP_Query([
-                       'post_type'      => 'attachment',
-                       'post_status'    => 'any',
-                       'posts_per_page' => 1,
-                       'meta_query'     => [
-                               [
-                                       'key'   => '_wow_raid_progress_icon',
-                                       'value' => 'raid_bg',
-                               ],
-                               [
-                                       'key'   => '_wow_raid_progress_raid',
-                                       'value' => $raid_slug,
-                               ],
-                       ],
-                       'fields'         => 'ids',
-                       'no_found_rows'  => true,
-               ]);
+			// Search for existing attachment via plugin metadata
+			$q = new WP_Query([
+				'post_type'      => 'attachment',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'meta_query'     => [
+					[
+						'key'   => '_wow_raid_progress_icon',
+						'value' => 'raid_bg',
+					],
+					[
+						'key'   => '_wow_raid_progress_raid',
+						'value' => $raid_slug,
+					],
+				],
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			]);
 
-               if (!empty($q->posts)) {
-                       $attachment_id = (int) $q->posts[0];
-                       if (get_post($attachment_id)) {
-                               set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-                               $this->debug_log(sprintf(__('Reused raid background for %s', 'wow-raid-progress'), $raid_slug));
-                               return $attachment_id;
-                       }
-               }
+			if (!empty($q->posts)) {
+				$attachment_id = (int) $q->posts[0];
+				if (get_post($attachment_id)) {
+					set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+					$this->debug_log(sprintf(__('Reused raid background for %s', 'wow-raid-progress'), $raid_slug));
+					return $attachment_id;
+				}
+			}
 
-               // Locate by filename when metadata is missing
-               $filename      = sanitize_file_name("raid_bg_{$raid_slug}.jpg");
-               $attachment_id = $this->find_attachment_by_filename($filename, [
-                       '_wow_raid_progress_icon' => 'raid_bg',
-                       '_wow_raid_progress_raid' => $raid_slug,
-               ]);
-               if ($attachment_id) {
-                       set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-                       $this->debug_log(sprintf(__('Found raid background by filename for %s', 'wow-raid-progress'), $raid_slug));
-                       return $attachment_id;
-               }
+			// Locate by filename when metadata is missing
+			$filename      = sanitize_file_name("raid_bg_{$raid_slug}.jpg");
+			$attachment_id = $this->find_attachment_by_filename($filename, [
+				'_wow_raid_progress_icon' => 'raid_bg',
+				'_wow_raid_progress_raid' => $raid_slug,
+			]);
+			if ($attachment_id) {
+				set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+				$this->debug_log(sprintf(__('Found raid background by filename for %s', 'wow-raid-progress'), $raid_slug));
+				return $attachment_id;
+			}
 
-               // Download from Blizzard when credentials are available
-               $journal_id = $this->get_journal_instance_id($raid_slug, $expansion_id);
-               if (!$journal_id) {
-                       $this->debug_log(sprintf(__('No journal instance found for %s', 'wow-raid-progress'), $raid_slug));
-                       return false;
-               }
+			// Download from Blizzard when credentials are available
+			$journal_id = $this->get_journal_instance_id($raid_slug, $expansion_id);
+			if (!$journal_id) {
+				$this->debug_log(sprintf(__('No journal instance found for %s', 'wow-raid-progress'), $raid_slug));
+				return false;
+			}
 
-               $this->debug_log(sprintf(__('Downloading raid background for %s', 'wow-raid-progress'), $raid_slug));
-               $attachment_id = $this->download_journal_instance_image($raid_slug, $journal_id, $expansion_id);
-               if ($attachment_id) {
-                       set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
-                       $this->debug_log(sprintf(__('Raid background saved for %s', 'wow-raid-progress'), $raid_slug));
-                       return $attachment_id;
-               }
+			$this->debug_log(sprintf(__('Downloading raid background for %s', 'wow-raid-progress'), $raid_slug));
+			$attachment_id = $this->download_journal_instance_image($raid_slug, $journal_id, $expansion_id);
+			if ($attachment_id) {
+				set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
+				$this->debug_log(sprintf(__('Raid background saved for %s', 'wow-raid-progress'), $raid_slug));
+				return $attachment_id;
+			}
 
-               $this->debug_log(sprintf(__('Raid background download failed for %s', 'wow-raid-progress'), $raid_slug));
-               return false;
-       } catch (Exception $e) {
-               error_log('Journal Image Error: ' . $e->getMessage());
-               return false;
-       }
-}
+			$this->debug_log(sprintf(__('Raid background download failed for %s', 'wow-raid-progress'), $raid_slug));
+			return false;
+		} catch (Exception $e) {
+			error_log('Journal Image Error: ' . $e->getMessage());
+			return false;
+		}
+	}
 
 	/**
-	* Download raid background image from Blizzard API
-	*
-	* @param string $raid_slug    Raid identifier
-	* @param int	$journal_id   Journal instance ID
-	* @param int	$expansion_id Expansion identifier
-	* @return int|false Attachment ID or false on failure
-	*/
+	 * Download raid background image from Blizzard API
+	 *
+	 * @param string $raid_slug    Raid identifier
+	 * @param int	$journal_id   Journal instance ID
+	 * @param int	$expansion_id Expansion identifier
+	 * @return int|false Attachment ID or false on failure
+	 */
 	private function download_journal_instance_image($raid_slug, $journal_id, $expansion_id) {
-	       $region = get_option('wow_raid_progress_blizzard_region', 'eu');
-	       $token  = $this->get_blizzard_token($region);
-	       if (!$token) {
-		       return false;
-	       }
+		$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+		$token  = $this->get_blizzard_token($region);
+		if (!$token) {
+			return false;
+		}
 
-	       $api_base  = $this->regional_endpoints[$region]['api'];
-	       $media_url = add_query_arg([
-		       'namespace' => 'static-' . $region,
-		       'locale'	   => 'en_US',
-	       ], "{$api_base}/data/wow/media/journal-instance/{$journal_id}");
+		$api_base  = $this->regional_endpoints[$region]['api'];
+		$media_url = add_query_arg([
+			'namespace' => 'static-' . $region,
+			'locale'	   => 'en_US',
+		], "{$api_base}/data/wow/media/journal-instance/{$journal_id}");
 
-	       $response = wp_remote_get($media_url, [
-		       'timeout' => $this->http_timeout,
-		       'headers' => array_merge($this->base_headers(), [
-			       'Authorization' => 'Bearer ' . $token,
-		       ]),
-	       ]);
+		$response = wp_remote_get($media_url, [
+			'timeout' => $this->http_timeout,
+			'headers' => array_merge($this->base_headers(), [
+				'Authorization' => 'Bearer ' . $token,
+			]),
+		]);
 
-	       if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-		       return false;
-	       }
+		if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+			return false;
+		}
 
-	       $data	 = json_decode(wp_remote_retrieve_body($response), true);
-	       $image_url = null;
-	       if (isset($data['assets'])) {
-		       foreach ($data['assets'] as $asset) {
-			       if ($asset['key'] === 'tile') {
-				       $image_url = $asset['value'];
-				       break;
-			       }
-		       }
-	       }
+		$data	 = json_decode(wp_remote_retrieve_body($response), true);
+		$image_url = null;
+		if (isset($data['assets'])) {
+			foreach ($data['assets'] as $asset) {
+				if ($asset['key'] === 'tile') {
+					$image_url = $asset['value'];
+					break;
+				}
+			}
+		}
 
-	       if (!$image_url) {
-		       return false;
-	       }
+		if (!$image_url) {
+			return false;
+		}
 
-	       require_once ABSPATH . 'wp-admin/includes/media.php';
-	       require_once ABSPATH . 'wp-admin/includes/file.php';
-	       require_once ABSPATH . 'wp-admin/includes/image.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-	       $tmp = download_url($image_url);
-	       if (is_wp_error($tmp)) {
-		       return false;
-	       }
+		$tmp = download_url($image_url);
+		if (is_wp_error($tmp)) {
+			return false;
+		}
 
-	       $file_array = [
-		       'name'	  => sanitize_file_name("raid_bg_{$raid_slug}.jpg"),
-		       'tmp_name' => $tmp,
-	       ];
+		$file_array = [
+			'name'	  => sanitize_file_name("raid_bg_{$raid_slug}.jpg"),
+			'tmp_name' => $tmp,
+		];
 
-	       // Derive raid name for attachment title
-	       $raid_name   = $raid_slug;
-	       $static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 0);
-	       if (!is_wp_error($static_data) && isset($static_data['raids'])) {
-		       foreach ($static_data['raids'] as $raid) {
-			       if ($raid['slug'] === $raid_slug) {
-				       $raid_name = $raid['name'];
-				       break;
-			       }
-		       }
-	       }
+		// Derive raid name for attachment title
+		$raid_name   = $raid_slug;
+		$static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 0);
+		if (!is_wp_error($static_data) && isset($static_data['raids'])) {
+			foreach ($static_data['raids'] as $raid) {
+				if ($raid['slug'] === $raid_slug) {
+					$raid_name = $raid['name'];
+					break;
+				}
+			}
+		}
 
-	       $attachment_id = media_handle_sideload($file_array, 0, $raid_name . ' Background');
-	       @unlink($tmp);
+		$attachment_id = media_handle_sideload($file_array, 0, $raid_name . ' Background');
+		@unlink($tmp);
 
-	       if (is_wp_error($attachment_id)) {
-		       return false;
-	       }
+		if (is_wp_error($attachment_id)) {
+			return false;
+		}
 
-	       update_post_meta($attachment_id, '_wow_raid_progress_icon', 'raid_bg');
-               update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
+		update_post_meta($attachment_id, '_wow_raid_progress_icon', 'raid_bg');
+		update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
 
-               return $attachment_id;
-       }
+		return $attachment_id;
+	}
 
-       /**
-        * Find an attachment by sanitized filename and ensure plugin metadata.
-        *
-        * @param string $filename Target filename (sanitized).
-        * @param array  $meta     Metadata key/value pairs to add if missing.
-        * @return int|false Attachment ID or false if not found.
-        */
-       private function find_attachment_by_filename($filename, array $meta) {
-               $name = sanitize_title(pathinfo($filename, PATHINFO_FILENAME));
+	/**
+	 * Find an attachment by sanitized filename and ensure plugin metadata.
+	 *
+	 * @param string $filename Target filename (sanitized).
+	 * @param array  $meta     Metadata key/value pairs to add if missing.
+	 * @return int|false Attachment ID or false if not found.
+	 */
+	private function find_attachment_by_filename($filename, array $meta) {
+		$name = sanitize_title(pathinfo($filename, PATHINFO_FILENAME));
 
-               $existing = get_posts([
-                       'post_type'      => 'attachment',
-                       'name'           => $name,
-                       'post_status'    => 'any',
-                       'posts_per_page' => 1,
-                       'fields'         => 'ids',
-               ]);
+		$existing = get_posts([
+			'post_type'      => 'attachment',
+			'name'           => $name,
+			'post_status'    => 'any',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+		]);
 
-               if (!empty($existing)) {
-                       $attachment_id = (int) $existing[0];
-                       foreach ($meta as $key => $value) {
-                               if (!metadata_exists('post', $attachment_id, $key)) {
-                                       update_post_meta($attachment_id, $key, $value);
-                               }
-                       }
-                       return $attachment_id;
-               }
+		if (!empty($existing)) {
+			$attachment_id = (int) $existing[0];
+			foreach ($meta as $key => $value) {
+				if (!metadata_exists('post', $attachment_id, $key)) {
+					update_post_meta($attachment_id, $key, $value);
+				}
+			}
+			return $attachment_id;
+		}
 
-               return false;
-       }
+		return false;
+	}
 
-       public function debug_log($message) {
-               $enabled = get_option('wow_raid_progress_debug_mode', false);
-               if (filter_var($enabled, FILTER_VALIDATE_BOOLEAN) ||
-                       (defined('WOW_RAID_PROGRESS_DEBUG') && WOW_RAID_PROGRESS_DEBUG)) {
-                       $log   = get_transient('wow_raid_debug_log') ?: [];
-                       $log[] = date('H:i:s') . ' - ' . $message;
-                       $log   = array_slice($log, -100);
-                       set_transient('wow_raid_debug_log', $log, HOUR_IN_SECONDS);
+	public function debug_log($message) {
+		$enabled = get_option('wow_raid_progress_debug_mode', false);
+		if (
+			filter_var($enabled, FILTER_VALIDATE_BOOLEAN) ||
+			(defined('WOW_RAID_PROGRESS_DEBUG') && WOW_RAID_PROGRESS_DEBUG)
+		) {
+			$log   = get_transient('wow_raid_debug_log') ?: [];
+			$log[] = date('H:i:s') . ' - ' . $message;
+			$log   = array_slice($log, -100);
+			set_transient('wow_raid_debug_log', $log, HOUR_IN_SECONDS);
 
-                       if (defined('WP_DEBUG') && WP_DEBUG) {
-                               error_log('WoW Raid Progress: ' . $message);
-                       }
-               }
-       }
+			if (defined('WP_DEBUG') && WP_DEBUG) {
+				error_log('WoW Raid Progress: ' . $message);
+			}
+		}
+	}
 }
