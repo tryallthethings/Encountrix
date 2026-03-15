@@ -41,8 +41,9 @@ class WoWRaidProgressAPI {
 	}
 
 	private $expansions = [
+		11 => ['name' => 'Midnight', 'category_name' => 'Midnight Raid'],
 		10 => ['name' => 'The War Within', 'category_name' => 'The War Within Raid'],
-		9  => ['name' => 'Dragonflight', 'category_name' => 'Dragonflight Raids'],
+		9  => ['name' => 'Dragonflight', 'category_name' => 'Dragonflight Raid'],
 		8  => ['name' => 'Shadowlands', 'category_name' => 'Shadowlands Raid'],
 		7  => ['name' => 'Battle for Azeroth', 'category_name' => 'Battle for Azeroth Raid']
 	];
@@ -55,6 +56,7 @@ class WoWRaidProgressAPI {
 	];
 
 	private $achievement_category_ids = [
+		'Midnight' => 15566,
 		'The War Within' => 15526,
 		'Dragonflight' => 15468,
 		'Shadowlands' => 15438,
