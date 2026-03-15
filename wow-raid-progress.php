@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: WoW Raid Progress Tracker
  * Plugin URI: https://example.com/wow-raid-progress
@@ -12,7 +13,7 @@
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
-    exit;
+	exit;
 }
 
 // Define plugin constants
@@ -30,7 +31,7 @@ add_action('plugins_loaded', 'wow_raid_progress_load_textdomain');
  * @return void
  */
 function wow_raid_progress_load_textdomain() {
-    load_plugin_textdomain('wow-raid-progress', false, dirname(plugin_basename(__FILE__)) . '/languages');
+	load_plugin_textdomain('wow-raid-progress', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 
 // Include required files
@@ -47,8 +48,8 @@ require_once WOW_RAID_PROGRESS_PLUGIN_DIR . 'includes/class-wow-raid-progress-wi
  * @return void
  */
 function wow_raid_progress_init() {
-    $plugin = new WoWRaidProgress();
-    $plugin->run();
+	$plugin = new WoWRaidProgress();
+	$plugin->run();
 }
 add_action('plugins_loaded', 'wow_raid_progress_init');
 
@@ -62,19 +63,19 @@ register_activation_hook(__FILE__, 'wow_raid_progress_activate');
  * @return void
  */
 function wow_raid_progress_activate() {
-    // Set default options
-    $defaults = wow_raid_progress_get_default_options();
-    foreach ($defaults as $option_name => $default_value) {
-        if (get_option($option_name) === false) {
-            add_option($option_name, $default_value);
-        }
-    }
+	// Set default options
+	$defaults = wow_raid_progress_get_default_options();
+	foreach ($defaults as $option_name => $default_value) {
+		if (get_option($option_name) === false) {
+			add_option($option_name, $default_value);
+		}
+	}
 
-    // Create database table for cached raids if needed
-    wow_raid_progress_create_cache_table();
+	// Create database table for cached raids if needed
+	wow_raid_progress_create_cache_table();
 
-    // Flush rewrite rules
-    flush_rewrite_rules();
+	// Flush rewrite rules
+	flush_rewrite_rules();
 }
 
 // Deactivation hook
@@ -87,15 +88,15 @@ register_deactivation_hook(__FILE__, 'wow_raid_progress_deactivate');
  * @return void
  */
 function wow_raid_progress_deactivate() {
-    wow_raid_progress_clear_transients([
-        '_transient_wow_raid_%',
-        '_transient_timeout_wow_raid_%',
-        '_transient_wow_blizzard_%',
-        '_transient_timeout_wow_blizzard_%'
-    ]);
+	wow_raid_progress_clear_transients([
+		'_transient_wow_raid_%',
+		'_transient_timeout_wow_raid_%',
+		'_transient_wow_blizzard_%',
+		'_transient_timeout_wow_blizzard_%'
+	]);
 
-    // Clear scheduled events if any
-    wp_clear_scheduled_hook('wow_raid_progress_cron');
+	// Clear scheduled events if any
+	wp_clear_scheduled_hook('wow_raid_progress_cron');
 }
 
 // Uninstall hook
@@ -108,34 +109,34 @@ register_uninstall_hook(__FILE__, 'wow_raid_progress_uninstall');
  * @return void
  */
 function wow_raid_progress_uninstall() {
-    // Remove all options
-    $options = [
-        'wow_raid_progress_api_key',
-        'wow_raid_progress_guild_ids',
-        'wow_raid_progress_expansion',
-        'wow_raid_progress_raid',
-        'wow_raid_progress_difficulty',
-        'wow_raid_progress_region',
-        'wow_raid_progress_realm',
-        'wow_raid_progress_cache_time',
-        'wow_raid_progress_show_icons',
-        'wow_raid_progress_show_killed',
-        'wow_raid_progress_use_blizzard_icons',
-        'wow_raid_progress_limit',
-        'wow_raid_progress_blizzard_client_id',
-        'wow_raid_progress_blizzard_client_secret',
-        'wow_raid_progress_blizzard_region',
-        'wow_raid_progress_cached_raids'
-    ];
+	// Remove all options
+	$options = [
+		'wow_raid_progress_api_key',
+		'wow_raid_progress_guild_ids',
+		'wow_raid_progress_expansion',
+		'wow_raid_progress_raid',
+		'wow_raid_progress_difficulty',
+		'wow_raid_progress_region',
+		'wow_raid_progress_realm',
+		'wow_raid_progress_cache_time',
+		'wow_raid_progress_show_icons',
+		'wow_raid_progress_show_killed',
+		'wow_raid_progress_use_blizzard_icons',
+		'wow_raid_progress_limit',
+		'wow_raid_progress_blizzard_client_id',
+		'wow_raid_progress_blizzard_client_secret',
+		'wow_raid_progress_blizzard_region',
+		'wow_raid_progress_cached_raids'
+	];
 
-    foreach ($options as $option) {
-        delete_option($option);
-    }
+	foreach ($options as $option) {
+		delete_option($option);
+	}
 
-    wow_raid_progress_clear_transients([
-        '_transient_wow_%',
-        '_transient_timeout_wow_%'
-    ]);
+	wow_raid_progress_clear_transients([
+		'_transient_wow_%',
+		'_transient_timeout_wow_%'
+	]);
 }
 
 // Helper function to get default options
@@ -146,24 +147,24 @@ function wow_raid_progress_uninstall() {
  * @return array
  */
 function wow_raid_progress_get_default_options() {
-    return [
-        'wow_raid_progress_api_key' => '',
-        'wow_raid_progress_guild_ids' => '',
-        'wow_raid_progress_expansion' => 10,
-        'wow_raid_progress_raid' => '',
-        'wow_raid_progress_difficulty' => 'highest',
-        'wow_raid_progress_region' => 'eu',
-        'wow_raid_progress_realm' => '',
-        'wow_raid_progress_cache_time' => 60,
-        'wow_raid_progress_show_icons' => 'true',
-        'wow_raid_progress_show_killed' => 'false',
-        'wow_raid_progress_use_blizzard_icons' => 'true',
-        'wow_raid_progress_limit' => 50,
-        'wow_raid_progress_blizzard_client_id' => '',
-        'wow_raid_progress_blizzard_client_secret' => '',
-        'wow_raid_progress_blizzard_region' => 'eu',
-        'wow_raid_progress_cached_raids' => []
-    ];
+	return [
+		'wow_raid_progress_api_key' => '',
+		'wow_raid_progress_guild_ids' => '',
+		'wow_raid_progress_expansion' => 10,
+		'wow_raid_progress_raid' => '',
+		'wow_raid_progress_difficulty' => 'highest',
+		'wow_raid_progress_region' => 'eu',
+		'wow_raid_progress_realm' => '',
+		'wow_raid_progress_cache_time' => 60,
+		'wow_raid_progress_show_icons' => 'true',
+		'wow_raid_progress_show_killed' => 'false',
+		'wow_raid_progress_use_blizzard_icons' => 'true',
+		'wow_raid_progress_limit' => 50,
+		'wow_raid_progress_blizzard_client_id' => '',
+		'wow_raid_progress_blizzard_client_secret' => '',
+		'wow_raid_progress_blizzard_region' => 'eu',
+		'wow_raid_progress_cached_raids' => []
+	];
 }
 
 // Create cache table for raids
@@ -174,11 +175,11 @@ function wow_raid_progress_get_default_options() {
  * @return void
  */
 function wow_raid_progress_create_cache_table() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'wow_raid_cache';
-    $charset_collate = $wpdb->get_charset_collate();
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'wow_raid_cache';
+	$charset_collate = $wpdb->get_charset_collate();
 
-    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+	$sql = "CREATE TABLE IF NOT EXISTS $table_name (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         expansion_id int(11) NOT NULL,
         raid_data longtext NOT NULL,
@@ -187,8 +188,8 @@ function wow_raid_progress_create_cache_table() {
         KEY expansion_id (expansion_id)
     ) $charset_collate;";
 
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	dbDelta($sql);
 }
 
 /**
@@ -198,13 +199,80 @@ function wow_raid_progress_create_cache_table() {
  * @return void
  */
 function wow_raid_progress_clear_transients(array $patterns) {
-    global $wpdb;
-    foreach ($patterns as $pattern) {
-        $wpdb->query(
-            $wpdb->prepare(
-                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-                $pattern
-            )
-        );
-    }
+	global $wpdb;
+	foreach ($patterns as $pattern) {
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$pattern
+			)
+		);
+	}
 }
+
+// Clean up on deactivation
+register_deactivation_hook(__FILE__, function () {
+	wp_clear_scheduled_hook('wow_raid_progress_update_data');
+});
+
+/**
+ * Check if we should use cron updates instead of frontend
+ */
+function wow_raid_progress_should_use_cron() {
+	return get_option('wow_raid_progress_use_cron', 'false') === 'true';
+}
+
+/**
+ * Schedule background data updates
+ */
+function wow_raid_progress_schedule_updates() {
+	if (wow_raid_progress_should_use_cron()) {
+		if (!wp_next_scheduled('wow_raid_progress_update_data')) {
+			wp_schedule_event(time(), 'hourly', 'wow_raid_progress_update_data');
+		}
+	} else {
+		wp_clear_scheduled_hook('wow_raid_progress_update_data');
+	}
+}
+add_action('wp', 'wow_raid_progress_schedule_updates');
+
+/**
+ * Background update task
+ */
+function wow_raid_progress_background_update() {
+	if (!wow_raid_progress_should_use_cron()) {
+		return;
+	}
+
+	$guild_ids = get_option('wow_raid_progress_guild_ids', '');
+	if (empty($guild_ids)) {
+		return;
+	}
+
+	$api = new WoWRaidProgressAPI();
+	$raid = get_option('wow_raid_progress_raid', '');
+	$region = get_option('wow_raid_progress_region', 'eu');
+	$realm = get_option('wow_raid_progress_realm', '');
+
+	if (empty($raid)) {
+		return;
+	}
+
+	// Update each difficulty with longer cache time
+	foreach (['normal', 'heroic', 'mythic'] as $difficulty) {
+		$api->fetch_raid_data(
+			$raid,
+			$difficulty,
+			$region,
+			$realm,
+			$guild_ids,
+			1440, // Cache for 24 hours
+			50,
+			0
+		);
+
+		// Wait between requests to avoid rate limiting
+		sleep(2);
+	}
+}
+add_action('wow_raid_progress_update_data', 'wow_raid_progress_background_update');
