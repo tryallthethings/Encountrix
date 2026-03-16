@@ -98,13 +98,13 @@
 						$raidSelect.prop('disabled', false);
 						adjustSelectWidth($raidSelect);
 					} else {
-						$raidSelect.html('<option value="">Error loading raids</option>');
-						showNotice(response.data || 'Failed to load raids', 'error');
+						$raidSelect.html('<option value="">' + wow_raid_admin.strings.error_loading_raids + '</option>');
+						showNotice(response.data || wow_raid_admin.strings.failed_load_raids, 'error');
 					}
 				},
 				error: function (xhr, status, error) {
-					$raidSelect.html('<option value="">Error loading raids</option>');
-					showNotice('Failed to load raids: ' + error, 'error');
+					$raidSelect.html('<option value="">' + wow_raid_admin.strings.error_loading_raids + '</option>');
+					showNotice(wow_raid_admin.strings.failed_load_raids + ': ' + error, 'error');
 				}
 			});
 		}
@@ -128,13 +128,13 @@
 					success: function (response) {
 						if (response.success) {
 							loadRaidsForExpansion();
-							showNotice('Raids refreshed successfully!', 'success');
+							showNotice(wow_raid_admin.strings.raids_refreshed_success, 'success');
 						} else {
-							showNotice('Failed to refresh raids: ' + (response.data || 'Unknown error'), 'error');
+							showNotice(wow_raid_admin.strings.failed_refresh_raids + ': ' + (response.data || wow_raid_admin.strings.unknown_error), 'error');
 						}
 					},
 					error: function (xhr, status, error) {
-						showNotice('Failed to refresh raids: ' + error, 'error');
+						showNotice(wow_raid_admin.strings.failed_refresh_raids + ': ' + error, 'error');
 					},
 					complete: function () {
 						$btn.prop('disabled', false);
@@ -152,7 +152,7 @@
 				var clientSecret = $('#wow_raid_progress_blizzard_client_secret').val();
 
 				if (!clientId || !clientSecret) {
-					showNotice('Please configure Blizzard API credentials first', 'error');
+					showNotice(wow_raid_admin.strings.configure_blizzard_api_first, 'error');
 					$('.nav-tab[href="#blizzard"]').trigger('click');
 					return;
 				}
@@ -160,7 +160,7 @@
 				// Check if a raid is selected
 				var selectedRaid = $('#wow_raid_progress_raid').val();
 				if (!selectedRaid) {
-					showNotice('Please select a raid first', 'error');
+					showNotice(wow_raid_admin.strings.select_raid_first, 'error');
 					$('.nav-tab[href="#general"]').trigger('click');
 					return;
 				}
@@ -174,9 +174,9 @@
 				var originalText = $btn.text();
 
 				$btn.prop('disabled', true);
-				$btn.text('Importing...');
+				$btn.text(wow_raid_admin.strings.importing);
 				$status.show().removeClass('notice-success notice-error');
-				$status.html('<strong>Starting import process...</strong>');
+				$status.html('<strong>' + wow_raid_admin.strings.starting_import + '</strong>');
 
 				$.ajax({
 					url: wow_raid_admin.ajax_url,
@@ -190,7 +190,7 @@
 						$btn.text(originalText);
 
 						if (response.success && response.data.log) {
-							var logHtml = '<strong>Import Complete!</strong><br>';
+							var logHtml = '<strong>' + wow_raid_admin.strings.import_complete + '</strong><br>';
 
 							$.each(response.data.log, function (index, entry) {
 								var className = 'log-entry';
@@ -210,7 +210,7 @@
 						} else {
 							$status.addClass('notice-error').html(
 								'<strong>' + wow_raid_admin.strings.error + '</strong> ' +
-								(response.data || 'Unknown error')
+								(response.data || wow_raid_admin.strings.unknown_error)
 							);
 						}
 					},
@@ -237,7 +237,7 @@
 				var originalText = $btn.text();
 
 				$btn.prop('disabled', true);
-				$btn.text('Deleting...');
+				$btn.text(wow_raid_admin.strings.deleting);
 
 				$.ajax({
 					url: wow_raid_admin.ajax_url,
@@ -250,11 +250,11 @@
 						if (response.success) {
 							$message.text(response.data).fadeIn().delay(5000).fadeOut();
 						} else {
-							showNotice('Failed to delete icons: ' + (response.data || 'Unknown error'), 'error');
+							showNotice(wow_raid_admin.strings.failed_delete_icons + ': ' + (response.data || wow_raid_admin.strings.unknown_error), 'error');
 						}
 					},
 					error: function (xhr, status, error) {
-						showNotice('Failed to delete icons: ' + error, 'error');
+						showNotice(wow_raid_admin.strings.failed_delete_icons + ': ' + error, 'error');
 					},
 					complete: function () {
 						$btn.prop('disabled', false);
@@ -287,11 +287,11 @@
 						if (response.success) {
 							$message.fadeIn().delay(3000).fadeOut();
 						} else {
-							showNotice('Failed to clear cache: ' + (response.data || 'Unknown error'), 'error');
+							showNotice(wow_raid_admin.strings.failed_clear_cache + ': ' + (response.data || wow_raid_admin.strings.unknown_error), 'error');
 						}
 					},
 					error: function (xhr, status, error) {
-						showNotice('Failed to clear cache: ' + error, 'error');
+						showNotice(wow_raid_admin.strings.failed_clear_cache + ': ' + error, 'error');
 					},
 					complete: function () {
 						$btn.prop('disabled', false);
@@ -309,7 +309,7 @@
 				// Validate API key
 				var apiKey = $('#wow_raid_progress_api_key').val();
 				if (!apiKey) {
-					if (!confirm('No API key is set. The plugin will not be able to fetch raid data. Continue anyway?')) {
+					if (!confirm(wow_raid_admin.strings.no_api_key_continue)) {
 						e.preventDefault();
 						return false;
 					}
@@ -329,12 +329,12 @@
 					});
 
 					if (invalidGuilds.length > 0) {
-						errors.push('Invalid guild IDs: ' + invalidGuilds.join(', ') + '. Guild IDs must be numeric.');
+						errors.push(wow_raid_admin.strings.invalid_guild_ids + ' ' + invalidGuilds.join(', ') + '. ' + wow_raid_admin.strings.guild_ids_numeric);
 						isValid = false;
 					}
 
 					if (guilds.length > 10) {
-						errors.push('Maximum 10 guild IDs allowed.');
+						errors.push(wow_raid_admin.strings.max_guild_ids);
 						isValid = false;
 					}
 				}
@@ -342,7 +342,7 @@
 				// Validate realm name
 				var realm = $('#wow_raid_progress_realm').val();
 				if (realm && realm.length > 50) {
-					errors.push('Realm name is too long (max 50 characters).');
+					errors.push(wow_raid_admin.strings.realm_too_long);
 					isValid = false;
 				}
 
@@ -351,7 +351,7 @@
 				if ($cacheField.length) {
 					var cacheTime = parseInt($cacheField.val());
 					if (isNaN(cacheTime) || cacheTime < 0 || cacheTime > 1440) {
-						errors.push('Cache time must be between 0 and 1440 minutes.');
+						errors.push(wow_raid_admin.strings.cache_time_invalid);
 						isValid = false;
 					}
 				}
@@ -361,7 +361,7 @@
 				if ($limitField.length) {
 					var limit = parseInt($limitField.val());
 					if (isNaN(limit) || limit < 1 || limit > 100) {
-						errors.push('Results limit must be between 1 and 100.');
+						errors.push(wow_raid_admin.strings.limit_invalid);
 						isValid = false;
 					}
 				}
@@ -369,7 +369,7 @@
 				// Show errors if any
 				if (!isValid) {
 					e.preventDefault();
-					var errorMsg = 'Please fix the following errors:\n\n' + errors.join('\n');
+					var errorMsg = wow_raid_admin.strings.please_fix_errors + '\n\n' + errors.join('\n');
 					alert(errorMsg);
 					return false;
 				}
@@ -403,7 +403,7 @@
 			var $notice = $('<div class="notice ' + noticeClass + ' is-dismissible">' +
 				'<p>' + escapeHtml(message) + '</p>' +
 				'<button type="button" class="notice-dismiss">' +
-				'<span class="screen-reader-text">Dismiss this notice.</span>' +
+				'<span class="screen-reader-text">' + wow_raid_admin.strings.dismiss_notice + '</span>' +
 				'</button></div>');
 
 			$('.wow-raid-progress-admin h1').after($notice);
@@ -763,7 +763,7 @@
 						nonce: wow_raid_admin.nonce
 					},
 					success: function () {
-						$('.debug-log-content').html('Log cleared');
+						$('.debug-log-content').html(wow_raid_admin.strings.log_cleared);
 					}
 				});
 			});
@@ -801,7 +801,7 @@
 					success: function (response) {
 						if (response.success && response.data) {
 							var html = response.data.join('<br>');
-							$('.debug-log-content').html(html || 'No log entries');
+							$('.debug-log-content').html(html || wow_raid_admin.strings.no_log_entries);
 						}
 					}
 				});
@@ -876,7 +876,7 @@
 		// Warn before leaving with unsaved changes
 		$(window).on('beforeunload', function () {
 			if (settingsChanged) {
-				return 'You have unsaved changes. Are you sure you want to leave?';
+				return wow_raid_admin.strings.unsaved_changes;
 			}
 		});
 
