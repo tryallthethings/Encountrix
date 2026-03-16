@@ -3,188 +3,191 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: WoW Raid Progress Tracker 5.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-16 00:54+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2026-03-16 00:56+0000\n"
+"Last-Translator: Encountrix Team <team@example.com>\n"
+"Language-Team: de_DE\n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: includes/class-wow-raid-progress-admin.php:33
 msgid "WoW Raid Progress Settings"
-msgstr ""
+msgstr "WoW Raid Progress Settings"
 
 #: includes/class-wow-raid-progress-admin.php:34
 msgid "WoW Raid Progress"
-msgstr ""
+msgstr "WoW Raid Progress"
 
 #: includes/class-wow-raid-progress-admin.php:300
 msgid "Loading..."
-msgstr ""
+msgstr "Lade..."
 
 #: includes/class-wow-raid-progress-admin.php:301
 msgid "Success!"
-msgstr ""
+msgstr "Erfolg!"
 
 #: includes/class-wow-raid-progress-admin.php:302
 msgid "Error:"
-msgstr ""
+msgstr "Fehler:"
 
 #: includes/class-wow-raid-progress-admin.php:303
 msgid "Unknown error"
-msgstr ""
+msgstr "Unbekannter Fehler"
 
 #: includes/class-wow-raid-progress-admin.php:304
 msgid "Are you sure you want to clear the cache?"
-msgstr ""
+msgstr "Are you sure you want to clear the cache?"
 
 #: includes/class-wow-raid-progress-admin.php:305
 msgid "This will import boss icons for the selected raid. Continue?"
-msgstr ""
+msgstr "This will import boss icons for the selected raid. Continue?"
 
 #: includes/class-wow-raid-progress-admin.php:306
 msgid ""
 "WARNING: This will permanently delete ALL imported icons from your media "
 "library. This cannot be undone. Are you sure?"
 msgstr ""
+"WARNING: This will permanently delete ALL imported icons from your media "
+"library. This cannot be undone. Are you sure?"
 
 #: includes/class-wow-raid-progress-admin.php:307
 msgid ""
 "No API key is set. The plugin will not be able to fetch raid data. Continue "
 "anyway?"
 msgstr ""
+"No API key is set. The plugin will not be able to fetch raid data. Continue "
+"anyway?"
 
 #: includes/class-wow-raid-progress-admin.php:308
 msgid "You have unsaved changes. Are you sure you want to leave?"
-msgstr ""
+msgstr "You have unsaved changes. Are you sure you want to leave?"
 
 #: includes/class-wow-raid-progress-admin.php:309
 #: includes/class-wow-raid-progress-admin.php:695
 msgid "Settings saved successfully!"
-msgstr ""
+msgstr "Einstellungen erfolgreich gespeichert!"
 
 #: includes/class-wow-raid-progress-admin.php:310
 msgid "-- Select a Raid --"
-msgstr ""
+msgstr "-- Select a Raid --"
 
 #: includes/class-wow-raid-progress-admin.php:311
 msgid "Error loading raids"
-msgstr ""
+msgstr "Error loading raids"
 
 #: includes/class-wow-raid-progress-admin.php:312
 msgid "Failed to load raids"
-msgstr ""
+msgstr "Failed to load raids"
 
 #: includes/class-wow-raid-progress-admin.php:313
 msgid "Raids refreshed successfully!"
-msgstr ""
+msgstr "Raids refreshed successfully!"
 
 #: includes/class-wow-raid-progress-admin.php:314
 msgid "Failed to refresh raids"
-msgstr ""
+msgstr "Failed to refresh raids"
 
 #: includes/class-wow-raid-progress-admin.php:315
 msgid "Please configure Blizzard API credentials first"
-msgstr ""
+msgstr "Please configure Blizzard API credentials first"
 
 #: includes/class-wow-raid-progress-admin.php:316
 msgid "Please select a raid first"
-msgstr ""
+msgstr "Please select a raid first"
 
 #: includes/class-wow-raid-progress-admin.php:317
 msgid "Importing..."
-msgstr ""
+msgstr "Importing..."
 
 #: includes/class-wow-raid-progress-admin.php:318
 msgid "Deleting..."
-msgstr ""
+msgstr "Deleting..."
 
 #: includes/class-wow-raid-progress-admin.php:319
 msgid "Starting import process..."
-msgstr ""
+msgstr "Starting import process..."
 
 #: includes/class-wow-raid-progress-admin.php:320
 msgid "Import Complete!"
-msgstr ""
+msgstr "Import Complete!"
 
 #: includes/class-wow-raid-progress-admin.php:321
 msgid "Failed to delete icons"
-msgstr ""
+msgstr "Failed to delete icons"
 
 #: includes/class-wow-raid-progress-admin.php:322
 msgid "Failed to clear cache"
-msgstr ""
+msgstr "Failed to clear cache"
 
 #: includes/class-wow-raid-progress-admin.php:323
 msgid "Invalid guild IDs:"
-msgstr ""
+msgstr "Invalid guild IDs:"
 
 #: includes/class-wow-raid-progress-admin.php:324
 msgid "Guild IDs must be numeric."
-msgstr ""
+msgstr "Guild IDs must be numeric."
 
 #: includes/class-wow-raid-progress-admin.php:325
 msgid "Maximum 10 guild IDs allowed."
-msgstr ""
+msgstr "Maximum 10 guild IDs allowed."
 
 #: includes/class-wow-raid-progress-admin.php:326
 msgid "Realm name is too long (max 50 characters)."
-msgstr ""
+msgstr "Realm name is too long (max 50 characters)."
 
 #: includes/class-wow-raid-progress-admin.php:327
 msgid "Cache time must be between 0 and 1440 minutes."
-msgstr ""
+msgstr "Cache time must be between 0 and 1440 Minuten."
 
 #: includes/class-wow-raid-progress-admin.php:328
 msgid "Results limit must be between 1 and 100."
-msgstr ""
+msgstr "Results limit must be between 1 and 100."
 
 #: includes/class-wow-raid-progress-admin.php:329
 msgid "Please fix the following errors:"
-msgstr ""
+msgstr "Please fix the following errors:"
 
 #: includes/class-wow-raid-progress-admin.php:330
 msgid "Dismiss this notice."
-msgstr ""
+msgstr "Dismiss this notice."
 
 #: includes/class-wow-raid-progress-admin.php:331
 msgid "Log cleared"
-msgstr ""
+msgstr "Log geleert"
 
 #: includes/class-wow-raid-progress-admin.php:332
 msgid "No log entries"
-msgstr ""
+msgstr "Nein log entries"
 
 #: includes/class-wow-raid-progress-admin.php:333
 msgid "Could not load realms. You can still type a realm name manually."
-msgstr ""
+msgstr "Could not load realms. You can still type a realm name manually."
 
 #: includes/class-wow-raid-progress-admin.php:334
 msgid "No realms found for this region."
-msgstr ""
+msgstr "Nein realms found for this region."
 
 #: includes/class-wow-raid-progress-admin.php:335
 msgid "No realms match your search."
-msgstr ""
+msgstr "Nein realms match your search."
 
 #: includes/class-wow-raid-progress-admin.php:336
 msgid "Copied!"
-msgstr ""
+msgstr "Kopiert!"
 
 #: includes/class-wow-raid-progress-admin.php:337
 msgid "Press Ctrl+C to copy"
-msgstr ""
+msgstr "Drücke Strg+C zum Kopieren"
 
 #: includes/class-wow-raid-progress-admin.php:338
 msgid "For KR/TW regions, you may need to enter the realm name manually."
-msgstr ""
+msgstr "For KR/TW regions, you may need to enter the realm name manually."
 
 #: includes/class-wow-raid-progress-admin.php:349
 #: includes/class-wow-raid-progress-admin.php:383
@@ -196,7 +199,7 @@ msgstr ""
 #: includes/class-wow-raid-progress-admin.php:629
 #: includes/class-wow-raid-progress-admin.php:648
 msgid "Security check failed"
-msgstr ""
+msgstr "Security check failed"
 
 #: includes/class-wow-raid-progress-admin.php:355
 #: includes/class-wow-raid-progress-admin.php:389
@@ -206,639 +209,653 @@ msgstr ""
 #: includes/class-wow-raid-progress-admin.php:634
 #: includes/class-wow-raid-progress-admin.php:653
 msgid "Permission denied"
-msgstr ""
+msgstr "Permission denied"
 
 #: includes/class-wow-raid-progress-admin.php:374
 msgid "Cache cleared successfully"
-msgstr ""
+msgstr "Cache cleared successfully"
 
 #: includes/class-wow-raid-progress-admin.php:397
 msgid "No raid selected in settings"
-msgstr ""
+msgstr "Nein raid selected in settings"
 
 #: includes/class-wow-raid-progress-admin.php:406
 msgid "Could not fetch raid data"
-msgstr ""
+msgstr "Could not fetch raid data"
 
 #: includes/class-wow-raid-progress-admin.php:420
 #, php-format
 msgid "Could not find raid: %s"
-msgstr ""
+msgstr "Could not find raid: %s"
 
 #: includes/class-wow-raid-progress-admin.php:440
 #, php-format
 msgid "SUCCESS: Imported icon for %s (ID: %d)"
-msgstr ""
+msgstr "SUCCESS: Imported icon for %s (ID: %d)"
 
 #: includes/class-wow-raid-progress-admin.php:443
 #, php-format
 msgid "INFO: Icon for %s already exists"
-msgstr ""
+msgstr "INFO: Icon for %s already exists"
 
 #: includes/class-wow-raid-progress-admin.php:446
 #, php-format
 msgid "ERROR: Failed to import icon for %s"
-msgstr ""
+msgstr "ERROR: Failed to import icon for %s"
 
 #: includes/class-wow-raid-progress-admin.php:457
 #, php-format
 msgid "Summary: %d imported, %d skipped, %d errors"
-msgstr ""
+msgstr "Summary: %d imported, %d skipped, %d errors"
 
 #: includes/class-wow-raid-progress-admin.php:488
 #, php-format
 msgid "Successfully deleted %d icon(s) from the media library"
-msgstr ""
+msgstr "Successfully deleted %d icon(s) from the media library"
 
 #: includes/class-wow-raid-progress-admin.php:508
 msgid "Invalid expansion ID"
-msgstr ""
+msgstr "Invalid expansion ID"
 
 #: includes/class-wow-raid-progress-admin.php:524
 msgid "Could not fetch raids"
-msgstr ""
+msgstr "Could not fetch raids"
 
 #: includes/class-wow-raid-progress-admin.php:590
 msgid "Invalid region specified"
-msgstr ""
+msgstr "Invalid region specified"
 
 #: includes/class-wow-raid-progress-admin.php:598
 msgid "Could not fetch realms. Check Blizzard API settings."
-msgstr ""
+msgstr "Could not fetch realms. Check Blizzard API settings."
 
 #: includes/class-wow-raid-progress-admin.php:640
 msgid "Debug log cleared"
-msgstr ""
+msgstr "Debug log cleared"
 
 #: includes/class-wow-raid-progress-admin.php:689
 msgid "You do not have sufficient permissions to access this page."
-msgstr ""
+msgstr "You do not have sufficient permissions to access this page."
 
 #: includes/class-wow-raid-progress-api.php:179
 msgid "Data is being updated in the background. Please check back shortly."
-msgstr ""
+msgstr "Data is being updated in the background. Please check back shortly."
 
 #: includes/class-wow-raid-progress-api.php:185
 msgid "Raid name is required."
-msgstr ""
+msgstr "Raid name is required."
 
 #: includes/class-wow-raid-progress-api.php:189
 msgid "Invalid difficulty specified."
-msgstr ""
+msgstr "Invalid difficulty specified."
 
 #: includes/class-wow-raid-progress-api.php:263
 msgid "Raider.io API key not configured."
-msgstr ""
+msgstr "Raider.io API key not configured."
 
 #: includes/class-wow-raid-progress-api.php:288
 #: includes/class-wow-raid-progress-api.php:436
 msgid "API rate limit exceeded. Please try again in a moment."
-msgstr ""
+msgstr "API rate limit exceeded. Please try again in a moment."
 
 #: includes/class-wow-raid-progress-api.php:308
 #, php-format
 msgid "Failed to connect to Raider.io API: %s"
-msgstr ""
+msgstr "Failed to connect to Raider.io API: %s"
 
 #: includes/class-wow-raid-progress-api.php:322
 #, php-format
 msgid "Raider.io API error (HTTP %d): %s"
-msgstr ""
+msgstr "Raider.io API error (HTTP %d): %s"
 
 #: includes/class-wow-raid-progress-api.php:330
 msgid "Failed to parse API response."
-msgstr ""
+msgstr "Failed to parse API response."
 
 #: includes/class-wow-raid-progress-api.php:335
 msgid "Invalid API response structure."
-msgstr ""
+msgstr "Invalid API response structure."
 
 #: includes/class-wow-raid-progress-api.php:401
 #, php-format
 msgid "An unexpected error occurred: %s"
-msgstr ""
+msgstr "An unexpected error occurred: %s"
 
 #: includes/class-wow-raid-progress-api.php:425
 msgid "API key not configured"
-msgstr ""
+msgstr "API key not configured"
 
 #: includes/class-wow-raid-progress-api.php:453
 msgid "Failed to fetch static raid data"
-msgstr ""
+msgstr "Failed to fetch static raid data"
 
 #: includes/class-wow-raid-progress-api.php:461
 msgid "Failed to parse static data"
-msgstr ""
+msgstr "Failed to parse static data"
 
 #: includes/class-wow-raid-progress-api.php:1178
 #, php-format
 msgid "API authentication failed. Please check your API key. Details: %s"
-msgstr ""
+msgstr "API authentication failed. Please check your API key. Details: %s"
 
 #: includes/class-wow-raid-progress-api.php:1179
 msgid "Invalid or expired API key"
-msgstr ""
+msgstr "Invalid or expired API key"
 
 #: includes/class-wow-raid-progress-api.php:1183
 #, php-format
 msgid "Access forbidden. Please verify API key permissions. Details: %s"
-msgstr ""
+msgstr "Access forbidden. Please verify API key permissions. Details: %s"
 
 #: includes/class-wow-raid-progress-api.php:1184
 msgid "Insufficient permissions"
-msgstr ""
+msgstr "Insufficient permissions"
 
 #: includes/class-wow-raid-progress-api.php:1188
 #, php-format
 msgid "Resource not found. Please check raid name and parameters. Details: %s"
-msgstr ""
+msgstr "Resource not found. Please check raid name and parameters. Details: %s"
 
 #: includes/class-wow-raid-progress-api.php:1189
 msgid "The requested raid or guild was not found"
-msgstr ""
+msgstr "The requested raid or guild was not found"
 
 #: includes/class-wow-raid-progress-api.php:1192
 msgid "API rate limit exceeded. Please try again in a few minutes."
-msgstr ""
+msgstr "API rate limit exceeded. Please try again in a few Minuten."
 
 #: includes/class-wow-raid-progress-api.php:1197
 #, php-format
 msgid ""
 "API server error. The service may be temporarily unavailable. Details: %s"
 msgstr ""
+"API server error. The service may be temporarily unavailable. Details: %s"
 
 #: includes/class-wow-raid-progress-api.php:1198
 msgid "Please try again later"
-msgstr ""
+msgstr "Please try again later"
 
 #: includes/class-wow-raid-progress-api.php:1202
 #, php-format
 msgid "API Error (HTTP %d): %s"
-msgstr ""
+msgstr "API Error (HTTP %d): %s"
 
 #: includes/class-wow-raid-progress-api.php:1204
 msgid "Unknown error occurred"
-msgstr ""
+msgstr "Unbekannter Fehler occurred"
 
 #: includes/class-wow-raid-progress-widget.php:62
 msgid ""
 "No raid specified. Please configure a default raid in the plugin settings or "
 "specify one in the shortcode."
 msgstr ""
+"No raid specified. Please configure a default raid in the plugin settings or "
+"specify one in the shortcode."
 
 #: includes/class-wow-raid-progress-widget.php:66
 msgid ""
 "No region specified. Please configure a default region in the plugin "
 "settings or specify one in the shortcode."
 msgstr ""
+"No region specified. Please configure a default region in the plugin "
+"settings or specify one in the shortcode."
 
 #: includes/class-wow-raid-progress-widget.php:92
 #, php-format
 msgid "Error fetching raid information: %s"
-msgstr ""
+msgstr "Error fetching raid information: %s"
 
 #: includes/class-wow-raid-progress-widget.php:103
 #, php-format
 msgid "Raid \"%s\" not found. Please check the raid name."
-msgstr ""
+msgstr "Raid \"%s\" not found. Please check the raid name."
 
 #: includes/class-wow-raid-progress-widget.php:162
 msgid "Boss artwork © Blizzard Entertainment"
-msgstr ""
+msgstr "Boss artwork © Blizzard Entertainment"
 
 #: includes/class-wow-raid-progress-widget.php:273
 #: includes/class-wow-raid-progress-widget.php:309
 #, php-format
 msgid "Error loading %s data: %s"
-msgstr ""
+msgstr "Error loading %s data: %s"
 
 #: includes/class-wow-raid-progress-widget.php:365
 msgid "Data and media © Blizzard Entertainment"
-msgstr ""
+msgstr "Data and media © Blizzard Entertainment"
 
 #: includes/class-wow-raid-progress-widget.php:392
 #, php-format
 msgid "Invalid guild ID: %s"
-msgstr ""
+msgstr "Invalid guild ID: %s"
 
 #: includes/class-wow-raid-progress-widget.php:433
 #, php-format
 msgid "Error loading %s data for guild %s: %s"
-msgstr ""
+msgstr "Error loading %s data for guild %s: %s"
 
 #: includes/class-wow-raid-progress-widget.php:470
 msgid "No raid data available for this guild."
-msgstr ""
+msgstr "Nein raid data available for this guild."
 
 #: includes/class-wow-raid-progress-widget.php:517
 #, php-format
 msgid ""
 "No %s data found for your guild at this raid (and no lower-tier data either)."
 msgstr ""
+"No %s data found for your guild at this raid (and no lower-tier data either)."
 
 #: includes/class-wow-raid-progress-widget.php:538
 msgid "Realm:"
-msgstr ""
+msgstr "Realm:"
 
 #: includes/class-wow-raid-progress-widget.php:540
 msgid "World:"
-msgstr ""
+msgstr "World:"
 
 #: includes/class-wow-raid-progress-widget.php:554
 msgid "Bosses"
-msgstr ""
+msgstr "Bosses"
 
 #: includes/class-wow-raid-progress-widget.php:602
 msgid "Defeated"
-msgstr ""
+msgstr "Defeated"
 
 #: includes/class-wow-raid-progress-widget.php:605
 msgid "Pulls:"
-msgstr ""
+msgstr "Pulls:"
 
 #: includes/class-wow-raid-progress-widget.php:609
 msgid "Best:"
-msgstr ""
+msgstr "Best:"
 
 #: includes/class-wow-raid-progress-widget.php:613
 msgid "Not Started"
-msgstr ""
+msgstr "Neint Started"
 
 #: templates/admin-page.php:21
 msgid "General Settings"
-msgstr ""
+msgstr "Allgemeine Einstellungen"
 
 #: templates/admin-page.php:22
 msgid "Display Settings"
-msgstr ""
+msgstr "Anzeigeeinstellungen"
 
 #: templates/admin-page.php:23
 msgid "Tools"
-msgstr ""
+msgstr "Werkzeuge"
 
 #: templates/admin-page.php:24
 msgid "Documentation"
-msgstr ""
+msgstr "Dokumentation"
 
 #: templates/admin-page.php:34
 msgid "Raider.io API Configuration"
-msgstr ""
+msgstr "Raider.io API Configuration"
 
 #: templates/admin-page.php:39
 msgid "Raider.io API Key"
-msgstr ""
+msgstr "Raider.io API Key"
 
 #: templates/admin-page.php:51
 #, php-format
 msgid "Get your API key from %s"
-msgstr ""
+msgstr "Get your API key from %s"
 
 #: templates/admin-page.php:63
 msgid "Blizzard API Configuration"
-msgstr ""
+msgstr "Blizzard API Configuration"
 
 #: templates/admin-page.php:67
 #, php-format
 msgid "Required for boss icons and realm list. Get credentials from %s"
-msgstr ""
+msgstr "Required for boss icons and realm list. Get credentials from %s"
 
 #: templates/admin-page.php:76
 msgid "Blizzard Region"
-msgstr ""
+msgstr "Blizzard Region"
 
 #: templates/admin-page.php:81 templates/admin-page.php:179
 msgid "US"
-msgstr ""
+msgstr "US"
 
 #: templates/admin-page.php:82 templates/admin-page.php:180
 msgid "EU"
-msgstr ""
+msgstr "EU"
 
 #: templates/admin-page.php:83 templates/admin-page.php:181
 msgid "KR"
-msgstr ""
+msgstr "KR"
 
 #: templates/admin-page.php:84 templates/admin-page.php:182
 msgid "TW"
-msgstr ""
+msgstr "TW"
 
 #: templates/admin-page.php:91
 msgid "Client ID"
-msgstr ""
+msgstr "Client ID"
 
 #: templates/admin-page.php:105
 msgid "Client Secret"
-msgstr ""
+msgstr "Client Secret"
 
 #: templates/admin-page.php:119
 msgid "Debug Mode"
-msgstr ""
+msgstr "Debug Mode"
 
 #: templates/admin-page.php:125
 msgid "Disabled"
-msgstr ""
+msgstr "Deaktiviert"
 
 #: templates/admin-page.php:128
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiviert"
 
 #: templates/admin-page.php:132
 msgid "Enable debug logging for API calls (admin only)"
-msgstr ""
+msgstr "Enable debug logging for API calls (admin only)"
 
 #: templates/admin-page.php:138
 msgid "Debug Log"
-msgstr ""
+msgstr "Debug Log"
 
 #: templates/admin-page.php:143
 msgid "Clear Log"
-msgstr ""
+msgstr "Clear Log"
 
 #: templates/admin-page.php:144
 msgid "Test Blizzard API"
-msgstr ""
+msgstr "Test Blizzard API"
 
 #: templates/admin-page.php:152
 msgid "Default Guild Settings"
-msgstr ""
+msgstr "Default Guild Settings"
 
 #: templates/admin-page.php:157
 msgid "Guild IDs"
-msgstr ""
+msgstr "Guild IDs"
 
 #: templates/admin-page.php:167
 msgid ""
 "Comma-separated Raider.io guild IDs (max 10). Leave empty to show realm "
 "rankings."
 msgstr ""
+"Comma-separated Raider.io guild IDs (max 10). Leave empty to show realm "
+"rankings."
 
 #: templates/admin-page.php:174
 msgid "Default Region"
-msgstr ""
+msgstr "Standardregion"
 
 #: templates/admin-page.php:189
 msgid "Default Realm"
-msgstr ""
+msgstr "Standardrealm"
 
 #: templates/admin-page.php:199
 msgid "Type to search realms..."
-msgstr ""
+msgstr "Type to search realms..."
 
 #: templates/admin-page.php:208
 msgid "Select a realm or leave empty for region-wide rankings."
-msgstr ""
+msgstr "Select a realm or leave empty for region-wide rankings."
 
 #: templates/admin-page.php:216
 msgid "Default Raid Settings"
-msgstr ""
+msgstr "Standard-Raid Settings"
 
 #: templates/admin-page.php:221
 msgid "Expansion"
-msgstr ""
+msgstr "Expansion"
 
 #: templates/admin-page.php:237
 msgid "Default Raid"
-msgstr ""
+msgstr "Standard-Raid"
 
 #: templates/admin-page.php:245
 msgid "Loading raids..."
-msgstr ""
+msgstr "Loading raids..."
 
 #: templates/admin-page.php:248
 msgid "Refresh Raids"
-msgstr ""
+msgstr "Refresh Raids"
 
 #: templates/admin-page.php:252
 msgid "Select a raid from the chosen expansion"
-msgstr ""
+msgstr "Select a raid from the chosen expansion"
 
 #: templates/admin-page.php:259
 msgid "Default Difficulty"
-msgstr ""
+msgstr "Standardschwierigkeit"
 
 #: templates/admin-page.php:265
 msgid "Highest Progress"
-msgstr ""
+msgstr "Höchster Fortschritt"
 
 #: templates/admin-page.php:268
 msgid "All Difficulties"
-msgstr ""
+msgstr "Alle Schwierigkeitsgrade"
 
 #: templates/admin-page.php:271
 msgid "Normal"
-msgstr ""
+msgstr "Neinrmal"
 
 #: templates/admin-page.php:274
 msgid "Heroic"
-msgstr ""
+msgstr "Heroisch"
 
 #: templates/admin-page.php:277
 msgid "Mythic"
-msgstr ""
+msgstr "Mythisch"
 
 #: templates/admin-page.php:287 templates/admin-page.php:437
 msgid "Save Changes"
-msgstr ""
+msgstr "Änderungen speichern"
 
 #: templates/admin-page.php:295
 msgid "Display Options"
-msgstr ""
+msgstr "Display Options"
 
 #: templates/admin-page.php:300
 msgid "Show Raid Name"
-msgstr ""
+msgstr "Raid-Namen anzeigen"
 
 #: templates/admin-page.php:306 templates/admin-page.php:326
 #: templates/admin-page.php:343 templates/admin-page.php:363
 #: templates/admin-page.php:383
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: templates/admin-page.php:309 templates/admin-page.php:329
 #: templates/admin-page.php:346 templates/admin-page.php:366
 #: templates/admin-page.php:386
 msgid "No"
-msgstr ""
+msgstr "Nein"
 
 #: templates/admin-page.php:313
 msgid "Display the raid name as a header in the widget"
-msgstr ""
+msgstr "Display the raid name as a header in the widget"
 
 #: templates/admin-page.php:320
 msgid "Show Boss Icons"
-msgstr ""
+msgstr "Boss-Icons anzeigen"
 
 #: templates/admin-page.php:337
 msgid "Show Raid Background"
-msgstr ""
+msgstr "Raid-Hintergrund anzeigen"
 
 #: templates/admin-page.php:350
 msgid ""
 "Display the raid journal background image in the header (requires Blizzard "
 "API)"
 msgstr ""
+"Display the raid journal background image in the header (requires Blizzard "
+"API)"
 
 #: templates/admin-page.php:357
 msgid "Show Defeated Bosses"
-msgstr ""
+msgstr "Besiegte Bosse anzeigen"
 
 #: templates/admin-page.php:370
 msgid "When set to No, defeated bosses will be hidden from the list"
-msgstr ""
+msgstr "When set to Nein, defeated bosses will be hidden from the list"
 
 #: templates/admin-page.php:377
 msgid "Use Blizzard Icons"
-msgstr ""
+msgstr "Blizzard-Icons verwenden"
 
 #: templates/admin-page.php:390
 msgid "Download and display official Blizzard achievement icons"
-msgstr ""
+msgstr "Download and display official Blizzard achievement icons"
 
 #: templates/admin-page.php:397
 msgid "Cache Duration"
-msgstr ""
+msgstr "Cache-Dauer"
 
 #: templates/admin-page.php:408
 msgid "minutes"
-msgstr ""
+msgstr "Minuten"
 
 #: templates/admin-page.php:410
 msgid "How long to cache API data (0 to disable caching, max 1440)"
-msgstr ""
+msgstr "How long to cache API data (0 to disable caching, max 1440)"
 
 #: templates/admin-page.php:417
 msgid "Results Limit"
-msgstr ""
+msgstr "Ergebnislimit"
 
 #: templates/admin-page.php:429
 msgid "Maximum number of guilds to display (1-100)"
-msgstr ""
+msgstr "Maximum number of guilds to display (1-100)"
 
 #: templates/admin-page.php:446
 msgid "Icon Management"
-msgstr ""
+msgstr "Icon Management"
 
 #: templates/admin-page.php:448
 msgid "Import Boss Icons"
-msgstr ""
+msgstr "Import Boss Icons"
 
 #: templates/admin-page.php:449
 msgid ""
 "Download and import boss achievement icons for the selected raid from "
 "Blizzard API."
 msgstr ""
+"Download and import boss achievement icons for the selected raid from "
+"Blizzard API."
 
 #: templates/admin-page.php:451
 msgid "Import Icons"
-msgstr ""
+msgstr "Icons importieren"
 
 #: templates/admin-page.php:457 templates/admin-page.php:460
 msgid "Delete All Icons"
-msgstr ""
+msgstr "Alle Icons löschen"
 
 #: templates/admin-page.php:458
 msgid "Warning:"
-msgstr ""
+msgstr "Warnung:"
 
 #: templates/admin-page.php:458
 msgid ""
 "This will permanently delete ALL imported boss and raid icons from your "
 "media library."
 msgstr ""
+"This will permanently delete ALL imported boss and raid icons from your "
+"media library."
 
 #: templates/admin-page.php:467
 msgid "Cache Management"
-msgstr ""
+msgstr "Cache Management"
 
 #: templates/admin-page.php:469
 msgid "Clear All Cache"
-msgstr ""
+msgstr "Gesamten Cache leeren"
 
 #: templates/admin-page.php:470
 msgid "Remove all cached API data and force fresh data retrieval."
-msgstr ""
+msgstr "Remove all cached API data and force fresh data retrieval."
 
 #: templates/admin-page.php:472
 msgid "Clear Cache"
-msgstr ""
+msgstr "Cache leeren"
 
 #: templates/admin-page.php:475
 msgid "Cache cleared successfully!"
-msgstr ""
+msgstr "Cache erfolgreich geleert!"
 
 #: templates/admin-page.php:484
 msgid "Shortcode Documentation"
-msgstr ""
+msgstr "Shortcode Dokumentation"
 
 #: templates/admin-page.php:487
 msgid "Basic Usage"
-msgstr ""
+msgstr "Grundlegende Verwendung"
 
 #: templates/admin-page.php:488
 msgid "Use the following shortcode to display raid progress:"
-msgstr ""
+msgstr "Use the following shortcode to display raid progress:"
 
 #: templates/admin-page.php:491
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "In Zwischenablage kopieren"
 
 #: templates/admin-page.php:493 templates/admin-page.php:522
 #: templates/admin-page.php:531
 msgid "Copy"
-msgstr ""
+msgstr "Kopieren"
 
 #: templates/admin-page.php:496
 msgid "This will use all default settings configured above."
-msgstr ""
+msgstr "This will use all default settings configured above."
 
 #: templates/admin-page.php:500
 msgid "Available Parameters"
-msgstr ""
+msgstr "Verfügbare Parameter"
 
 #: templates/admin-page.php:502
 msgid "Raid slug (e.g., nerub-ar-palace)"
-msgstr ""
+msgstr "Raid slug (e.g., nerub-ar-palace)"
 
 #: templates/admin-page.php:503
 msgid "Difficulty to display: highest, all, normal, heroic, or mythic"
-msgstr ""
+msgstr "Difficulty to display: highest, all, normal, heroic, or mythic"
 
 #: templates/admin-page.php:504
 msgid "Region: us, eu, kr, or tw"
-msgstr ""
+msgstr "Region: us, eu, kr, or tw"
 
 #: templates/admin-page.php:505
 msgid "Specific realm name"
-msgstr ""
+msgstr "Specific realm name"
 
 #: templates/admin-page.php:506
 msgid "Comma-separated guild IDs (max 10)"
-msgstr ""
+msgstr "Comma-separated guild IDs (max 10)"
 
 #: templates/admin-page.php:507
 msgid "Cache duration in minutes"
-msgstr ""
+msgstr "Cache duration in Minuten"
 
 #: templates/admin-page.php:508
 msgid "Show raid name header: true or false"
-msgstr ""
+msgstr "Show raid name header: true or false"
 
 #: templates/admin-page.php:509
 msgid "Show boss icons: true or false"
-msgstr ""
+msgstr "Show boss icons: true or false"
 
 #: templates/admin-page.php:510
 msgid "Maximum number of guilds to display"
-msgstr ""
+msgstr "Maximum number of guilds to display"
 
 #: templates/admin-page.php:515
 msgid "Example Shortcodes"
-msgstr ""
+msgstr "Beispiel-Shortcodes"
 
 #: templates/admin-page.php:517
 msgid "Display specific guild progress:"
-msgstr ""
+msgstr "Display specific guild progress:"
 
 #: templates/admin-page.php:526
 msgid "Display realm rankings:"
-msgstr ""
+msgstr "Display realm rankings:"
