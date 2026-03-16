@@ -1,31 +1,31 @@
-# WoW Raid Progress Tracker - WordPress Plugin
+# Encountrix WoW Raid Progress Tracker - WordPress Plugin
 
-## Version 5.0.0 - Complete Rewrite
+## Version 5.1.0 - Complete Rewrite
 
 A WordPress plugin to display World of Warcraft raid progress from Raider.io API with Blizzard achievement icons.
 
 ## 📁 File Structure
 
 ```
-wow-raid-progress/
-├── wow-raid-progress.php           # Main plugin file
+encountrix/
+├── encountrix.php           # Main plugin file
 ├── README.md                        # This file
 ├── LICENSE                          # GPL v2 license
 ├── includes/                        # PHP class files
-│   ├── class-wow-raid-progress.php         # Main plugin class
-│   ├── class-wow-raid-progress-admin.php   # Admin settings class
-│   ├── class-wow-raid-progress-api.php     # API handler class
-│   └── class-wow-raid-progress-widget.php  # Widget/shortcode class
+│   ├── class-encountrix.php         # Main plugin class
+│   ├── class-encountrix-admin.php   # Admin settings class
+│   ├── class-encountrix-api.php     # API handler class
+│   └── class-encountrix-widget.php  # Widget/shortcode class
 ├── assets/                          # Frontend assets
 │   ├── css/
-│   │   ├── wow-raid-progress.css   # Frontend styles
+│   │   ├── encountrix.css   # Frontend styles
 │   │   └── admin.css                # Admin panel styles
 │   └── js/
-│       ├── wow-raid-progress.js    # Frontend JavaScript
+│       ├── encountrix.js    # Frontend JavaScript
 │       └── admin.js                 # Admin panel JavaScript
 └── languages/                       # Translation files
-    ├── wow-raid-progress.pot       # Translation template
-    └── wow-raid-progress-de_DE.mo  # German translation (example)
+    ├── encountrix.pot       # Translation template
+    └── encountrix-de_DE.mo  # German translation (example)
 ```
 
 ## 🚀 Key Improvements
@@ -55,7 +55,7 @@ wow-raid-progress/
 - Refresh button to update cache
 
 ### 5. ✅ Full Internationalization
-- Text domain: `wow-raid-progress`
+- Text domain: `encountrix`
 - All strings translatable
 - POT file included
 - Translation-ready architecture
@@ -97,7 +97,7 @@ wow-raid-progress/
 ## 📋 Installation
 
 1. **Upload Plugin**
-   - Upload the `wow-raid-progress` folder to `/wp-content/plugins/`
+   - Upload the `encountrix` folder to `/wp-content/plugins/`
    - Or install via WordPress admin panel
 
 2. **Activate Plugin**
@@ -173,11 +173,11 @@ wow-raid-progress/
 
 1. Use the POT file in `/languages/` folder
 2. Create translation with tools like Poedit
-3. Save as `wow-raid-progress-{locale}.po` and `.mo`
+3. Save as `encountrix-{locale}.po` and `.mo`
 4. Place in `/languages/` folder
 
 ### Available Text Domains
-- Plugin Name: `wow-raid-progress`
+- Plugin Name: `encountrix`
 - All strings use `__()` or `_e()` functions
 
 ## 🐛 Error Handling
@@ -204,7 +204,7 @@ wow-raid-progress/
 
 ### CSS Classes Structure
 ```css
-.wow-raid-progress-container     /* Main container */
+.encountrix-container     /* Main container */
 .wow-raid-section                /* Each difficulty section */
 .wow-raid-header                 /* Section header */
 .wow-raid-title                  /* Guild/raid name */
@@ -301,7 +301,7 @@ GPL v2 or later - See LICENSE file
 
 ---
 
-**Version:** 5.0.0  
-**Requires WordPress:** 5.0+  
-**Requires PHP:** 7.2+  
+**Version:** 5.0.0
+**Requires WordPress:** 5.0+
+**Requires PHP:** 7.2+
 **Tested up to:** WordPress 6.4

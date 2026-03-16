@@ -1,10 +1,10 @@
 /**
- * WoW Raid Progress - Frontend Styles
- * Version: 5.0.0
+ * Encountrix - Frontend Styles
+ * Version: 5.0.1
  */
 
 /* Container */
-.wow-raid-progress-container {
+.encountrix-container {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 	background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 	border-radius: 8px;
@@ -16,27 +16,25 @@
 	margin: 20px 0;
 }
 
-.wow-raid-progress-container * {
+.encountrix-container * {
 	box-sizing: border-box;
 }
 
-/* Section */
-.wow-raid-section {
+.encountrix-section {
 	margin-bottom: 20px;
 }
 
-.wow-raid-section:last-child {
+.encountrix-section:last-child {
 	margin-bottom: 0;
 }
 
-/* Header */
-.wow-raid-header {
+.encountrix-header {
 	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 	padding-bottom: 15px;
 	margin-bottom: 20px;
 }
 
-.wow-raid-title .wow-raid-icon {
+.encountrix-title .encountrix-icon {
 	width: 28px;
 	height: 28px;
 	border-radius: 4px;
@@ -44,8 +42,7 @@
 	vertical-align: middle;
 }
 
-/* Difficulty Badges */
-.wow-difficulty-badge {
+.encountrix-difficulty-badge {
 	font-size: 12px;
 	padding: 4px 12px;
 	border-radius: 3px;
@@ -55,21 +52,20 @@
 	color: #fff;
 }
 
-.wow-difficulty-badge.normal {
+.encountrix-difficulty-badge.normal {
 	background: #1eff00;
 	color: #000;
 }
 
-.wow-difficulty-badge.heroic {
+.encountrix-difficulty-badge.heroic {
 	background: #0070ff;
 }
 
-.wow-difficulty-badge.mythic {
+.encountrix-difficulty-badge.mythic {
 	background: #a335ee;
 }
 
-/* Meta Information */
-.wow-raid-meta {
+.encountrix-meta {
 	display: flex;
 	gap: 15px;
 	font-size: 14px;
@@ -77,29 +73,27 @@
 	margin-bottom: 8px;
 }
 
-.wow-raid-meta span {
+.encountrix-meta span {
 	background: transparent;
 	padding: 0;
 	border-radius: 0;
 }
 
-/* Ranks */
-.wow-raid-ranks {
+.encountrix-ranks {
 	display: flex;
 	gap: 10px;
 	font-size: 12px;
 	color: rgba(255, 255, 255, 0.95);
 }
 
-.wow-rank {
+.encountrix-rank {
 	background: rgba(255, 255, 255, 0.1);
 	padding: 3px 8px;
 	border-radius: 4px;
 	border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Progress Bar */
-.wow-progress-bar {
+.encountrix-progress-bar {
 	background: rgba(0, 0, 0, 0.3);
 	border-radius: 12px;
 	height: 28px;
@@ -109,38 +103,35 @@
 	border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.wow-progress-fill {
+.encountrix-progress-fill {
 	height: 100%;
 	border-radius: 11px;
 	position: relative;
 }
 
-.wow-progress-fill.normal {
+.encountrix-progress-fill.normal {
 	background: linear-gradient(90deg, #4caf50, #66bb6a);
 }
 
-.wow-progress-fill.heroic {
+.encountrix-progress-fill.heroic {
 	background: linear-gradient(90deg, #2196f3, #42a5f5);
 }
 
-.wow-progress-fill.mythic {
+.encountrix-progress-fill.mythic {
 	background: linear-gradient(90deg, #9c27b0, #ba68c8);
 }
 
-.wow-progress-fill::after {
+.encountrix-progress-fill::after {
 	content: '';
 	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: linear-gradient(90deg,
-			transparent,
-			rgba(255, 255, 255, 0.2) 50%,
-			transparent);
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2) 50%, transparent);
 }
 
-.wow-progress-text {
+.encountrix-progress-text {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -152,14 +143,13 @@
 	z-index: 1;
 }
 
-/* Boss List */
-.wow-boss-list {
+.encountrix-boss-list {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 }
 
-.wow-boss-item {
+.encountrix-boss-item {
 	background: rgba(255, 255, 255, 0.05);
 	border-radius: 6px;
 	padding: 10px 12px;
@@ -171,36 +161,34 @@
 	position: relative;
 }
 
-.wow-boss-item:hover {
+.encountrix-boss-item:hover {
 	background: rgba(255, 255, 255, 0.08);
 	transform: translateX(2px);
 }
 
-/* Boss Status Classes */
-.wow-boss-item.defeated {
+.encountrix-boss-item.defeated {
 	opacity: 0.9;
 	background: rgba(76, 175, 80, 0.15);
 	border-color: rgba(76, 175, 80, 0.3);
 }
 
-.wow-boss-item.defeated .wow-boss-name {
+.encountrix-boss-item.defeated .encountrix-boss-name {
 	text-decoration: line-through;
 	color: rgba(255, 255, 255, 0.6);
 }
 
-.wow-boss-item.in-progress {
+.encountrix-boss-item.in-progress {
 	background: rgba(255, 152, 0, 0.12);
 	border-color: rgba(255, 152, 0, 0.35);
 }
 
-.wow-boss-item.not-started {
+.encountrix-boss-item.not-started {
 	opacity: 0.85;
 	background: rgba(100, 100, 100, 0.08);
 	border-color: rgba(100, 100, 100, 0.2);
 }
 
-/* Boss Icon */
-.wow-boss-icon {
+.encountrix-boss-icon {
 	width: 28px;
 	height: 28px;
 	border-radius: 50%;
@@ -213,7 +201,7 @@
 	background: none;
 }
 
-.wow-boss-icon.wow-boss-portrait {
+.encountrix-boss-icon.encountrix-boss-portrait {
 	width: 42px;
 	height: 42px;
 	border-radius: 6px;
@@ -223,19 +211,18 @@
 	background: rgba(0, 0, 0, 0.3);
 }
 
-.wow-boss-icon.wow-boss-portrait img {
+.encountrix-boss-icon.encountrix-boss-portrait img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
 }
 
-.wow-boss-icon.wow-boss-portrait span {
+.encountrix-boss-icon.encountrix-boss-portrait span {
 	color: rgba(255, 255, 255, 0.5);
 }
 
-/* Defeated Boss Check Mark */
-.wow-boss-item.defeated .wow-boss-icon.wow-boss-portrait::after {
-	content: '✓';
+.encountrix-boss-item.defeated .encountrix-boss-icon.encountrix-boss-portrait::after {
+	content: '\2713';
 	position: absolute;
 	bottom: -2px;
 	right: -2px;
@@ -252,13 +239,12 @@
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* Boss Info */
-.wow-boss-info {
+.encountrix-boss-info {
 	flex: 1;
 	min-width: 0;
 }
 
-.wow-boss-name {
+.encountrix-boss-name {
 	font-weight: 500;
 	margin-bottom: 4px;
 	font-size: 14px;
@@ -268,7 +254,7 @@
 	text-overflow: ellipsis;
 }
 
-.wow-boss-stats {
+.encountrix-boss-stats {
 	font-size: 12px;
 	color: rgba(255, 255, 255, 0.7);
 	display: flex;
@@ -276,43 +262,42 @@
 	align-items: center;
 }
 
-.wow-defeated-label {
+.encountrix-defeated-label {
 	color: #66bb6a;
 	font-weight: 500;
 }
 
-.wow-pulls {
+.encountrix-pulls {
 	color: #ffa726;
 }
 
-.wow-percent {
+.encountrix-percent {
 	color: #ff7043;
 	font-weight: 500;
 }
 
-.wow-not-started {
+.encountrix-not-started {
 	color: #9e9e9e;
 	font-style: italic;
 }
 
-/* Rankings Table */
-.wow-rankings-table {
+.encountrix-rankings-table {
 	overflow-x: auto;
 }
 
-.wow-rankings-table table {
+.encountrix-rankings-table table {
 	width: 100%;
 	border-collapse: collapse;
 }
 
-.wow-rankings-table th,
-.wow-rankings-table td {
+.encountrix-rankings-table th,
+.encountrix-rankings-table td {
 	padding: 10px 12px;
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.wow-rankings-table th {
+.encountrix-rankings-table th {
 	background: rgba(255, 255, 255, 0.08);
 	font-weight: 600;
 	font-size: 13px;
@@ -321,35 +306,30 @@
 	color: rgba(255, 255, 255, 0.9);
 }
 
-.wow-rankings-table tbody tr {
-	transition: background-color 0.2s ease;
-}
-
-.wow-rankings-table tbody tr:hover {
+.encountrix-rankings-table tbody tr:hover {
 	background: rgba(255, 255, 255, 0.05);
 }
 
-.wow-rankings-table .rank {
+.encountrix-rankings-table .rank {
 	font-weight: 600;
 	color: #ffa726;
 }
 
-.wow-rankings-table .guild-name {
+.encountrix-rankings-table .guild-name {
 	font-weight: 500;
 }
 
-.wow-rankings-table .realm {
+.encountrix-rankings-table .realm {
 	color: rgba(255, 255, 255, 0.7);
 	font-size: 13px;
 }
 
-.wow-rankings-table .progress {
+.encountrix-rankings-table .progress {
 	font-weight: 500;
 	color: #66bb6a;
 }
 
-/* Attribution */
-.wow-raid-attribution {
+.encountrix-attribution {
 	margin-top: 16px;
 	padding-top: 16px;
 	border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -358,9 +338,8 @@
 	font-size: 11px;
 }
 
-/* Error Messages */
-.wow-raid-error,
-.wow-raid-error-inline {
+.encountrix-error,
+.encountrix-error-inline {
 	background: rgba(244, 67, 54, 0.1);
 	border: 1px solid rgba(244, 67, 54, 0.3);
 	color: #fff;
@@ -372,13 +351,13 @@
 	margin: 16px 0;
 }
 
-.wow-raid-error-inline {
+.encountrix-error-inline {
 	margin: 8px 0;
 	padding: 12px;
 	font-size: 13px;
 }
 
-.wow-raid-header h3.wow-raid-title {
+.encountrix-header h3.encountrix-title {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -387,7 +366,7 @@
 	font-weight: 600;
 }
 
-.wow-raid-header .wow-raid-icon {
+.encountrix-header .encountrix-icon {
 	width: 32px;
 	height: 32px;
 	border-radius: 6px;
@@ -395,12 +374,12 @@
 	flex-shrink: 0;
 }
 
-.wow-raid-header .wow-raid-name {
+.encountrix-header .encountrix-name {
 	flex: 1;
 	line-height: 1.2;
 }
 
-.wow-raid-title {
+.encountrix-title {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -410,90 +389,57 @@
 	color: #fff;
 }
 
-/* Realm selector enhancement */
-input[list="realm-list"] {
-	position: relative;
-}
-
-input[list="realm-list"]:focus {
-	border-color: #5b9dd9;
-	box-shadow: 0 0 0 1px #5b9dd9;
-}
-
-/* Raid Header with Journal Background */
-.wow-raid-header-container {
+.encountrix-header-container {
 	margin-bottom: 20px;
 }
 
-/* Raid Header with Journal Background - Full Width */
-.wow-raid-header-hero {
+.encountrix-header-hero {
 	position: relative;
 	height: 140px;
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
 	margin: -20px -20px 20px -20px;
-	/* Negative margins to break out of container padding */
 	border-radius: 8px 8px 0 0;
 	overflow: hidden;
 }
 
-.wow-raid-header-overlay {
+.encountrix-header-overlay {
 	position: absolute;
 	bottom: 0;
 	left: 0;
 	right: 0;
 	padding: 20px 20px;
-	background: linear-gradient(to top,
-			rgba(0, 0, 0, 0.95) 0%,
-			rgba(0, 0, 0, 0.7) 50%,
-			rgba(0, 0, 0, 0.3) 100%);
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.3) 100%);
 	display: flex;
 	align-items: flex-end;
 }
 
-.wow-raid-header-title {
+.encountrix-header-title {
 	margin: 0;
 	color: #fff;
 	text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
 	letter-spacing: 0.5px;
 	line-height: 1.2;
 	word-wrap: break-word;
-	/* Break long words */
 	overflow-wrap: break-word;
-	/* Modern property */
 	hyphens: manual;
-	/* Prevent auto-hyphenation */
 	width: 100%;
 }
 
-.wow-raid-header-title span {
+.encountrix-header-title span {
 	display: inline-block;
 	font-size: clamp(20px, 4vw, 32px);
-	/* Responsive font size */
 	font-weight: 700;
 }
 
-/* Use JavaScript to dynamically adjust font size if needed */
-.wow-raid-header-title[data-text] {
-	position: relative;
-}
-
-/* Fallback for very long titles */
-@media (max-width: 600px) {
-	.wow-raid-header-title span {
-		font-size: clamp(18px, 3.5vw, 28px);
-	}
-}
-
-/* Simple header without background */
-.wow-raid-header-simple {
+.encountrix-header-simple {
 	padding: 15px 0;
 	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 	margin-bottom: 20px;
 }
 
-.wow-raid-header-simple .wow-raid-header-title {
+.encountrix-header-simple .encountrix-header-title {
 	margin: 0;
 	font-size: 24px;
 	font-weight: 600;
@@ -502,99 +448,75 @@ input[list="realm-list"]:focus {
 	overflow-wrap: break-word;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
-	.wow-raid-progress-container {
+	.encountrix-container {
 		padding: 16px;
 	}
 
-	.wow-raid-title {
+	.encountrix-title {
 		font-size: 16px;
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 8px;
 	}
 
-	.wow-difficulty-badge {
+	.encountrix-difficulty-badge {
 		margin-left: 0;
 	}
 
-	.wow-raid-meta {
+	.encountrix-meta {
 		flex-wrap: wrap;
 	}
 
-	.wow-boss-icon.wow-boss-portrait {
+	.encountrix-boss-icon.encountrix-boss-portrait {
 		width: 36px;
 		height: 36px;
 	}
 
-	.wow-boss-name {
+	.encountrix-boss-name {
 		font-size: 13px;
 	}
 
-	.wow-boss-stats {
+	.encountrix-boss-stats {
 		font-size: 11px;
 		flex-wrap: wrap;
 	}
 
-	.wow-rankings-table {
+	.encountrix-rankings-table {
 		font-size: 12px;
 	}
 
-	.wow-rankings-table th,
-	.wow-rankings-table td {
+	.encountrix-rankings-table th,
+	.encountrix-rankings-table td {
 		padding: 8px;
 	}
-}
 
-/* Dark Mode Compatibility */
-@media (prefers-color-scheme: light) {
-	.wow-raid-progress-container {
-		background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-		color: #333;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-	}
-
-	.wow-raid-title,
-	.wow-boss-name {
-		color: #333;
-	}
-
-	.wow-raid-meta,
-	.wow-boss-stats {
-		color: #666;
-	}
-
-	.wow-raid-header {
-		border-bottom-color: rgba(0, 0, 0, 0.1);
-	}
-
-	.wow-progress-bar {
-		background: rgba(0, 0, 0, 0.1);
-		border-color: rgba(0, 0, 0, 0.2);
+	.encountrix-header-title span {
+		font-size: clamp(18px, 3.5vw, 28px);
 	}
 }
 
 /* Print Styles */
 @media print {
-	.wow-raid-progress-container {
+	.encountrix-container {
 		background: none;
 		color: #000;
 		box-shadow: none;
 		border: 1px solid #ccc;
 	}
 
-	.wow-difficulty-badge {
+	.encountrix-difficulty-badge {
 		color: #000;
 		border: 1px solid #000;
 		background: none !important;
 	}
 
-	.wow-progress-bar {
+	.encountrix-progress-bar {
 		border: 1px solid #000;
 	}
 
-	.wow-progress-fill::after {
+	.encountrix-progress-fill::after {
 		display: none;
 	}
 }

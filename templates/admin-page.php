@@ -3,52 +3,46 @@
 /**
  * Admin page template
  *
- * @package WoWRaidProgress
+ * @package Encountrix
  * @since 5.0.0
  */
 
-// Exit if accessed directly
 if (!defined('ABSPATH')) {
 	exit;
 }
 ?>
 
-<div class="wrap wow-raid-progress-admin">
+<div class="wrap encountrix-admin">
 	<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
-	<div class="wow-raid-tabs">
+	<div class="encountrix-tabs">
 		<h2 class="nav-tab-wrapper">
-			<a href="#general" class="nav-tab nav-tab-active"><?php _e('General Settings', 'wow-raid-progress'); ?></a>
-			<a href="#display" class="nav-tab"><?php _e('Display Settings', 'wow-raid-progress'); ?></a>
-			<a href="#tools" class="nav-tab"><?php _e('Tools', 'wow-raid-progress'); ?></a>
-			<a href="#documentation" class="nav-tab"><?php _e('Documentation', 'wow-raid-progress'); ?></a>
+			<a href="#general" class="nav-tab nav-tab-active"><?php esc_html_e('General Settings', 'encountrix'); ?></a>
+			<a href="#display" class="nav-tab"><?php esc_html_e('Display Settings', 'encountrix'); ?></a>
+			<a href="#tools" class="nav-tab"><?php esc_html_e('Tools', 'encountrix'); ?></a>
+			<a href="#documentation" class="nav-tab"><?php esc_html_e('Documentation', 'encountrix'); ?></a>
 		</h2>
 	</div>
 
 	<form method="post" action="options.php">
-		<?php settings_fields('wow_raid_progress_settings'); ?>
+		<?php settings_fields('encountrix_settings'); ?>
 
 		<!-- General Settings Tab -->
 		<div id="general" class="tab-content active">
-			<div class="wow-raid-settings-section">
-				<h2><?php _e('Raider.io API Configuration', 'wow-raid-progress'); ?></h2>
+			<div class="encountrix-settings-section">
+				<h2><?php esc_html_e('Raider.io API Configuration', 'encountrix'); ?></h2>
 				<table class="form-table">
 					<tr>
 						<th scope="row">
-							<label for="wow_raid_progress_api_key">
-								<?php _e('Raider.io API Key', 'wow-raid-progress'); ?>
-							</label>
+							<label for="encountrix_api_key"><?php esc_html_e('Raider.io API Key', 'encountrix'); ?></label>
 						</th>
 						<td>
-							<input type="text"
-								id="wow_raid_progress_api_key"
-								name="wow_raid_progress_api_key"
-								value="<?php echo esc_attr($api_key); ?>"
-								class="regular-text" />
+							<input type="text" id="encountrix_api_key" name="encountrix_api_key" value="<?php echo esc_attr($api_key); ?>" class="regular-text" />
 							<p class="description">
 								<?php
 								printf(
-									__('Get your API key from %s', 'wow-raid-progress'),
+									/* translators: %s: link to Raider.io */
+									esc_html__('Get your API key from %s', 'encountrix'),
 									'<a href="https://raider.io/api" target="_blank">Raider.io</a>'
 								);
 								?>
@@ -58,477 +52,297 @@ if (!defined('ABSPATH')) {
 				</table>
 			</div>
 
-			<!-- Blizzard API Tab -->
-			<div class="wow-raid-settings-section">
-				<h2><?php _e('Blizzard API Configuration', 'wow-raid-progress'); ?></h2>
+			<div class="encountrix-settings-section">
+				<h2><?php esc_html_e('Blizzard API Configuration', 'encountrix'); ?></h2>
 				<p class="description">
 					<?php
 					printf(
-						__('Required for boss icons and realm list. Get credentials from %s', 'wow-raid-progress'),
+						/* translators: %s: link to Battle.net Developer Portal */
+						esc_html__('Required for boss icons and realm list. Get credentials from %s', 'encountrix'),
 						'<a href="https://develop.battle.net" target="_blank">Battle.net Developer Portal</a>'
 					);
 					?>
 				</p>
 				<table class="form-table">
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_blizzard_region">
-								<?php _e('Blizzard Region', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_blizzard_region"><?php esc_html_e('Blizzard Region', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_blizzard_region" name="wow_raid_progress_blizzard_region">
-								<option value="us" <?php selected($blizzard_region, 'us'); ?>><?php _e('US', 'wow-raid-progress'); ?></option>
-								<option value="eu" <?php selected($blizzard_region, 'eu'); ?>><?php _e('EU', 'wow-raid-progress'); ?></option>
-								<option value="kr" <?php selected($blizzard_region, 'kr'); ?>><?php _e('KR', 'wow-raid-progress'); ?></option>
-								<option value="tw" <?php selected($blizzard_region, 'tw'); ?>><?php _e('TW', 'wow-raid-progress'); ?></option>
+							<select id="encountrix_blizzard_region" name="encountrix_blizzard_region">
+								<option value="us" <?php selected($blizzard_region, 'us'); ?>><?php esc_html_e('US', 'encountrix'); ?></option>
+								<option value="eu" <?php selected($blizzard_region, 'eu'); ?>><?php esc_html_e('EU', 'encountrix'); ?></option>
+								<option value="kr" <?php selected($blizzard_region, 'kr'); ?>><?php esc_html_e('KR', 'encountrix'); ?></option>
+								<option value="tw" <?php selected($blizzard_region, 'tw'); ?>><?php esc_html_e('TW', 'encountrix'); ?></option>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_blizzard_client_id">
-								<?php _e('Client ID', 'wow-raid-progress'); ?>
-							</label>
-						</th>
-						<td>
-							<input type="text"
-								id="wow_raid_progress_blizzard_client_id"
-								name="wow_raid_progress_blizzard_client_id"
-								value="<?php echo esc_attr($blizzard_client_id); ?>"
-								class="regular-text" />
-						</td>
+						<th scope="row"><label for="encountrix_blizzard_client_id"><?php esc_html_e('Client ID', 'encountrix'); ?></label></th>
+						<td><input type="text" id="encountrix_blizzard_client_id" name="encountrix_blizzard_client_id" value="<?php echo esc_attr($blizzard_client_id); ?>" class="regular-text" /></td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_blizzard_client_secret">
-								<?php _e('Client Secret', 'wow-raid-progress'); ?>
-							</label>
-						</th>
-						<td>
-							<input type="password"
-								id="wow_raid_progress_blizzard_client_secret"
-								name="wow_raid_progress_blizzard_client_secret"
-								value="<?php echo esc_attr($blizzard_client_secret); ?>"
-								class="regular-text" />
-						</td>
+						<th scope="row"><label for="encountrix_blizzard_client_secret"><?php esc_html_e('Client Secret', 'encountrix'); ?></label></th>
+						<td><input type="password" id="encountrix_blizzard_client_secret" name="encountrix_blizzard_client_secret" value="<?php echo esc_attr($blizzard_client_secret); ?>" class="regular-text" /></td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_debug_mode">
-								<?php _e('Debug Mode', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_debug_mode"><?php esc_html_e('Debug Mode', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_debug_mode" name="wow_raid_progress_debug_mode">
-								<option value="false" <?php selected($debug_mode, 'false'); ?>>
-									<?php _e('Disabled', 'wow-raid-progress'); ?>
-								</option>
-								<option value="true" <?php selected($debug_mode, 'true'); ?>>
-									<?php _e('Enabled', 'wow-raid-progress'); ?>
-								</option>
+							<select id="encountrix_debug_mode" name="encountrix_debug_mode">
+								<option value="false" <?php selected($debug_mode, 'false'); ?>><?php esc_html_e('Disabled', 'encountrix'); ?></option>
+								<option value="true" <?php selected($debug_mode, 'true'); ?>><?php esc_html_e('Enabled', 'encountrix'); ?></option>
 							</select>
-							<p class="description">
-								<?php _e('Enable debug logging for API calls (admin only)', 'wow-raid-progress'); ?>
-							</p>
+							<p class="description"><?php esc_html_e('Enable debug logging for API calls (admin only)', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<?php if ($debug_mode === 'true'): ?>
 						<tr>
-							<th scope="row"><?php _e('Debug Log', 'wow-raid-progress'); ?></th>
+							<th scope="row"><?php esc_html_e('Debug Log', 'encountrix'); ?></th>
 							<td>
 								<div id="debug-log" style="background: #f0f0f0; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;">
 									<div class="debug-log-content"></div>
 								</div>
-								<button type="button" class="button" id="clear-debug-log"><?php _e('Clear Log', 'wow-raid-progress'); ?></button>
-								<button type="button" class="button" id="test-blizzard-api"><?php _e('Test Blizzard API', 'wow-raid-progress'); ?></button>
+								<button type="button" class="button" id="clear-debug-log"><?php esc_html_e('Clear Log', 'encountrix'); ?></button>
+								<button type="button" class="button" id="test-blizzard-api"><?php esc_html_e('Test Blizzard API', 'encountrix'); ?></button>
 							</td>
 						</tr>
 					<?php endif; ?>
 				</table>
 			</div>
 
-			<div class="wow-raid-settings-section">
-				<h2><?php _e('Default Guild Settings', 'wow-raid-progress'); ?></h2>
+			<div class="encountrix-settings-section">
+				<h2><?php esc_html_e('Default Guild Settings', 'encountrix'); ?></h2>
 				<table class="form-table">
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_guild_ids">
-								<?php _e('Guild IDs', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_guild_ids"><?php esc_html_e('Guild IDs', 'encountrix'); ?></label></th>
 						<td>
-							<input type="text"
-								id="wow_raid_progress_guild_ids"
-								name="wow_raid_progress_guild_ids"
-								value="<?php echo esc_attr($guild_ids); ?>"
-								class="regular-text" />
-							<p class="description">
-								<?php _e('Comma-separated Raider.io guild IDs (max 10). Leave empty to show realm rankings.', 'wow-raid-progress'); ?>
-							</p>
+							<input type="text" id="encountrix_guild_ids" name="encountrix_guild_ids" value="<?php echo esc_attr($guild_ids); ?>" class="regular-text" />
+							<p class="description"><?php esc_html_e('Comma-separated Raider.io guild IDs (max 10). Leave empty to show realm rankings.', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_region">
-								<?php _e('Default Region', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_region"><?php esc_html_e('Default Region', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_region" name="wow_raid_progress_region">
-								<option value="us" <?php selected($region, 'us'); ?>><?php _e('US', 'wow-raid-progress'); ?></option>
-								<option value="eu" <?php selected($region, 'eu'); ?>><?php _e('EU', 'wow-raid-progress'); ?></option>
-								<option value="kr" <?php selected($region, 'kr'); ?>><?php _e('KR', 'wow-raid-progress'); ?></option>
-								<option value="tw" <?php selected($region, 'tw'); ?>><?php _e('TW', 'wow-raid-progress'); ?></option>
+							<select id="encountrix_region" name="encountrix_region">
+								<option value="us" <?php selected($region, 'us'); ?>><?php esc_html_e('US', 'encountrix'); ?></option>
+								<option value="eu" <?php selected($region, 'eu'); ?>><?php esc_html_e('EU', 'encountrix'); ?></option>
+								<option value="kr" <?php selected($region, 'kr'); ?>><?php esc_html_e('KR', 'encountrix'); ?></option>
+								<option value="tw" <?php selected($region, 'tw'); ?>><?php esc_html_e('TW', 'encountrix'); ?></option>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_realm">
-								<?php _e('Default Realm', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_realm"><?php esc_html_e('Default Realm', 'encountrix'); ?></label></th>
 						<td>
-							<div class="wow-realm-selector">
-								<input type="text"
-									id="wow_raid_progress_realm"
-									name="wow_raid_progress_realm"
-									value="<?php echo esc_attr($realm); ?>"
-									class="regular-text"
-									placeholder="<?php esc_attr_e('Type to search realms...', 'wow-raid-progress'); ?>"
-									autocomplete="off" />
-								<div class="wow-realm-dropdown" id="realm-dropdown" style="display: none;">
-									<div class="wow-realm-list" id="realm-list">
-										<!-- Populated via JavaScript -->
-									</div>
+							<div class="encountrix-realm-selector">
+								<input type="text" id="encountrix_realm" name="encountrix_realm" value="<?php echo esc_attr($realm); ?>" class="regular-text" placeholder="<?php esc_attr_e('Type to search realms...', 'encountrix'); ?>" autocomplete="off" />
+								<div class="encountrix-realm-dropdown" id="realm-dropdown" style="display: none;">
+									<div class="encountrix-realm-list" id="realm-list"></div>
 								</div>
 							</div>
-							<p class="description">
-								<?php _e('Select a realm or leave empty for region-wide rankings.', 'wow-raid-progress'); ?>
-							</p>
+							<p class="description"><?php esc_html_e('Select a realm or leave empty for region-wide rankings.', 'encountrix'); ?></p>
 						</td>
 					</tr>
 				</table>
 			</div>
 
-			<div class="wow-raid-settings-section">
-				<h2><?php _e('Default Raid Settings', 'wow-raid-progress'); ?></h2>
+			<div class="encountrix-settings-section">
+				<h2><?php esc_html_e('Default Raid Settings', 'encountrix'); ?></h2>
 				<table class="form-table">
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_expansion">
-								<?php _e('Expansion', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_expansion"><?php esc_html_e('Expansion', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_expansion" name="wow_raid_progress_expansion">
+							<select id="encountrix_expansion" name="encountrix_expansion">
 								<?php foreach ($expansions as $id => $exp): ?>
-									<option value="<?php echo esc_attr($id); ?>" <?php selected($expansion, $id); ?>>
-										<?php echo esc_html($exp['name']); ?>
-									</option>
+									<option value="<?php echo esc_attr($id); ?>" <?php selected($expansion, $id); ?>><?php echo esc_html($exp['name']); ?></option>
 								<?php endforeach; ?>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_raid">
-								<?php _e('Default Raid', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_raid"><?php esc_html_e('Default Raid', 'encountrix'); ?></label></th>
 						<td>
 							<div class="inline-form-elements">
-								<select id="wow_raid_progress_raid"
-									name="wow_raid_progress_raid"
-									data-current-value="<?php echo esc_attr($raid); ?>">
-									<option value=""><?php _e('Loading raids...', 'wow-raid-progress'); ?></option>
+								<select id="encountrix_raid" name="encountrix_raid" data-current-value="<?php echo esc_attr($raid); ?>">
+									<option value=""><?php esc_html_e('Loading raids...', 'encountrix'); ?></option>
 								</select>
-								<button type="button" class="button" id="refresh-raids-btn">
-									<?php _e('Refresh Raids', 'wow-raid-progress'); ?>
-								</button>
+								<button type="button" class="button" id="refresh-raids-btn"><?php esc_html_e('Refresh Raids', 'encountrix'); ?></button>
 							</div>
-							<p class="description">
-								<?php _e('Select a raid from the chosen expansion', 'wow-raid-progress'); ?>
-							</p>
+							<p class="description"><?php esc_html_e('Select a raid from the chosen expansion', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_difficulty">
-								<?php _e('Default Difficulty', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_difficulty"><?php esc_html_e('Default Difficulty', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_difficulty" name="wow_raid_progress_difficulty">
-								<option value="highest" <?php selected($difficulty, 'highest'); ?>>
-									<?php _e('Highest Progress', 'wow-raid-progress'); ?>
-								</option>
-								<option value="all" <?php selected($difficulty, 'all'); ?>>
-									<?php _e('All Difficulties', 'wow-raid-progress'); ?>
-								</option>
-								<option value="normal" <?php selected($difficulty, 'normal'); ?>>
-									<?php _e('Normal', 'wow-raid-progress'); ?>
-								</option>
-								<option value="heroic" <?php selected($difficulty, 'heroic'); ?>>
-									<?php _e('Heroic', 'wow-raid-progress'); ?>
-								</option>
-								<option value="mythic" <?php selected($difficulty, 'mythic'); ?>>
-									<?php _e('Mythic', 'wow-raid-progress'); ?>
-								</option>
+							<select id="encountrix_difficulty" name="encountrix_difficulty">
+								<option value="highest" <?php selected($difficulty, 'highest'); ?>><?php esc_html_e('Highest Progress', 'encountrix'); ?></option>
+								<option value="all" <?php selected($difficulty, 'all'); ?>><?php esc_html_e('All Difficulties', 'encountrix'); ?></option>
+								<option value="normal" <?php selected($difficulty, 'normal'); ?>><?php esc_html_e('Normal', 'encountrix'); ?></option>
+								<option value="heroic" <?php selected($difficulty, 'heroic'); ?>><?php esc_html_e('Heroic', 'encountrix'); ?></option>
+								<option value="mythic" <?php selected($difficulty, 'mythic'); ?>><?php esc_html_e('Mythic', 'encountrix'); ?></option>
 							</select>
 						</td>
 					</tr>
 				</table>
 			</div>
 
-			<p class="submit">
-				<button type="submit" class="button button-primary">
-					<?php _e('Save Changes', 'wow-raid-progress'); ?>
-				</button>
-			</p>
+			<p class="submit"><button type="submit" class="button button-primary"><?php esc_html_e('Save Changes', 'encountrix'); ?></button></p>
 		</div>
 
 		<!-- Display Settings Tab -->
 		<div id="display" class="tab-content">
-			<div class="wow-raid-settings-section">
-				<h2><?php _e('Display Options', 'wow-raid-progress'); ?></h2>
+			<div class="encountrix-settings-section">
+				<h2><?php esc_html_e('Display Options', 'encountrix'); ?></h2>
 				<table class="form-table">
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_show_raid_name">
-								<?php _e('Show Raid Name', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_show_raid_name"><?php esc_html_e('Show Raid Name', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_show_raid_name" name="wow_raid_progress_show_raid_name">
-								<option value="true" <?php selected($show_raid_name, 'true'); ?>>
-									<?php _e('Yes', 'wow-raid-progress'); ?>
-								</option>
-								<option value="false" <?php selected($show_raid_name, 'false'); ?>>
-									<?php _e('No', 'wow-raid-progress'); ?>
-								</option>
+							<select id="encountrix_show_raid_name" name="encountrix_show_raid_name">
+								<option value="true" <?php selected($show_raid_name, 'true'); ?>><?php esc_html_e('Yes', 'encountrix'); ?></option>
+								<option value="false" <?php selected($show_raid_name, 'false'); ?>><?php esc_html_e('No', 'encountrix'); ?></option>
 							</select>
-							<p class="description">
-								<?php _e('Display the raid name as a header in the widget', 'wow-raid-progress'); ?>
-							</p>
+							<p class="description"><?php esc_html_e('Display the raid name as a header in the widget', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_show_icons">
-								<?php _e('Show Boss Icons', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_show_icons"><?php esc_html_e('Show Boss Icons', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_show_icons" name="wow_raid_progress_show_icons">
-								<option value="true" <?php selected($show_icons, 'true'); ?>>
-									<?php _e('Yes', 'wow-raid-progress'); ?>
-								</option>
-								<option value="false" <?php selected($show_icons, 'false'); ?>>
-									<?php _e('No', 'wow-raid-progress'); ?>
-								</option>
+							<select id="encountrix_show_icons" name="encountrix_show_icons">
+								<option value="true" <?php selected($show_icons, 'true'); ?>><?php esc_html_e('Yes', 'encountrix'); ?></option>
+								<option value="false" <?php selected($show_icons, 'false'); ?>><?php esc_html_e('No', 'encountrix'); ?></option>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_show_raid_icon">
-								<?php _e('Show Raid Background', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_show_raid_icon"><?php esc_html_e('Show Raid Background', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_show_raid_icon" name="wow_raid_progress_show_raid_icon">
-								<option value="true" <?php selected($show_raid_icon, 'true'); ?>>
-									<?php _e('Yes', 'wow-raid-progress'); ?>
-								</option>
-								<option value="false" <?php selected($show_raid_icon, 'false'); ?>>
-									<?php _e('No', 'wow-raid-progress'); ?>
-								</option>
+							<select id="encountrix_show_raid_icon" name="encountrix_show_raid_icon">
+								<option value="true" <?php selected($show_raid_icon, 'true'); ?>><?php esc_html_e('Yes', 'encountrix'); ?></option>
+								<option value="false" <?php selected($show_raid_icon, 'false'); ?>><?php esc_html_e('No', 'encountrix'); ?></option>
 							</select>
-							<p class="description">
-								<?php _e('Display the raid journal background image in the header (requires Blizzard API)', 'wow-raid-progress'); ?>
-							</p>
+							<p class="description"><?php esc_html_e('Display the raid journal background image in the header (requires Blizzard API)', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_show_killed">
-								<?php _e('Show Defeated Bosses', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_show_killed"><?php esc_html_e('Show Defeated Bosses', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_show_killed" name="wow_raid_progress_show_killed">
-								<option value="true" <?php selected($show_killed, 'true'); ?>>
-									<?php _e('Yes', 'wow-raid-progress'); ?>
-								</option>
-								<option value="false" <?php selected($show_killed, 'false'); ?>>
-									<?php _e('No', 'wow-raid-progress'); ?>
-								</option>
+							<select id="encountrix_show_killed" name="encountrix_show_killed">
+								<option value="true" <?php selected($show_killed, 'true'); ?>><?php esc_html_e('Yes', 'encountrix'); ?></option>
+								<option value="false" <?php selected($show_killed, 'false'); ?>><?php esc_html_e('No', 'encountrix'); ?></option>
 							</select>
-							<p class="description">
-								<?php _e('When set to No, defeated bosses will be hidden from the list', 'wow-raid-progress'); ?>
-							</p>
+							<p class="description"><?php esc_html_e('When set to No, defeated bosses will be hidden from the list', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_use_blizzard_icons">
-								<?php _e('Use Blizzard Icons', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_use_blizzard_icons"><?php esc_html_e('Use Blizzard Icons', 'encountrix'); ?></label></th>
 						<td>
-							<select id="wow_raid_progress_use_blizzard_icons" name="wow_raid_progress_use_blizzard_icons">
-								<option value="true" <?php selected($use_blizzard_icons, 'true'); ?>>
-									<?php _e('Yes', 'wow-raid-progress'); ?>
-								</option>
-								<option value="false" <?php selected($use_blizzard_icons, 'false'); ?>>
-									<?php _e('No', 'wow-raid-progress'); ?>
-								</option>
+							<select id="encountrix_use_blizzard_icons" name="encountrix_use_blizzard_icons">
+								<option value="true" <?php selected($use_blizzard_icons, 'true'); ?>><?php esc_html_e('Yes', 'encountrix'); ?></option>
+								<option value="false" <?php selected($use_blizzard_icons, 'false'); ?>><?php esc_html_e('No', 'encountrix'); ?></option>
 							</select>
-							<p class="description">
-								<?php _e('Download and display official Blizzard achievement icons', 'wow-raid-progress'); ?>
-							</p>
+							<p class="description"><?php esc_html_e('Download and display official Blizzard achievement icons', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_cache_time">
-								<?php _e('Cache Duration', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_cache_time"><?php esc_html_e('Cache Duration', 'encountrix'); ?></label></th>
 						<td>
-							<input type="number"
-								id="wow_raid_progress_cache_time"
-								name="wow_raid_progress_cache_time"
-								value="<?php echo esc_attr($cache_time); ?>"
-								min="0"
-								max="1440"
-								class="small-text" />
-							<?php _e('minutes', 'wow-raid-progress'); ?>
-							<p class="description">
-								<?php _e('How long to cache API data (0 to disable caching, max 1440)', 'wow-raid-progress'); ?>
-							</p>
+							<input type="number" id="encountrix_cache_time" name="encountrix_cache_time" value="<?php echo esc_attr($cache_time); ?>" min="0" max="1440" class="small-text" />
+							<?php esc_html_e('minutes', 'encountrix'); ?>
+							<p class="description"><?php esc_html_e('How long to cache API data (0 to disable caching, max 1440)', 'encountrix'); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row">
-							<label for="wow_raid_progress_limit">
-								<?php _e('Results Limit', 'wow-raid-progress'); ?>
-							</label>
-						</th>
+						<th scope="row"><label for="encountrix_limit"><?php esc_html_e('Results Limit', 'encountrix'); ?></label></th>
 						<td>
-							<input type="number"
-								id="wow_raid_progress_limit"
-								name="wow_raid_progress_limit"
-								value="<?php echo esc_attr($limit); ?>"
-								min="1"
-								max="100"
-								class="small-text" />
-							<p class="description">
-								<?php _e('Maximum number of guilds to display (1-100)', 'wow-raid-progress'); ?>
-							</p>
+							<input type="number" id="encountrix_limit" name="encountrix_limit" value="<?php echo esc_attr($limit); ?>" min="1" max="100" class="small-text" />
+							<p class="description"><?php esc_html_e('Maximum number of guilds to display (1-100)', 'encountrix'); ?></p>
 						</td>
 					</tr>
 				</table>
 			</div>
-			<p class="submit">
-				<button type="submit" class="button button-primary">
-					<?php _e('Save Changes', 'wow-raid-progress'); ?>
-				</button>
-			</p>
+			<p class="submit"><button type="submit" class="button button-primary"><?php esc_html_e('Save Changes', 'encountrix'); ?></button></p>
 		</div>
 	</form>
 
 	<!-- Tools Tab -->
 	<div id="tools" class="tab-content">
-		<div class="wow-raid-settings-section">
-			<h2><?php _e('Icon Management', 'wow-raid-progress'); ?></h2>
-			<div class="wow-raid-tool-card">
-				<h3><?php _e('Import Boss Icons', 'wow-raid-progress'); ?></h3>
-				<p><?php _e('Download and import boss achievement icons for the selected raid from Blizzard API.', 'wow-raid-progress'); ?></p>
-				<button type="button" class="button button-primary" id="import-icons-btn">
-					<?php _e('Import Icons', 'wow-raid-progress'); ?>
-				</button>
+		<div class="encountrix-settings-section">
+			<h2><?php esc_html_e('Icon Management', 'encountrix'); ?></h2>
+			<div class="encountrix-tool-card">
+				<h3><?php esc_html_e('Import Boss Icons', 'encountrix'); ?></h3>
+				<p><?php esc_html_e('Download and import boss achievement icons for the selected raid from Blizzard API.', 'encountrix'); ?></p>
+				<button type="button" class="button button-primary" id="import-icons-btn"><?php esc_html_e('Import Icons', 'encountrix'); ?></button>
 				<div id="import-status" class="notice" style="display: none;"></div>
 			</div>
 
-			<div class="wow-raid-tool-card warning">
-				<h3><?php _e('Delete All Icons', 'wow-raid-progress'); ?></h3>
-				<p><strong><?php _e('Warning:', 'wow-raid-progress'); ?></strong> <?php _e('This will permanently delete ALL imported boss and raid icons from your media library.', 'wow-raid-progress'); ?></p>
-				<button type="button" class="button button-danger" id="delete-icons-btn">
-					<?php _e('Delete All Icons', 'wow-raid-progress'); ?>
-				</button>
+			<div class="encountrix-tool-card warning">
+				<h3><?php esc_html_e('Delete All Icons', 'encountrix'); ?></h3>
+				<p><strong><?php esc_html_e('Warning:', 'encountrix'); ?></strong> <?php esc_html_e('This will permanently delete ALL imported boss and raid icons from your media library.', 'encountrix'); ?></p>
+				<button type="button" class="button button-danger" id="delete-icons-btn"><?php esc_html_e('Delete All Icons', 'encountrix'); ?></button>
 				<span id="delete-icons-message" class="notice notice-success" style="display: none;"></span>
 			</div>
 		</div>
 
-		<div class="wow-raid-settings-section">
-			<h2><?php _e('Cache Management', 'wow-raid-progress'); ?></h2>
-			<div class="wow-raid-tool-card">
-				<h3><?php _e('Clear All Cache', 'wow-raid-progress'); ?></h3>
-				<p><?php _e('Remove all cached API data and force fresh data retrieval.', 'wow-raid-progress'); ?></p>
-				<button type="button" class="button" id="clear-cache-btn">
-					<?php _e('Clear Cache', 'wow-raid-progress'); ?>
-				</button>
-				<span id="cache-clear-message" class="notice notice-success" style="display: none;">
-					<?php _e('Cache cleared successfully!', 'wow-raid-progress'); ?>
-				</span>
+		<div class="encountrix-settings-section">
+			<h2><?php esc_html_e('Cache Management', 'encountrix'); ?></h2>
+			<div class="encountrix-tool-card">
+				<h3><?php esc_html_e('Clear All Cache', 'encountrix'); ?></h3>
+				<p><?php esc_html_e('Remove all cached API data and force fresh data retrieval.', 'encountrix'); ?></p>
+				<button type="button" class="button" id="clear-cache-btn"><?php esc_html_e('Clear Cache', 'encountrix'); ?></button>
+				<span id="cache-clear-message" class="notice notice-success" style="display: none;"><?php esc_html_e('Cache cleared successfully!', 'encountrix'); ?></span>
 			</div>
 		</div>
 	</div>
 
 	<!-- Documentation Tab -->
 	<div id="documentation" class="tab-content">
-		<div class="wow-raid-settings-section">
-			<h2><?php _e('Shortcode Documentation', 'wow-raid-progress'); ?></h2>
+		<div class="encountrix-settings-section">
+			<h2><?php esc_html_e('Shortcode Documentation', 'encountrix'); ?></h2>
 
-			<div class="wow-raid-doc-section">
-				<h3><?php _e('Basic Usage', 'wow-raid-progress'); ?></h3>
-				<p><?php _e('Use the following shortcode to display raid progress:', 'wow-raid-progress'); ?></p>
+			<div class="encountrix-doc-section">
+				<h3><?php esc_html_e('Basic Usage', 'encountrix'); ?></h3>
+				<p><?php esc_html_e('Use the following shortcode to display raid progress:', 'encountrix'); ?></p>
 				<div class="shortcode-wrapper">
-					<code class="shortcode-example" data-shortcode="[wow_raid_progress]">[wow_raid_progress]</code>
-					<button type="button" class="copy-shortcode button button-small" title="<?php esc_attr_e('Copy to clipboard', 'wow-raid-progress'); ?>">
+					<code class="shortcode-example" data-shortcode="[encountrix]">[encountrix]</code>
+					<button type="button" class="copy-shortcode button button-small" title="<?php esc_attr_e('Copy to clipboard', 'encountrix'); ?>">
 						<span class="dashicons dashicons-clipboard"></span>
-						<span class="copy-text"><?php _e('Copy', 'wow-raid-progress'); ?></span>
+						<span class="copy-text"><?php esc_html_e('Copy', 'encountrix'); ?></span>
 					</button>
 				</div>
-				<p><?php _e('This will use all default settings configured above.', 'wow-raid-progress'); ?></p>
+				<p><?php esc_html_e('This will use all default settings configured above.', 'encountrix'); ?></p>
 			</div>
 
-			<div class="wow-raid-doc-section">
-				<h3><?php _e('Available Parameters', 'wow-raid-progress'); ?></h3>
+			<div class="encountrix-doc-section">
+				<h3><?php esc_html_e('Available Parameters', 'encountrix'); ?></h3>
 				<ul>
-					<li><code>raid</code> - <?php _e('Raid slug (e.g., nerub-ar-palace)', 'wow-raid-progress'); ?></li>
-					<li><code>difficulty</code> - <?php _e('Difficulty to display: highest, all, normal, heroic, or mythic', 'wow-raid-progress'); ?></li>
-					<li><code>region</code> - <?php _e('Region: us, eu, kr, or tw', 'wow-raid-progress'); ?></li>
-					<li><code>realm</code> - <?php _e('Specific realm name', 'wow-raid-progress'); ?></li>
-					<li><code>guilds</code> - <?php _e('Comma-separated guild IDs (max 10)', 'wow-raid-progress'); ?></li>
-					<li><code>cache</code> - <?php _e('Cache duration in minutes', 'wow-raid-progress'); ?></li>
-					<li><code>show_raid_name</code> - <?php _e('Show raid name header: true or false', 'wow-raid-progress'); ?></li>
-					<li><code>show_icons</code> - <?php _e('Show boss icons: true or false', 'wow-raid-progress'); ?></li>
-					<li><code>limit</code> - <?php _e('Maximum number of guilds to display', 'wow-raid-progress'); ?></li>
+					<li><code>raid</code> - <?php esc_html_e('Raid slug (e.g., nerub-ar-palace)', 'encountrix'); ?></li>
+					<li><code>difficulty</code> - <?php esc_html_e('Difficulty to display: highest, all, normal, heroic, or mythic', 'encountrix'); ?></li>
+					<li><code>region</code> - <?php esc_html_e('Region: us, eu, kr, or tw', 'encountrix'); ?></li>
+					<li><code>realm</code> - <?php esc_html_e('Specific realm name', 'encountrix'); ?></li>
+					<li><code>guilds</code> - <?php esc_html_e('Comma-separated guild IDs (max 10)', 'encountrix'); ?></li>
+					<li><code>cache</code> - <?php esc_html_e('Cache duration in minutes', 'encountrix'); ?></li>
+					<li><code>show_raid_name</code> - <?php esc_html_e('Show raid name header: true or false', 'encountrix'); ?></li>
+					<li><code>show_icons</code> - <?php esc_html_e('Show boss icons: true or false', 'encountrix'); ?></li>
+					<li><code>limit</code> - <?php esc_html_e('Maximum number of guilds to display', 'encountrix'); ?></li>
 				</ul>
 			</div>
 
-			<div class="wow-raid-doc-section">
-				<h3><?php _e('Example Shortcodes', 'wow-raid-progress'); ?></h3>
+			<div class="encountrix-doc-section">
+				<h3><?php esc_html_e('Example Shortcodes', 'encountrix'); ?></h3>
 
-				<h4><?php _e('Display specific guild progress:', 'wow-raid-progress'); ?></h4>
+				<h4><?php esc_html_e('Display specific guild progress:', 'encountrix'); ?></h4>
 				<div class="shortcode-wrapper">
-					<code class="shortcode-example" data-shortcode='[wow_raid_progress guilds="12345" raid="nerub-ar-palace" difficulty="mythic"]'>[wow_raid_progress guilds="12345" raid="nerub-ar-palace" difficulty="mythic"]</code>
+					<code class="shortcode-example" data-shortcode='[encountrix guilds="12345" raid="nerub-ar-palace" difficulty="mythic"]'>[encountrix guilds="12345" raid="nerub-ar-palace" difficulty="mythic"]</code>
 					<button type="button" class="copy-shortcode button button-small">
 						<span class="dashicons dashicons-clipboard"></span>
-						<span class="copy-text"><?php _e('Copy', 'wow-raid-progress'); ?></span>
+						<span class="copy-text"><?php esc_html_e('Copy', 'encountrix'); ?></span>
 					</button>
 				</div>
 
-				<h4><?php _e('Display realm rankings:', 'wow-raid-progress'); ?></h4>
+				<h4><?php esc_html_e('Display realm rankings:', 'encountrix'); ?></h4>
 				<div class="shortcode-wrapper">
-					<code class="shortcode-example" data-shortcode='[wow_raid_progress region="us" realm="Stormrage" limit="10"]'>[wow_raid_progress region="us" realm="Stormrage" limit="10"]</code>
+					<code class="shortcode-example" data-shortcode='[encountrix region="us" realm="Stormrage" limit="10"]'>[encountrix region="us" realm="Stormrage" limit="10"]</code>
 					<button type="button" class="copy-shortcode button button-small">
 						<span class="dashicons dashicons-clipboard"></span>
-						<span class="copy-text"><?php _e('Copy', 'wow-raid-progress'); ?></span>
+						<span class="copy-text"><?php esc_html_e('Copy', 'encountrix'); ?></span>
 					</button>
 				</div>
 			</div>
