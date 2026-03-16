@@ -4,11 +4,12 @@
  * Plugin Name: WoW Raid Progress Tracker
  * Plugin URI: https://example.com/wow-raid-progress
  * Description: Display World of Warcraft raid progress from Raider.io API with Blizzard achievement icons
- * Version: 5.0.0
+ * Version: 5.0.1
  * Author: Your Name
  * License: GPL v2 or later
  * Text Domain: wow-raid-progress
  * Domain Path: /languages
+ * Requires PHP: 8.0
  */
 
 // Prevent direct access
@@ -17,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WOW_RAID_PROGRESS_VERSION', '5.0.0');
+define('WOW_RAID_PROGRESS_VERSION', '5.0.1');
 define('WOW_RAID_PROGRESS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WOW_RAID_PROGRESS_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WOW_RAID_PROGRESS_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -27,10 +28,8 @@ add_action('plugins_loaded', 'wow_raid_progress_load_textdomain');
 
 /**
  * Load plugin text domain for internationalization.
- *
- * @return void
  */
-function wow_raid_progress_load_textdomain() {
+function wow_raid_progress_load_textdomain(): void {
 	load_plugin_textdomain('wow-raid-progress', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 
@@ -40,14 +39,10 @@ require_once WOW_RAID_PROGRESS_PLUGIN_DIR . 'includes/class-wow-raid-progress-ad
 require_once WOW_RAID_PROGRESS_PLUGIN_DIR . 'includes/class-wow-raid-progress-api.php';
 require_once WOW_RAID_PROGRESS_PLUGIN_DIR . 'includes/class-wow-raid-progress-widget.php';
 
-// Initialize the plugin
-
 /**
  * Bootstraps the core plugin functionality.
- *
- * @return void
  */
-function wow_raid_progress_init() {
+function wow_raid_progress_init(): void {
 	$plugin = new WoWRaidProgress();
 	$plugin->run();
 }
@@ -59,10 +54,8 @@ register_activation_hook(__FILE__, 'wow_raid_progress_activate');
 /**
  * Runs during plugin activation.
  * Sets up default options and required database structures.
- *
- * @return void
  */
-function wow_raid_progress_activate() {
+function wow_raid_progress_activate(): void {
 	// Set default options
 	$defaults = wow_raid_progress_get_default_options();
 	foreach ($defaults as $option_name => $default_value) {
@@ -78,25 +71,24 @@ function wow_raid_progress_activate() {
 	flush_rewrite_rules();
 }
 
-// Deactivation hook
+// FIX #11: Single deactivation hook (was registered twice — the anonymous closure silently replaced the named function)
 register_deactivation_hook(__FILE__, 'wow_raid_progress_deactivate');
 
 /**
  * Runs on plugin deactivation.
  * Cleans up cached data and scheduled events.
- *
- * @return void
  */
-function wow_raid_progress_deactivate() {
+function wow_raid_progress_deactivate(): void {
 	wow_raid_progress_clear_transients([
-		'_transient_wow_raid_%',
-		'_transient_timeout_wow_raid_%',
-		'_transient_wow_blizzard_%',
-		'_transient_timeout_wow_blizzard_%'
+		'_transient_wow_raid_',
+		'_transient_timeout_wow_raid_',
+		'_transient_wow_blizzard_',
+		'_transient_timeout_wow_blizzard_',
 	]);
 
-	// Clear scheduled events if any
+	// Clear all scheduled events
 	wp_clear_scheduled_hook('wow_raid_progress_cron');
+	wp_clear_scheduled_hook('wow_raid_progress_update_data');
 }
 
 // Uninstall hook
@@ -105,48 +97,26 @@ register_uninstall_hook(__FILE__, 'wow_raid_progress_uninstall');
 /**
  * Runs on plugin uninstall.
  * Removes stored options and cached transients.
- *
- * @return void
  */
-function wow_raid_progress_uninstall() {
-	// Remove all options
-	$options = [
-		'wow_raid_progress_api_key',
-		'wow_raid_progress_guild_ids',
-		'wow_raid_progress_expansion',
-		'wow_raid_progress_raid',
-		'wow_raid_progress_difficulty',
-		'wow_raid_progress_region',
-		'wow_raid_progress_realm',
-		'wow_raid_progress_cache_time',
-		'wow_raid_progress_show_icons',
-		'wow_raid_progress_show_killed',
-		'wow_raid_progress_use_blizzard_icons',
-		'wow_raid_progress_limit',
-		'wow_raid_progress_blizzard_client_id',
-		'wow_raid_progress_blizzard_client_secret',
-		'wow_raid_progress_blizzard_region',
-		'wow_raid_progress_cached_raids'
-	];
-
-	foreach ($options as $option) {
+function wow_raid_progress_uninstall(): void {
+	// FIX #10: Derive option list from defaults so it can't drift
+	$defaults = wow_raid_progress_get_default_options();
+	foreach (array_keys($defaults) as $option) {
 		delete_option($option);
 	}
 
 	wow_raid_progress_clear_transients([
-		'_transient_wow_%',
-		'_transient_timeout_wow_%'
+		'_transient_wow_',
+		'_transient_timeout_wow_',
 	]);
 }
-
-// Helper function to get default options
 
 /**
  * Retrieve plugin default option values.
  *
- * @return array
+ * @return array<string, mixed>
  */
-function wow_raid_progress_get_default_options() {
+function wow_raid_progress_get_default_options(): array {
 	return [
 		'wow_raid_progress_api_key' => '',
 		'wow_raid_progress_guild_ids' => '',
@@ -159,22 +129,22 @@ function wow_raid_progress_get_default_options() {
 		'wow_raid_progress_show_icons' => 'true',
 		'wow_raid_progress_show_killed' => 'false',
 		'wow_raid_progress_use_blizzard_icons' => 'true',
+		'wow_raid_progress_show_raid_name' => 'false',
+		'wow_raid_progress_show_raid_icon' => 'false',
 		'wow_raid_progress_limit' => 50,
 		'wow_raid_progress_blizzard_client_id' => '',
 		'wow_raid_progress_blizzard_client_secret' => '',
 		'wow_raid_progress_blizzard_region' => 'eu',
-		'wow_raid_progress_cached_raids' => []
+		'wow_raid_progress_cached_raids' => [],
+		'wow_raid_progress_debug_mode' => 'false',
+		'wow_raid_progress_use_cron' => 'false',
 	];
 }
 
-// Create cache table for raids
-
 /**
  * Create database table used for caching raid information.
- *
- * @return void
  */
-function wow_raid_progress_create_cache_table() {
+function wow_raid_progress_create_cache_table(): void {
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'wow_raid_cache';
 	$charset_collate = $wpdb->get_charset_collate();
@@ -193,39 +163,33 @@ function wow_raid_progress_create_cache_table() {
 }
 
 /**
- * Remove plugin transients matching the provided patterns.
+ * Remove plugin transients matching the provided prefixes.
  *
- * @param array $patterns Array of SQL LIKE patterns.
- * @return void
+ * FIX #1: Uses $wpdb->esc_like() + prepare() instead of raw LIKE patterns.
+ *
+ * @param array<string> $prefixes Array of option_name prefixes (without trailing %).
  */
-function wow_raid_progress_clear_transients(array $patterns) {
+function wow_raid_progress_clear_transients(array $prefixes): void {
 	global $wpdb;
-	foreach ($patterns as $pattern) {
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-				$pattern
-			)
-		);
+	foreach ($prefixes as $prefix) {
+		$wpdb->query($wpdb->prepare(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+			$wpdb->esc_like($prefix) . '%'
+		));
 	}
 }
-
-// Clean up on deactivation
-register_deactivation_hook(__FILE__, function () {
-	wp_clear_scheduled_hook('wow_raid_progress_update_data');
-});
 
 /**
  * Check if we should use cron updates instead of frontend
  */
-function wow_raid_progress_should_use_cron() {
+function wow_raid_progress_should_use_cron(): bool {
 	return get_option('wow_raid_progress_use_cron', 'false') === 'true';
 }
 
 /**
  * Schedule background data updates
  */
-function wow_raid_progress_schedule_updates() {
+function wow_raid_progress_schedule_updates(): void {
 	if (wow_raid_progress_should_use_cron()) {
 		if (!wp_next_scheduled('wow_raid_progress_update_data')) {
 			wp_schedule_event(time(), 'hourly', 'wow_raid_progress_update_data');
@@ -239,7 +203,7 @@ add_action('wp', 'wow_raid_progress_schedule_updates');
 /**
  * Background update task
  */
-function wow_raid_progress_background_update() {
+function wow_raid_progress_background_update(): void {
 	if (!wow_raid_progress_should_use_cron()) {
 		return;
 	}

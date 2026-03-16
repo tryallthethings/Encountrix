@@ -403,7 +403,7 @@ msgstr "Raid \"%s\" wurde nicht gefunden. Bitte prüfe den Raid-Namen."
 
 #: includes/class-wow-raid-progress-widget.php:162
 msgid "Boss artwork © Blizzard Entertainment"
-msgstr "Boss artwork Â© Blizzard Entertainment"
+msgstr "Boss-Artwork © Blizzard Entertainment"
 
 #: includes/class-wow-raid-progress-widget.php:273
 #: includes/class-wow-raid-progress-widget.php:309
@@ -413,7 +413,7 @@ msgstr "Fehler beim Laden von %s-Daten: %s"
 
 #: includes/class-wow-raid-progress-widget.php:365
 msgid "Data and media © Blizzard Entertainment"
-msgstr "Data and media Â© Blizzard Entertainment"
+msgstr "Daten und Medien © Blizzard Entertainment"
 
 #: includes/class-wow-raid-progress-widget.php:392
 #, php-format
@@ -432,8 +432,8 @@ msgstr "Für diese Gilde sind keine Raid-Daten verfügbar."
 #: includes/class-wow-raid-progress-widget.php:517
 #, php-format
 msgid ""
-"No %s data found for your guild at this raid (and no lower-tier data either)."
-msgstr "Für deine Gilde wurden in diesem Raid keine %s-Daten gefunden (auch keine Daten aus niedrigeren Schwierigkeitsstufen)."
+"No data found for your guild in this raid."
+msgstr "Für deine Gilde gibt es in diesem Raid keine Daten."
 
 #: includes/class-wow-raid-progress-widget.php:538
 msgid "Realm:"

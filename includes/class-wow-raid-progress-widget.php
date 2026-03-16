@@ -2,6 +2,9 @@
 
 /**
  * Widget and shortcode handler class
+ *
+ * FIX #8: Uses batch icon loading via get_all_boss_icon_ids() instead of
+ *         per-boss get_boss_icon_id() calls (eliminates N+1 queries).
  */
 
 if (!defined('ABSPATH')) {
@@ -10,16 +13,16 @@ if (!defined('ABSPATH')) {
 
 class WoWRaidProgressWidget {
 
-	private $api;
+	private WoWRaidProgressAPI $api;
 
-	public function __construct($api) {
+	public function __construct(WoWRaidProgressAPI $api) {
 		$this->api = $api;
 	}
 
 	/**
 	 * Render shortcode
 	 */
-	public function render_shortcode($atts) {
+	public function render_shortcode(array $atts): string {
 
 		if (defined('WOW_RAID_PROGRESS_PLUGIN_URL')) {
 			wp_enqueue_style(
@@ -54,10 +57,8 @@ class WoWRaidProgressWidget {
 			'page' => 0
 		];
 
-		// Parse shortcode attributes
 		$atts = shortcode_atts($defaults, $atts, 'wow_raid_progress');
 
-		// Validate required parameters
 		if (empty($atts['raid'])) {
 			return $this->render_error(__('No raid specified. Please configure a default raid in the plugin settings or specify one in the shortcode.', 'wow-raid-progress'));
 		}
@@ -70,7 +71,7 @@ class WoWRaidProgressWidget {
 		$raid_slug = sanitize_text_field($atts['raid']);
 		$difficulty = $this->validate_difficulty($atts['difficulty']);
 		$region = sanitize_text_field($atts['region']);
-		$realm	= $this->api->sanitize_realm($atts['realm']);
+		$realm = $this->api->sanitize_realm($atts['realm']);
 		$guilds = $this->api->sanitize_guilds($atts['guilds']);
 		$cache_minutes = absint($atts['cache']);
 		$show_icons = filter_var($atts['show_icons'], FILTER_VALIDATE_BOOLEAN);
@@ -81,10 +82,8 @@ class WoWRaidProgressWidget {
 		$limit = max(1, min(100, absint($atts['limit'])));
 		$page = max(0, absint($atts['page']));
 
-		// Get expansion ID
 		$expansion_id = get_option('wow_raid_progress_expansion', 10);
 
-		// Fetch static raid data
 		$static_data = $this->api->fetch_static_raid_data_by_expansion($expansion_id, $cache_minutes);
 		if (is_wp_error($static_data)) {
 			return $this->render_error(
@@ -95,7 +94,6 @@ class WoWRaidProgressWidget {
 			);
 		}
 
-		// Find raid info
 		$raid_info = $this->find_raid_info($static_data, $raid_slug);
 		if (!$raid_info) {
 			return $this->render_error(
@@ -106,55 +104,38 @@ class WoWRaidProgressWidget {
 			);
 		}
 
+		// FIX #8: Batch-load all boss icons for this raid in one query
+		$icon_map = [];
+		if ($show_icons && $use_blizzard_icons) {
+			$icon_map = $this->api->get_all_boss_icon_ids($raid_slug);
+		}
+
 		// Handle multiple guilds
 		$guild_ids = !empty($guilds) ? explode(',', $guilds) : [];
 		$guild_ids = array_map('trim', $guild_ids);
 		$guild_ids = array_filter($guild_ids);
 
-		// If no specific guilds, show general rankings
 		if (empty($guild_ids)) {
 			return $this->render_rankings(
-				$raid_info,
-				$raid_slug,
-				$difficulty,
-				$region,
-				$realm,
-				'',
-				$cache_minutes,
-				$limit,
-				$page,
-				$show_icons,
-				$show_killed,
-				$use_blizzard_icons,
-				$show_raid_name,
-				$show_raid_icon,
-				$expansion_id
+				$raid_info, $raid_slug, $difficulty, $region, $realm, '',
+				$cache_minutes, $limit, $page,
+				$show_icons, $show_killed, $use_blizzard_icons,
+				$show_raid_name, $show_raid_icon, $expansion_id, $icon_map
 			);
 		}
 
-		// Render progress for each guild
 		$output = '<div class="wow-raid-progress-container">';
 
-		// Show raid header if enabled
 		if ($show_raid_name || $show_raid_icon) {
-			$output .= $this->render_raid_header($raid_info, $show_raid_name, $show_raid_icon,  $use_blizzard_icons, $expansion_id);
+			$output .= $this->render_raid_header($raid_info, $show_raid_name, $show_raid_icon, $use_blizzard_icons, $expansion_id);
 		}
 
 		foreach ($guild_ids as $guild_id) {
-			$guild_output = $this->render_guild_progress(
-				$raid_info,
-				$raid_slug,
-				$difficulty,
-				$region,
-				$realm,
-				$guild_id,
-				$cache_minutes,
-				$show_icons,
-				$show_killed,
-				$use_blizzard_icons,
-				$expansion_id
+			$output .= $this->render_guild_progress(
+				$raid_info, $raid_slug, $difficulty, $region, $realm, $guild_id,
+				$cache_minutes, $show_icons, $show_killed, $use_blizzard_icons,
+				$expansion_id, $icon_map
 			);
-			$output .= $guild_output;
 		}
 
 		if ($use_blizzard_icons) {
@@ -171,7 +152,13 @@ class WoWRaidProgressWidget {
 	/**
 	 * Render raid header
 	 */
-	private function render_raid_header($raid_info, $show_raid_name, $show_raid_icon, $use_blizzard_icons, $expansion_id) {
+	private function render_raid_header(
+		array $raid_info,
+		bool $show_raid_name,
+		bool $show_raid_icon,
+		bool $use_blizzard_icons,
+		int $expansion_id
+	): string {
 		if (!$show_raid_name && !$show_raid_icon) {
 			return '';
 		}
@@ -179,7 +166,6 @@ class WoWRaidProgressWidget {
 		$raid_name = !empty($raid_info['name']) ? $raid_info['name'] : '';
 		$raid_slug = !empty($raid_info['slug']) ? $raid_info['slug'] : '';
 
-		// Try to get journal background image
 		$bg_image_url = '';
 		if ($show_raid_icon && $use_blizzard_icons) {
 			$bg_image_id = $this->api->get_journal_instance_image_id($raid_slug, $expansion_id);
@@ -209,25 +195,27 @@ class WoWRaidProgressWidget {
 
 	/**
 	 * Render general rankings (no specific guild)
+	 *
+	 * @param array<string, int> $icon_map Pre-loaded boss icon map
 	 */
 	private function render_rankings(
-		$raid_info,
-		$raid_slug,
-		$difficulty,
-		$region,
-		$realm,
-		$guilds,
-		$cache_minutes,
-		$limit,
-		$page,
-		$show_icons,
-		$show_killed,
-		$use_blizzard_icons,
-		$show_raid_name,
-		$show_raid_icon,
-		$expansion_id
-	) {
-		// Get background image if needed
+		array $raid_info,
+		string $raid_slug,
+		string $difficulty,
+		string $region,
+		string $realm,
+		string $guilds,
+		int $cache_minutes,
+		int $limit,
+		int $page,
+		bool $show_icons,
+		bool $show_killed,
+		bool $use_blizzard_icons,
+		bool $show_raid_name,
+		bool $show_raid_icon,
+		int $expansion_id,
+		array $icon_map
+	): string {
 		$bg_image_url = '';
 		if ($show_raid_icon && $use_blizzard_icons) {
 			$bg_image_id = $this->api->get_journal_instance_image_id($raid_slug, $expansion_id);
@@ -238,7 +226,6 @@ class WoWRaidProgressWidget {
 
 		$output = '<div class="wow-raid-progress">';
 
-		// Render hero header if we have background image
 		if ($bg_image_url && $show_raid_name) {
 			$output .= '<div class="wow-raid-header-hero" style="background-image: url(' . esc_url($bg_image_url) . ');">';
 			$output .= '<div class="wow-raid-header-overlay">';
@@ -253,11 +240,7 @@ class WoWRaidProgressWidget {
 			$output .= '</div>';
 		}
 
-		// Highest view: choose target tier, then render full section with boss grid for that tier only.
 		if ($difficulty === 'highest') {
-			// Build all difficulty datasets using your existing code-paths.
-			// If you already build $all elsewhere, keep that; the structure should be:
-			// $all = ['normal' => $normalData, 'heroic' => $heroicData, 'mythic' => $mythicData]
 			$all = [
 				'normal' => $this->api->fetch_raid_data($raid_slug, 'normal', $region, $realm, $guilds, $cache_minutes, $limit, $page),
 				'heroic' => $this->api->fetch_raid_data($raid_slug, 'heroic', $region, $realm, $guilds, $cache_minutes, $limit, $page),
@@ -265,7 +248,7 @@ class WoWRaidProgressWidget {
 			];
 
 			$target = $this->find_highest_progress_difficulty($all, $raid_info);
-			$data	= isset($all[$target]) ? $all[$target] : ['raidRankings' => []];
+			$data = $all[$target] ?? ['raidRankings' => []];
 
 			if (is_wp_error($data)) {
 				if (!$this->is_rate_limit_error($data)) {
@@ -274,33 +257,19 @@ class WoWRaidProgressWidget {
 					);
 				}
 			} else {
-				// Full section: boss grid from target tier only; header/rank may fall back within render_difficulty_section
 				$output .= $this->render_difficulty_section(
 					is_array($data) ? $data : ['raidRankings' => []],
-					$target,
-					$raid_info,
-					$all,
-					$show_icons,
-					$show_killed,
-					$use_blizzard_icons,
-					$expansion_id
+					$target, $raid_info, $all,
+					$show_icons, $show_killed, $use_blizzard_icons,
+					$expansion_id, $icon_map
 				);
 			}
 		} else {
-			// Explicit difficulty render (may be 'normal', 'heroic', 'mythic', or an array you already computed)
 			$difficulties_to_render = is_array($difficulty) ? $difficulty : [$difficulty];
 
 			foreach ($difficulties_to_render as $diff) {
-				// Use your existing fetch_with_fallback; it should provide an $all_attempts map keyed by difficulty.
-				list($data, $used_diff, $all_attempts) = $this->fetch_with_fallback(
-					$raid_slug,
-					$diff,
-					$region,
-					$realm,
-					$guilds,
-					$cache_minutes,
-					$limit,
-					$page
+				[$data, $used_diff, $all_attempts] = $this->fetch_with_fallback(
+					$raid_slug, $diff, $region, $realm, $guilds, $cache_minutes, $limit, $page
 				);
 
 				if (is_wp_error($data)) {
@@ -312,51 +281,14 @@ class WoWRaidProgressWidget {
 					continue;
 				}
 
-				// Pin boss grid to the requested tier only; header/rank may fall back inside render_difficulty_section
 				$current_tier_data = (isset($all_attempts[$diff]) && is_array($all_attempts[$diff]))
 					? $all_attempts[$diff]
 					: ['raidRankings' => []];
 
-				if ($diff === 'normal') {
-					// Full section even if empty (Normal has no lower tier)
-					$output .= $this->render_difficulty_section(
-						$current_tier_data,
-						$diff,
-						$raid_info,
-						['normal' => $current_tier_data],
-						$show_icons,
-						$show_killed,
-						$use_blizzard_icons,
-						$expansion_id
-					);
-					continue;
-				}
-
-				if (in_array($diff, ['heroic', 'mythic'], true)) {
-					// Full section; bosses from requested tier only; header may fall back to lower
-					$output .= $this->render_difficulty_section(
-						$current_tier_data,
-						$diff,
-						$raid_info,
-						$all_attempts,
-						$show_icons,
-						$show_killed,
-						$use_blizzard_icons,
-						$expansion_id
-					);
-					continue;
-				}
-
-				// If other custom difficulties exist, default to full section as safe behavior
 				$output .= $this->render_difficulty_section(
-					$current_tier_data,
-					$diff,
-					$raid_info,
-					$all_attempts,
-					$show_icons,
-					$show_killed,
-					$use_blizzard_icons,
-					$expansion_id
+					$current_tier_data, $diff, $raid_info, $all_attempts,
+					$show_icons, $show_killed, $use_blizzard_icons,
+					$expansion_id, $icon_map
 				);
 			}
 		}
@@ -371,50 +303,42 @@ class WoWRaidProgressWidget {
 
 	/**
 	 * Render progress for a specific guild
+	 *
+	 * @param array<string, int> $icon_map Pre-loaded boss icon map
 	 */
 	private function render_guild_progress(
-		$raid_info,
-		$raid_slug,
-		$difficulty,
-		$region,
-		$realm,
-		$guild_id,
-		$cache_minutes,
-		$show_icons,
-		$show_killed,
-		$use_blizzard_icons,
-		$expansion_id
-	) {
+		array $raid_info,
+		string $raid_slug,
+		string $difficulty,
+		string $region,
+		string $realm,
+		string $guild_id,
+		int $cache_minutes,
+		bool $show_icons,
+		bool $show_killed,
+		bool $use_blizzard_icons,
+		int $expansion_id,
+		array $icon_map
+	): string {
 
-		// Validate guild ID
 		if (!preg_match('/^\d+$/', $guild_id)) {
 			return $this->render_error_inline(
 				sprintf(__('Invalid guild ID: %s', 'wow-raid-progress'), esc_html($guild_id))
 			);
 		}
 
-		// Fetch all difficulty data for the guild
 		$all_difficulties_data = [];
 		foreach (['normal', 'heroic', 'mythic'] as $diff_key) {
 			$all_difficulties_data[$diff_key] = $this->api->fetch_raid_data(
-				$raid_slug,
-				$diff_key,
-				$region,
-				$realm,
-				$guild_id,
-				$cache_minutes,
-				50,
-				0
+				$raid_slug, $diff_key, $region, $realm, $guild_id, $cache_minutes, 50, 0
 			);
 		}
 
-		// Determine which difficulties to display
 		$difficulties_to_render = [];
 
 		if ($difficulty === 'all') {
 			$difficulties_to_render = ['normal', 'heroic', 'mythic'];
 		} elseif ($difficulty === 'highest') {
-			// Find the highest difficulty with progress
 			$target_diff = $this->find_highest_progress_difficulty($all_difficulties_data, $raid_info);
 			$difficulties_to_render[] = $target_diff;
 		} else {
@@ -427,94 +351,91 @@ class WoWRaidProgressWidget {
 			$data = $all_difficulties_data[$diff] ?? null;
 
 			if (is_wp_error($data)) {
-			$this->api->debug_log('Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message());
-			$output .= $this->render_error_inline(
-			sprintf(
-			__('Error loading %s data for guild %s: %s', 'wow-raid-progress'),
-			ucfirst($diff),
-			$guild_id,
-			$data->get_error_message()
-			)
-			);
-			continue;
-}
+				$this->api->debug_log('Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message());
+				$output .= $this->render_error_inline(
+					sprintf(
+						__('Error loading %s data for guild %s: %s', 'wow-raid-progress'),
+						ucfirst($diff),
+						$guild_id,
+						$data->get_error_message()
+					)
+				);
+				continue;
+			}
 
 			if (empty($data) || empty($data['raidRankings'])) {
-				// Render the requested tier's boss grid (even if 0/8)
 				$output .= $this->render_difficulty_section(
 					(is_array($data) ? $data : ['raidRankings' => []]),
-					$diff,
-					$raid_info,
-					$all_difficulties_data,
-					$show_icons,
-					$show_killed,
-					$use_blizzard_icons,
-					$expansion_id
+					$diff, $raid_info, $all_difficulties_data,
+					$show_icons, $show_killed, $use_blizzard_icons,
+					$expansion_id, $icon_map
 				);
 				continue;
 			}
 
 			$output .= $this->render_difficulty_section(
-			$data,
-			$diff,
-			$raid_info,
-			$all_difficulties_data,
-			$show_icons,
-			$show_killed,
-			$use_blizzard_icons,
-			$expansion_id
+				$data, $diff, $raid_info, $all_difficulties_data,
+				$show_icons, $show_killed, $use_blizzard_icons,
+				$expansion_id, $icon_map
 			);
-}
-
-		if ($output === '') {
-		$output = $this->render_error_inline(__('No raid data available for this guild.', 'wow-raid-progress'));
 		}
 
-return $output;
+		if ($output === '') {
+			$output = $this->render_error_inline(__('No raid data available for this guild.', 'wow-raid-progress'));
+		}
+
+		return $output;
 	}
 
 	/**
 	 * Render difficulty section
+	 *
+	 * FIX #8: Uses pre-loaded $icon_map instead of per-boss get_boss_icon_id() calls.
+	 *
+	 * @param array<string, int> $icon_map Pre-loaded boss_slug => attachment_id map
 	 */
 	private function render_difficulty_section(
-		$data,
-		$difficulty,
-		$raid_info,
-		$all_difficulties_data,
-		$show_icons,
-		$show_killed,
-		$use_blizzard_icons,
-		$expansion_id
-	) {
+		array $data,
+		string $difficulty,
+		array $raid_info,
+		array $all_difficulties_data,
+		bool $show_icons,
+		bool $show_killed,
+		bool $use_blizzard_icons,
+		int $expansion_id,
+		array $icon_map = []
+	): string {
 
 		$all_bosses = $raid_info['encounters'] ?? [];
 		$ranking_entry = $data['raidRankings'][0] ?? null;
 
-		// Boss progress (from higher tier); empty arrays if no entry at this tier
 		$encounters_defeated = $ranking_entry['encountersDefeated'] ?? [];
-		$pulled_encounters   = array_column($ranking_entry['encountersPulled'] ?? [], null, 'slug');
+		$pulled_encounters = array_column($ranking_entry['encountersPulled'] ?? [], null, 'slug');
 
-		// Rank panel fields (prefer current tier, fallback to lower)
 		$guild_info = $ranking_entry['guild'] ?? null;
-		$rank	    = $ranking_entry['rank'] ?? null;
+		$rank = $ranking_entry['rank'] ?? null;
 		$world_rank = $data['worldRanking'] ?? null;
 
-		// Pull just the rank/name/realm/region from a lower tier if missing
 		if (empty($guild_info) || !is_numeric($rank)) {
 			$source_data = $this->find_fallback_data($all_difficulties_data, $difficulty);
 			if ($source_data && !is_wp_error($source_data) && !empty($source_data['raidRankings'][0])) {
 				$src = $source_data['raidRankings'][0];
-				if (empty($guild_info))	  $guild_info = $src['guild'] ?? null;
-				if (!is_numeric($rank))	  $rank = $src['rank'] ?? null;
-				if (empty($world_rank))	  $world_rank = $source_data['worldRanking'] ?? null;
+				if (empty($guild_info)) {
+					$guild_info = $src['guild'] ?? null;
+				}
+				if (!is_numeric($rank)) {
+					$rank = $src['rank'] ?? null;
+				}
+				if (empty($world_rank)) {
+					$world_rank = $source_data['worldRanking'] ?? null;
+				}
 			}
 		}
 
-		// If we *still* have no guild info, that's a real "no data for this guild at any tier" error.
 		if (empty($guild_info)) {
 			return $this->render_error_inline(
 				sprintf(
-					__('No %s data found for your guild at this raid (and no lower-tier data either).', 'wow-raid-progress'),
+					__('No data found for your guild in this raid.', 'wow-raid-progress'),
 					ucfirst($difficulty)
 				)
 			);
@@ -535,9 +456,9 @@ return $output;
 					<span class="wow-region"><?php echo esc_html(strtoupper($guild_info['region']['short_name'])); ?></span>
 				</div>
 				<div class="wow-raid-ranks">
-					<span class="wow-rank realm"><?php _e('Realm:', 'wow-raid-progress'); ?> <strong>#<?php echo esc_html($rank); ?></strong></span>
+					<span class="wow-rank realm"><?php esc_html_e('Realm:', 'wow-raid-progress'); ?> <strong>#<?php echo esc_html($rank); ?></strong></span>
 					<?php if (!empty($world_rank)): ?>
-						<span class="wow-rank world"><?php _e('World:', 'wow-raid-progress'); ?> <strong>#<?php echo esc_html($world_rank); ?></strong></span>
+						<span class="wow-rank world"><?php esc_html_e('World:', 'wow-raid-progress'); ?> <strong>#<?php echo esc_html($world_rank); ?></strong></span>
 					<?php endif; ?>
 				</div>
 			</div>
@@ -551,16 +472,15 @@ return $output;
 						style="width: <?php echo esc_attr($progress_percent); ?>%"></div>
 					<div class="wow-progress-text">
 						<?php echo esc_html(count($encounters_defeated) . '/' . count($all_bosses)); ?>
-						<?php _e('Bosses', 'wow-raid-progress'); ?>
+						<?php esc_html_e('Bosses', 'wow-raid-progress'); ?>
 					</div>
 				</div>
 				<div class="wow-boss-list">
 					<?php
 					$defeated_slugs = array_column($encounters_defeated, 'slug');
 					foreach ($all_bosses as $boss):
-						$is_defeated = in_array($boss['slug'], $defeated_slugs);
+						$is_defeated = in_array($boss['slug'], $defeated_slugs, true);
 
-						// Skip defeated bosses if show_killed is false
 						if (!$show_killed && $is_defeated) {
 							continue;
 						}
@@ -572,13 +492,19 @@ return $output;
 								<div class="wow-boss-icon wow-boss-portrait">
 									<?php
 									if ($use_blizzard_icons) {
-										// Pass boss name and expansion ID for auto-download
-										$attachment_id = $this->api->get_boss_icon_id(
-											$boss['slug'],
-											$raid_info['slug'],
-											$boss['name'],
-											$expansion_id
-										);
+										// FIX #8: Use pre-loaded icon map instead of per-boss query
+										$attachment_id = $icon_map[$boss['slug']] ?? null;
+
+										// Fall back to individual lookup only if not in batch map
+										if (!$attachment_id) {
+											$attachment_id = $this->api->get_boss_icon_id(
+												$boss['slug'],
+												$raid_info['slug'],
+												$boss['name'],
+												$expansion_id
+											);
+										}
+
 										if ($attachment_id) {
 											echo wp_get_attachment_image(
 												$attachment_id,
@@ -599,18 +525,18 @@ return $output;
 								<div class="wow-boss-name"><?php echo esc_html($boss['name']); ?></div>
 								<div class="wow-boss-stats">
 									<?php if ($is_defeated): ?>
-										<span class="wow-defeated-label"><?php _e('Defeated', 'wow-raid-progress'); ?></span>
+										<span class="wow-defeated-label"><?php esc_html_e('Defeated', 'wow-raid-progress'); ?></span>
 									<?php elseif (isset($pulled_encounters[$boss['slug']])): ?>
 										<span class="wow-pulls">
-											<?php _e('Pulls:', 'wow-raid-progress'); ?>
+											<?php esc_html_e('Pulls:', 'wow-raid-progress'); ?>
 											<?php echo esc_html($pulled_encounters[$boss['slug']]['numPulls']); ?>
 										</span>
 										<span class="wow-percent">
-											<?php _e('Best:', 'wow-raid-progress'); ?>
+											<?php esc_html_e('Best:', 'wow-raid-progress'); ?>
 											<?php echo esc_html(number_format($pulled_encounters[$boss['slug']]['bestPercent'], 1)); ?>%
 										</span>
 									<?php else: ?>
-										<span class="wow-not-started"><?php _e('Not Started', 'wow-raid-progress'); ?></span>
+										<span class="wow-not-started"><?php esc_html_e('Not Started', 'wow-raid-progress'); ?></span>
 									<?php endif; ?>
 								</div>
 							</div>
@@ -626,11 +552,10 @@ return $output;
 	/**
 	 * Find highest progress difficulty
 	 */
-	private function find_highest_progress_difficulty($all_difficulties_data, $raid_info) {
+	private function find_highest_progress_difficulty(array $all_difficulties_data, array $raid_info): string {
 		$total_bosses = count($raid_info['encounters']);
 		$target_diff = 'normal';
 
-		// Check progress in each difficulty
 		$normal_kills = 0;
 		if (
 			!is_wp_error($all_difficulties_data['normal']) &&
@@ -655,11 +580,9 @@ return $output;
 			$mythic_kills = count($all_difficulties_data['mythic']['raidRankings'][0]['encountersDefeated'] ?? []);
 		}
 
-		// Determine highest active difficulty
 		if ($normal_kills > 0) $target_diff = 'heroic';
 		if ($heroic_kills >= $total_bosses) $target_diff = 'mythic';
 
-		// Check for partial progress
 		foreach (['mythic', 'heroic', 'normal'] as $diff) {
 			if (
 				!is_wp_error($all_difficulties_data[$diff]) &&
@@ -677,9 +600,9 @@ return $output;
 	}
 
 	/**
-	 * Find fallback data from lower difficulties (previous tier)
+	 * Find fallback data from lower difficulties
 	 */
-	private function find_fallback_data($all_difficulties_data, $current_difficulty) {
+	private function find_fallback_data(array $all_difficulties_data, string $current_difficulty): ?array {
 		$fallback_order = [
 			'mythic' => ['heroic', 'normal'],
 			'heroic' => ['normal'],
@@ -701,37 +624,18 @@ return $output;
 	}
 
 	/**
-	 * Get difficulties to render based on setting
-	 */
-	private function get_difficulties_to_render($difficulty) {
-		switch ($difficulty) {
-			case 'all':
-				return ['normal', 'heroic', 'mythic'];
-			case 'highest':
-				// This requires checking actual data, handled elsewhere
-				return ['normal']; // Default fallback
-			case 'normal':
-			case 'heroic':
-			case 'mythic':
-				return [$difficulty];
-			default:
-				return ['normal'];
-		}
-	}
-
-	/**
 	 * Validate difficulty setting
 	 */
-	private function validate_difficulty($difficulty) {
+	private function validate_difficulty(string $difficulty): string {
 		$valid = ['all', 'normal', 'heroic', 'mythic', 'highest'];
 		$difficulty = strtolower(sanitize_text_field($difficulty));
-		return in_array($difficulty, $valid) ? $difficulty : 'normal';
+		return in_array($difficulty, $valid, true) ? $difficulty : 'normal';
 	}
 
 	/**
 	 * Find raid info in static data
 	 */
-	private function find_raid_info($static_data, $raid_slug) {
+	private function find_raid_info(array $static_data, string $raid_slug): ?array {
 		if (!isset($static_data['raids'])) {
 			return null;
 		}
@@ -748,7 +652,7 @@ return $output;
 	/**
 	 * Render error message
 	 */
-	private function render_error($message) {
+	private function render_error(string $message): string {
 		return sprintf(
 			'<div class="wow-raid-error">%s</div>',
 			esc_html($message)
@@ -758,42 +662,55 @@ return $output;
 	/**
 	 * Render inline error message
 	 */
-	private function render_error_inline($message) {
+	private function render_error_inline(string $message): string {
 		return sprintf(
 			'<div class="wow-raid-error-inline">%s</div>',
 			esc_html($message)
 		);
 	}
 
-	// Order to try when a given difficulty has no data
-	private function difficulty_fallback_order($difficulty) {
-		switch ($difficulty) {
-			case 'mythic':
-				return ['mythic', 'heroic', 'normal'];
-			case 'heroic':
-				return ['heroic', 'normal'];
-			default:
-				return ['normal'];
-		}
+	/**
+	 * Difficulty fallback order
+	 *
+	 * @return array<string>
+	 */
+	private function difficulty_fallback_order(string $difficulty): array {
+		return match ($difficulty) {
+			'mythic' => ['mythic', 'heroic', 'normal'],
+			'heroic' => ['heroic', 'normal'],
+			default => ['normal'],
+		};
 	}
 
-	// Try requested difficulty, then fall back to lower ones until data appears
-	private function fetch_with_fallback($raid_slug, $difficulty, $region, $realm, $guilds, $cache_minutes, $limit, $page) {
+	/**
+	 * Try requested difficulty, then fall back to lower ones until data appears
+	 *
+	 * @return array{0: array|WP_Error, 1: string, 2: array}
+	 */
+	private function fetch_with_fallback(
+		string $raid_slug,
+		string $difficulty,
+		string $region,
+		string $realm,
+		string $guilds,
+		int $cache_minutes,
+		int $limit,
+		int $page
+	): array {
 		$results = [];
 		foreach ($this->difficulty_fallback_order($difficulty) as $diff) {
 			$data = $this->api->fetch_raid_data($raid_slug, $diff, $region, $realm, $guilds, $cache_minutes, $limit, $page);
 			$results[$diff] = $data;
 			if (!is_wp_error($data) && !empty($data['raidRankings'])) {
-				return [$data, $diff, $results]; // first non-empty wins
+				return [$data, $diff, $results];
 			}
 		}
-		// All attempts failed or empty; return the first attempt (error or empty) and the map
 		$first = reset($results);
 		$first_diff = array_key_first($results);
 		return [$first, $first_diff, $results];
 	}
 
-	private function is_rate_limit_error($err) {
+	private function is_rate_limit_error(mixed $err): bool {
 		if (!is_wp_error($err)) return false;
 		$msg = $err->get_error_message();
 		return stripos($msg, '429') !== false || stripos($msg, 'rate limit') !== false;

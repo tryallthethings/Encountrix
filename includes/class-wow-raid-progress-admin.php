@@ -15,11 +15,11 @@ if (!defined('ABSPATH')) {
 
 class WoWRaidProgressAdmin {
 
-	private $plugin_name;
-	private $version;
-	private $api;
+	private string $plugin_name;
+	private string $version;
+	private WoWRaidProgressAPI $api;
 
-	public function __construct($plugin_name, $version, $api) {
+	public function __construct(string $plugin_name, string $version, WoWRaidProgressAPI $api) {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 		$this->api = $api;
@@ -28,7 +28,7 @@ class WoWRaidProgressAdmin {
 	/**
 	 * Add admin menu page
 	 */
-	public function add_admin_menu() {
+	public function add_admin_menu(): void {
 		add_options_page(
 			__('WoW Raid Progress Settings', 'wow-raid-progress'),
 			__('WoW Raid Progress', 'wow-raid-progress'),
@@ -41,7 +41,7 @@ class WoWRaidProgressAdmin {
 	/**
 	 * Register plugin settings
 	 */
-	public function register_settings() {
+	public function register_settings(): void {
 		// API Settings
 		register_setting('wow_raid_progress_settings', 'wow_raid_progress_api_key', [
 			'type' => 'string',
@@ -169,77 +169,59 @@ class WoWRaidProgressAdmin {
 
 	/**
 	 * Sanitize expansion setting
-	 *
-	 * @param mixed $value Input value
-	 * @return int Sanitized expansion ID
 	 */
-	public function sanitize_expansion($value) {
+	public function sanitize_expansion(mixed $value): int {
 		$value = absint($value);
 		$valid_expansions = array_keys($this->api->get_expansions());
-		return in_array($value, $valid_expansions) ? $value : 10;
+		return in_array($value, $valid_expansions, true) ? $value : 10;
 	}
 
 	/**
 	 * Sanitize difficulty setting
-	 *
-	 * @param string $value Input value
-	 * @return string Sanitized difficulty
 	 */
-	public function sanitize_difficulty($value) {
+	public function sanitize_difficulty(mixed $value): string {
+		$value = (string) $value;
 		$valid = ['all', 'normal', 'heroic', 'mythic', 'highest'];
-		return in_array($value, $valid) ? $value : 'highest';
+		return in_array($value, $valid, true) ? $value : 'highest';
 	}
 
 	/**
 	 * Sanitize region setting
-	 *
-	 * @param string $value Input value
-	 * @return string Sanitized region
 	 */
-	public function sanitize_region($value) {
+	public function sanitize_region(mixed $value): string {
+		$value = (string) $value;
 		$valid = ['us', 'eu', 'kr', 'tw'];
-		return in_array($value, $valid) ? $value : 'eu';
+		return in_array($value, $valid, true) ? $value : 'eu';
 	}
 
 	/**
 	 * Sanitize cache time
-	 *
-	 * @param mixed $value Input value
-	 * @return int Sanitized cache time in minutes
 	 */
-	public function sanitize_cache_time($value) {
+	public function sanitize_cache_time(mixed $value): int {
 		$value = absint($value);
-		return min(1440, max(0, $value)); // Max 24 hours
+		return min(1440, max(0, $value));
 	}
 
 	/**
 	 * Sanitize limit
-	 *
-	 * @param mixed $value Input value
-	 * @return int Sanitized limit
 	 */
-	public function sanitize_limit($value) {
+	public function sanitize_limit(mixed $value): int {
 		$value = absint($value);
 		return min(100, max(1, $value));
 	}
 
 	/**
 	 * Sanitize boolean string
-	 *
-	 * @param string $value Input value
-	 * @return string 'true' or 'false'
 	 */
-	public function sanitize_boolean_string($value) {
-		return in_array($value, ['true', 'false']) ? $value : 'false';
+	public function sanitize_boolean_string(mixed $value): string {
+		$value = (string) $value;
+		return in_array($value, ['true', 'false'], true) ? $value : 'false';
 	}
 
 	/**
 	 * Sanitize cached raids
-	 *
-	 * @param mixed $value Input value
-	 * @return array Sanitized raids array
 	 */
-	public function sanitize_cached_raids($value) {
+	public function sanitize_cached_raids(mixed $value): array {
 		if (!is_array($value)) {
 			return [];
 		}
@@ -248,30 +230,22 @@ class WoWRaidProgressAdmin {
 
 	/**
 	 * Sanitize realm value
-	 *
-	 * @param string $value Raw realm value
-	 * @return string Sanitized realm string
 	 */
-	public function sanitize_realm($value) {
-		return $this->api->sanitize_realm($value);
+	public function sanitize_realm(mixed $value): string {
+		return $this->api->sanitize_realm((string) $value);
 	}
 
 	/**
 	 * Sanitize guild IDs
-	 *
-	 * @param string $value Raw guild IDs
-	 * @return string Sanitized guild IDs
 	 */
-	public function sanitize_guilds($value) {
-		return $this->api->sanitize_guilds($value);
+	public function sanitize_guilds(mixed $value): string {
+		return $this->api->sanitize_guilds($value ?? '');
 	}
 
 	/**
 	 * Enqueue admin assets
-	 *
-	 * @param string $hook Current admin page hook
 	 */
-	public function enqueue_admin_assets($hook) {
+	public function enqueue_admin_assets(string $hook): void {
 		// Only load assets on the plugin settings page
 		if ($hook !== 'settings_page_wow-raid-progress') {
 			return;
@@ -341,30 +315,44 @@ class WoWRaidProgressAdmin {
 	}
 
 	/**
-	 * AJAX handler for clearing cache
+	 * Helper to delete transients by prefix using prepared statements.
+	 *
+	 * FIX #1: Extracted from multiple methods that had raw SQL.
+	 *
+	 * @param array<string> $prefixes Option name prefixes (without trailing %).
 	 */
-	public function ajax_clear_cache() {
-		// Verify nonce
+	private function delete_transients_by_prefix(array $prefixes): void {
+		global $wpdb;
+		foreach ($prefixes as $prefix) {
+			$wpdb->query($wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$wpdb->esc_like($prefix) . '%'
+			));
+		}
+	}
+
+	/**
+	 * AJAX handler for clearing cache
+	 *
+	 * FIX #1: Raw SQL replaced with prepared statements via helper.
+	 */
+	public function ajax_clear_cache(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
 		}
 
-		// Check permissions
 		if (!current_user_can('manage_options')) {
 			wp_send_json_error(__('Permission denied', 'wow-raid-progress'));
 			return;
 		}
 
-		// Clear all plugin transients
-		global $wpdb;
-		$wpdb->query(
-			"DELETE FROM {$wpdb->options}
-			 WHERE option_name LIKE '_transient_wow_raid_%'
-			 OR option_name LIKE '_transient_timeout_wow_raid_%'
-			 OR option_name LIKE '_transient_wow_blizzard_%'
-			 OR option_name LIKE '_transient_timeout_wow_blizzard_%'"
-		);
+		$this->delete_transients_by_prefix([
+			'_transient_wow_raid_',
+			'_transient_timeout_wow_raid_',
+			'_transient_wow_blizzard_',
+			'_transient_timeout_wow_blizzard_',
+		]);
 
 		// Clear rate limit data
 		delete_transient('wow_raid_api_rate_limit');
@@ -376,15 +364,16 @@ class WoWRaidProgressAdmin {
 
 	/**
 	 * AJAX handler for importing icons
+	 *
+	 * FIX #4: Correctly distinguishes new imports (numeric) from existing (true) from failures (false).
+	 * FIX #5: Reduced sleep to usleep(300000) to avoid blocking PHP workers.
 	 */
-	public function ajax_import_icons() {
-		// Verify nonce
+	public function ajax_import_icons(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
 		}
 
-		// Check permissions
 		if (!current_user_can('manage_options')) {
 			wp_send_json_error(__('Permission denied', 'wow-raid-progress'));
 			return;
@@ -435,7 +424,7 @@ class WoWRaidProgressAdmin {
 				$expansion_id
 			);
 
-			if (is_numeric($result)) {
+			if (is_int($result)) {
 				$success_count++;
 				$log[] = sprintf(__('SUCCESS: Imported icon for %s (ID: %d)', 'wow-raid-progress'), $boss['name'], $result);
 			} elseif ($result === true) {
@@ -446,9 +435,9 @@ class WoWRaidProgressAdmin {
 				$log[] = sprintf(__('ERROR: Failed to import icon for %s', 'wow-raid-progress'), $boss['name']);
 			}
 
-			// Small delay to avoid overwhelming the API
+			// FIX #5: Shorter delay to avoid blocking PHP workers
 			if ($success_count > 0 && $success_count % 3 === 0) {
-				sleep(1);
+				usleep(300000); // 300ms instead of 1s
 			}
 		}
 
@@ -468,14 +457,12 @@ class WoWRaidProgressAdmin {
 	/**
 	 * AJAX handler for deleting all icons
 	 */
-	public function ajax_delete_icons() {
-		// Verify nonce
+	public function ajax_delete_icons(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
 		}
 
-		// Check permissions
 		if (!current_user_can('manage_options')) {
 			wp_send_json_error(__('Permission denied', 'wow-raid-progress'));
 			return;
@@ -492,11 +479,17 @@ class WoWRaidProgressAdmin {
 
 	/**
 	 * AJAX handler for getting raids
+	 *
+	 * FIX #6: Added missing current_user_can() check.
 	 */
-	public function ajax_get_raids() {
-		// Verify nonce
+	public function ajax_get_raids(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(__('Permission denied', 'wow-raid-progress'));
 			return;
 		}
 
@@ -504,7 +497,7 @@ class WoWRaidProgressAdmin {
 
 		// Validate expansion ID
 		$valid_expansions = array_keys($this->api->get_expansions());
-		if (!in_array($expansion_id, $valid_expansions)) {
+		if (!in_array($expansion_id, $valid_expansions, true)) {
 			wp_send_json_error(__('Invalid expansion ID', 'wow-raid-progress'));
 			return;
 		}
@@ -542,15 +535,15 @@ class WoWRaidProgressAdmin {
 
 	/**
 	 * AJAX handler for refreshing raids
+	 *
+	 * FIX #1: Raw SQL replaced with prepared statements via helper.
 	 */
-	public function ajax_refresh_raids() {
-		// Verify nonce
+	public function ajax_refresh_raids(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
 		}
 
-		// Check permissions
 		if (!current_user_can('manage_options')) {
 			wp_send_json_error(__('Permission denied', 'wow-raid-progress'));
 			return;
@@ -562,12 +555,10 @@ class WoWRaidProgressAdmin {
 		delete_option('wow_raid_progress_cached_raids');
 
 		// Clear transients for static data
-		global $wpdb;
-		$wpdb->query(
-			"DELETE FROM {$wpdb->options}
-			 WHERE option_name LIKE '_transient_wow_raid_static_%'
-			 OR option_name LIKE '_transient_timeout_wow_raid_static_%'"
-		);
+		$this->delete_transients_by_prefix([
+			'_transient_wow_raid_static_',
+			'_transient_timeout_wow_raid_static_',
+		]);
 
 		// Now fetch fresh data
 		$this->ajax_get_raids();
@@ -576,7 +567,7 @@ class WoWRaidProgressAdmin {
 	/**
 	 * AJAX handler for getting realms
 	 */
-	public function ajax_get_realms() {
+	public function ajax_get_realms(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
@@ -586,7 +577,7 @@ class WoWRaidProgressAdmin {
 
 		// Validate region
 		$valid_regions = ['us', 'eu', 'kr', 'tw'];
-		if (!in_array($region, $valid_regions)) {
+		if (!in_array($region, $valid_regions, true)) {
 			wp_send_json_error(__('Invalid region specified', 'wow-raid-progress'));
 			return;
 		}
@@ -606,7 +597,7 @@ class WoWRaidProgressAdmin {
 	/**
 	 * AJAX handler for getting debug log
 	 */
-	public function ajax_get_debug_log() {
+	public function ajax_get_debug_log(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
@@ -624,7 +615,7 @@ class WoWRaidProgressAdmin {
 	/**
 	 * AJAX handler for clearing debug log
 	 */
-	public function ajax_clear_debug_log() {
+	public function ajax_clear_debug_log(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
@@ -643,7 +634,7 @@ class WoWRaidProgressAdmin {
 	/**
 	 * AJAX handler for testing Blizzard API
 	 */
-	public function ajax_test_blizzard_api() {
+	public function ajax_test_blizzard_api(): void {
 		if (!check_ajax_referer('wow_raid_admin_nonce', 'nonce', false)) {
 			wp_send_json_error(__('Security check failed', 'wow-raid-progress'));
 			return;
@@ -681,10 +672,9 @@ class WoWRaidProgressAdmin {
 	}
 
 	/**
-	 * Render admin page (partial - just the documentation section as example)
-	 * Full admin_page method would be similar to the original but with proper translations
+	 * Render admin page
 	 */
-	public function admin_page() {
+	public function admin_page(): void {
 		if (!current_user_can('manage_options')) {
 			wp_die(__('You do not have sufficient permissions to access this page.', 'wow-raid-progress'));
 		}
@@ -692,11 +682,11 @@ class WoWRaidProgressAdmin {
 		// Show custom success message
 		if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true') {
 			echo '<div class="wow-raid-success-message">';
-			echo '<strong>' . __('Settings saved successfully!', 'wow-raid-progress') . '</strong>';
+			echo '<strong>' . esc_html__('Settings saved successfully!', 'wow-raid-progress') . '</strong>';
 			echo '</div>';
 		}
 
-		// Get current values (same as before)
+		// Get current values
 		$api_key = get_option('wow_raid_progress_api_key', '');
 		$guild_ids = get_option('wow_raid_progress_guild_ids', '');
 		$expansion = get_option('wow_raid_progress_expansion', 10);
@@ -718,10 +708,6 @@ class WoWRaidProgressAdmin {
 
 		// Get expansions
 		$expansions = $this->api->get_expansions();
-
-		// The full HTML output would be the same as the original admin_page() method
-		// but with all strings properly wrapped in __() for translation
-		// I'm showing just a snippet here due to space constraints
 
 		include WOW_RAID_PROGRESS_PLUGIN_DIR . 'templates/admin-page.php';
 	}

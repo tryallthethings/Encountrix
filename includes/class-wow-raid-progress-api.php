@@ -16,31 +16,32 @@ if (!defined('ABSPATH')) {
 
 class WoWRaidProgressAPI {
 
-	private $api_base_url = 'https://raider.io/api/v1/raiding/raid-rankings';
-	private $static_data_url = 'https://raider.io/api/v1/raiding/static-data';
-	private $cache_prefix = 'wow_raid_progress_';
-	private $static_cache_prefix = 'wow_raid_static_';
-	private $blizzard_cache_prefix = 'wow_blizzard_';
-	private $http_timeout = 8;
+	private string $api_base_url = 'https://raider.io/api/v1/raiding/raid-rankings';
+	private string $static_data_url = 'https://raider.io/api/v1/raiding/static-data';
+	private string $cache_prefix = 'wow_raid_progress_';
+	private string $static_cache_prefix = 'wow_raid_static_';
+	private string $blizzard_cache_prefix = 'wow_blizzard_';
+	private int $http_timeout = 8;
 
 	// Rate limiting configuration
-	private $rate_limit_key = 'wow_raid_api_rate_limit';
-	private $max_requests_per_minute = 30;
-	private $icon_retry_interval = 1800; // 30 minutes
+	private string $rate_limit_key = 'wow_raid_api_rate_limit';
+	private int $max_requests_per_minute = 30;
+	private int $icon_retry_interval = 1800; // 30 minutes
 
 	/**
 	 * Get base headers for all API requests
 	 *
-	 * @return array HTTP headers
+	 * @return array<string, string>
 	 */
-	private function base_headers() {
+	private function base_headers(): array {
 		return [
 			'User-Agent' => 'WoWRaidProgress/' . (defined('WOW_RAID_PROGRESS_VERSION') ? WOW_RAID_PROGRESS_VERSION : 'dev') .
 				' WordPress/' . get_bloginfo('version') . ' (' . home_url() . ')'
 		];
 	}
 
-	private $expansions = [
+	/** @var array<int, array{name: string, category_name: string}> */
+	private array $expansions = [
 		11 => ['name' => 'Midnight', 'category_name' => 'Midnight Raid'],
 		10 => ['name' => 'The War Within', 'category_name' => 'The War Within Raid'],
 		9  => ['name' => 'Dragonflight', 'category_name' => 'Dragonflight Raid'],
@@ -48,14 +49,16 @@ class WoWRaidProgressAPI {
 		7  => ['name' => 'Battle for Azeroth', 'category_name' => 'Battle for Azeroth Raid']
 	];
 
-	private $regional_endpoints = [
+	/** @var array<string, array{oauth: string, api: string}> */
+	private array $regional_endpoints = [
 		'us' => ['oauth' => 'https://oauth.battle.net/token', 'api' => 'https://us.api.blizzard.com'],
 		'eu' => ['oauth' => 'https://oauth.battle.net/token', 'api' => 'https://eu.api.blizzard.com'],
 		'kr' => ['oauth' => 'https://oauth.battle.net/token', 'api' => 'https://kr.api.blizzard.com'],
 		'tw' => ['oauth' => 'https://oauth.battle.net/token', 'api' => 'https://tw.api.blizzard.com']
 	];
 
-	private $achievement_category_ids = [
+	/** @var array<string, int> */
+	private array $achievement_category_ids = [
 		'Midnight' => 15566,
 		'The War Within' => 15526,
 		'Dragonflight' => 15468,
@@ -68,8 +71,8 @@ class WoWRaidProgressAPI {
 		'Wrath of the Lich King' => 14922
 	];
 
-	// Boss name mappings for achievement matching
-	private $boss_name_overrides = [
+	/** @var array<string, string> Boss name mappings for achievement matching */
+	private array $boss_name_overrides = [
 		'dimensius' => 'Dimensius, the All-Devouring',
 		'the-nine' => 'The Nine',
 		'fatescribe-roh-kalo' => 'Fatescribe Roh-Kalo',
@@ -77,23 +80,36 @@ class WoWRaidProgressAPI {
 		'sylvanas-windrunner' => 'Sylvanas Windrunner'
 	];
 
-    /**
-     * Multi-raid tier mappings.
-     *
-     * Raider.io sometimes groups several raids into one tier slug.
-     * This map resolves the tier slug to a Blizzard journal instance
-     * for fetching background images. 'primary' is tried first.
-     */
-    private $tier_journal_map = [
-        'tier-mn-1' => ['Voidspire', 'Dreamrift', 'March on Quel\'Danas'],
-    ];
+	/**
+	 * Multi-raid tier mappings.
+	 *
+	 * @var array<string, array<string>>
+	 */
+	private array $tier_journal_map = [
+		'tier-mn-1' => ['Voidspire', 'Dreamrift', 'March on Quel\'Danas'],
+	];
+
+	/**
+	 * Helper to delete transients by prefix using prepared statements.
+	 *
+	 * FIX #1: Replaces all raw LIKE queries in this class.
+	 *
+	 * @param array<string> $prefixes Option name prefixes (without trailing %).
+	 */
+	private function delete_transients_by_prefix(array $prefixes): void {
+		global $wpdb;
+		foreach ($prefixes as $prefix) {
+			$wpdb->query($wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$wpdb->esc_like($prefix) . '%'
+			));
+		}
+	}
 
 	/**
 	 * Check and enforce rate limiting
-	 *
-	 * @return bool True if request is allowed, false if rate limited
 	 */
-	private function check_rate_limit() {
+	private function check_rate_limit(): bool {
 		$current_time = time();
 		$rate_data = get_transient($this->rate_limit_key);
 
@@ -105,17 +121,15 @@ class WoWRaidProgressAPI {
 		}
 
 		// Clean old requests outside the 60-second window
-		$rate_data['requests'] = array_filter($rate_data['requests'], function ($timestamp) use ($current_time) {
+		$rate_data['requests'] = array_filter($rate_data['requests'], static function (int $timestamp) use ($current_time): bool {
 			return ($current_time - $timestamp) < 60;
 		});
 
-		// Check if we've exceeded the limit
 		if (count($rate_data['requests']) >= $this->max_requests_per_minute) {
 			$this->debug_log('Rate limit exceeded. Waiting before next request.');
 			return false;
 		}
 
-		// Add current request
 		$rate_data['requests'][] = $current_time;
 		set_transient($this->rate_limit_key, $rate_data, 60);
 
@@ -124,11 +138,8 @@ class WoWRaidProgressAPI {
 
 	/**
 	 * Wait for rate limit to clear if needed
-	 *
-	 * @param int $max_wait Maximum seconds to wait
-	 * @return bool True if can proceed, false if timed out
 	 */
-	private function wait_for_rate_limit($max_wait = 5) {
+	private function wait_for_rate_limit(int $max_wait = 5): bool {
 		$waited = 0;
 		while (!$this->check_rate_limit() && $waited < $max_wait) {
 			sleep(1);
@@ -140,21 +151,23 @@ class WoWRaidProgressAPI {
 	/**
 	 * Fetch raid data with comprehensive error handling and rate limiting
 	 *
-	 * @param string $raid Raid slug
-	 * @param string $difficulty Difficulty level
-	 * @param string $region Region code
-	 * @param string $realm Realm name
-	 * @param string $guilds Guild IDs
-	 * @param int $cache_minutes Cache duration
-	 * @param int $limit Results limit
-	 * @param int $page Page number
 	 * @return array|WP_Error Raid data or error
 	 */
-	public function fetch_raid_data($raid, $difficulty, $region, $realm, $guilds, $cache_minutes, $limit = 50, $page = 0) {
+	public function fetch_raid_data(
+		string $raid,
+		string $difficulty,
+		string $region,
+		string $realm,
+		string $guilds,
+		int $cache_minutes,
+		int $limit = 50,
+		int $page = 0
+	): array|WP_Error {
+		$in_progress_key = null;
+
 		try {
 			// Check if cron mode is enabled
 			if (function_exists('wow_raid_progress_should_use_cron') && wow_raid_progress_should_use_cron() && !defined('DOING_CRON')) {
-				// For frontend requests in cron mode, ONLY use cache
 				$request_key = md5(serialize([
 					'raid' => $raid,
 					'difficulty' => $difficulty,
@@ -173,7 +186,6 @@ class WoWRaidProgressAPI {
 					return $cached_data;
 				}
 
-				// Return placeholder if no cache exists
 				return [
 					'raidRankings' => [],
 					'message' => __('Data is being updated in the background. Please check back shortly.', 'wow-raid-progress')
@@ -185,7 +197,7 @@ class WoWRaidProgressAPI {
 				return new WP_Error('invalid_raid', __('Raid name is required.', 'wow-raid-progress'));
 			}
 
-			if (!in_array($difficulty, ['normal', 'heroic', 'mythic'])) {
+			if (!in_array($difficulty, ['normal', 'heroic', 'mythic'], true)) {
 				return new WP_Error('invalid_difficulty', __('Invalid difficulty specified.', 'wow-raid-progress'));
 			}
 
@@ -211,7 +223,7 @@ class WoWRaidProgressAPI {
 
 			$cache_key = $this->cache_prefix . $request_key;
 
-			// CRITICAL: Check cache FIRST before anything else
+			// Check cache FIRST
 			if ($cache_minutes > 0) {
 				$cached_data = get_transient($cache_key);
 				if ($cached_data !== false) {
@@ -227,9 +239,8 @@ class WoWRaidProgressAPI {
 			if ($in_progress !== false) {
 				$this->debug_log("Request already in progress, waiting for: $raid/$difficulty/$region");
 
-				// Wait for the other request to complete (max 5 seconds)
 				for ($i = 0; $i < 10; $i++) {
-					usleep(500000); // 0.5 seconds
+					usleep(500000);
 
 					$cached_data = get_transient($cache_key);
 					if ($cached_data !== false) {
@@ -237,7 +248,6 @@ class WoWRaidProgressAPI {
 						return $cached_data;
 					}
 
-					// Check if lock is still active
 					if (get_transient($in_progress_key) === false) {
 						break;
 					}
@@ -300,6 +310,7 @@ class WoWRaidProgressAPI {
 
 			// Clear the lock
 			delete_transient($in_progress_key);
+			$in_progress_key = null; // Prevent double-delete in catch
 
 			if (is_wp_error($response)) {
 				$msg = $response->get_error_message();
@@ -339,7 +350,6 @@ class WoWRaidProgressAPI {
 			if (!empty($data['raidRankings']) && !empty($guilds) && $region !== 'world') {
 				$this->debug_log("Fetching world ranking for guild: $guilds");
 
-				// Check if world ranking is already cached
 				$world_cache_key = $this->cache_prefix . md5("world_rank_{$raid}_{$difficulty}_{$guilds}");
 				$cached_world_rank = get_transient($world_cache_key);
 
@@ -347,7 +357,6 @@ class WoWRaidProgressAPI {
 					$data['worldRanking'] = $cached_world_rank;
 					$this->debug_log("Using cached world ranking: $cached_world_rank");
 				} else {
-					// Make a separate request for world ranking
 					$world_params = [
 						'access_key' => $api_key,
 						'raid' => $raid,
@@ -360,7 +369,6 @@ class WoWRaidProgressAPI {
 
 					$world_url = add_query_arg($world_params, $this->api_base_url);
 
-					// Wait for rate limit
 					if ($this->wait_for_rate_limit(5)) {
 						$this->debug_log("Fetching world ranking from: $world_url");
 
@@ -373,7 +381,6 @@ class WoWRaidProgressAPI {
 							$world_data = json_decode(wp_remote_retrieve_body($world_response), true);
 							if (!empty($world_data['raidRankings'][0]['rank'])) {
 								$data['worldRanking'] = $world_data['raidRankings'][0]['rank'];
-								// Cache world ranking separately
 								set_transient($world_cache_key, $data['worldRanking'], $cache_minutes * MINUTE_IN_SECONDS);
 								$this->debug_log("World ranking obtained: " . $data['worldRanking']);
 							}
@@ -382,19 +389,14 @@ class WoWRaidProgressAPI {
 				}
 			}
 
-			// Cache successful response (KEEP THIS ORIGINAL CODE)
-			if ($cache_minutes > 0) {
-				set_transient($cache_key, $data, $cache_minutes * MINUTE_IN_SECONDS);
-			}
-
-			// Cache successful response with MINIMUM 5 minute cache
+			// FIX #2: Single transient write (was duplicated — first write was immediately overwritten)
 			$actual_cache_time = max($cache_minutes, 5);
 			set_transient($cache_key, $data, $actual_cache_time * MINUTE_IN_SECONDS);
 			$this->debug_log("Cached API response for $actual_cache_time minutes: $raid/$difficulty/$region (key: $request_key)");
 
 			return $data;
-		} catch (Exception $e) {
-			if (isset($in_progress_key)) {
+		} catch (\Exception $e) {
+			if ($in_progress_key !== null) {
 				delete_transient($in_progress_key);
 			}
 			$this->debug_log('Exception in fetch_raid_data: ' . $e->getMessage());
@@ -405,14 +407,12 @@ class WoWRaidProgressAPI {
 	/**
 	 * Fetch static raid data for an expansion
 	 *
-	 * @param int $expansion_id Expansion ID
-	 * @param int $cache_minutes Cache duration (minimum 24 hours)
 	 * @return array|WP_Error Static raid data or error
 	 */
-	public function fetch_static_raid_data_by_expansion($expansion_id, $cache_minutes = 1440) {
+	public function fetch_static_raid_data_by_expansion(int $expansion_id, int $cache_minutes = 1440): array|WP_Error {
 		try {
 			$cache_key = $this->static_cache_prefix . 'expansion_' . $expansion_id;
-			$cache_duration = max($cache_minutes, 1440); // Minimum 24 hours for static data
+			$cache_duration = max($cache_minutes, 1440);
 
 			$cached_data = get_transient($cache_key);
 			if ($cached_data !== false) {
@@ -430,7 +430,6 @@ class WoWRaidProgressAPI {
 				'expansion_id' => absint($expansion_id)
 			], $this->static_data_url);
 
-			// Wait for rate limit
 			if (!$this->wait_for_rate_limit(10)) {
 				$this->debug_log("Rate limit timeout for static data fetch");
 				return new WP_Error('rate_limit', __('API rate limit exceeded. Please try again in a moment.', 'wow-raid-progress'));
@@ -465,7 +464,7 @@ class WoWRaidProgressAPI {
 			$this->debug_log("Cached static data for $cache_duration minutes");
 
 			return $data;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in fetch_static_raid_data: ' . $e->getMessage());
 			return new WP_Error('unexpected_error', $e->getMessage());
 		}
@@ -474,10 +473,9 @@ class WoWRaidProgressAPI {
 	/**
 	 * Get Blizzard OAuth token with caching
 	 *
-	 * @param string|null $region Region code
 	 * @return string|false OAuth token or false on failure
 	 */
-	public function get_blizzard_token($region = null) {
+	public function get_blizzard_token(?string $region = null): string|false {
 		try {
 			if (!$region) {
 				$region = get_option('wow_raid_progress_blizzard_region', 'eu');
@@ -500,7 +498,6 @@ class WoWRaidProgressAPI {
 
 			$oauth_url = $this->regional_endpoints[$region]['oauth'] ?? $this->regional_endpoints['us']['oauth'];
 
-			// Wait for rate limit
 			if (!$this->wait_for_rate_limit(10)) {
 				$this->debug_log("Rate limit timeout for Blizzard token request");
 				return false;
@@ -542,7 +539,7 @@ class WoWRaidProgressAPI {
 
 			$this->debug_log("No access token in Blizzard response");
 			return false;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in get_blizzard_token: ' . $e->getMessage());
 			return false;
 		}
@@ -551,11 +548,9 @@ class WoWRaidProgressAPI {
 	/**
 	 * Get achievement map for a raid with proper boss name matching
 	 *
-	 * @param string $raid_slug Raid slug
-	 * @param int $expansion_id Expansion ID
-	 * @return array Achievement ID map keyed by boss slug
+	 * @return array<string, int> Achievement ID map keyed by boss slug
 	 */
-	public function get_achievement_map($raid_slug, $expansion_id) {
+	public function get_achievement_map(string $raid_slug, int $expansion_id): array {
 		try {
 			$cache_key = $this->blizzard_cache_prefix . 'achieve_map_' . $raid_slug;
 			$cached_map = get_transient($cache_key);
@@ -584,7 +579,6 @@ class WoWRaidProgressAPI {
 				'locale' => 'en_US'
 			], "{$api_base}/data/wow/achievement-category/{$category_id}");
 
-			// Wait for rate limit
 			if (!$this->wait_for_rate_limit(10)) {
 				$this->debug_log("Rate limit timeout for achievement map fetch");
 				return [];
@@ -613,8 +607,7 @@ class WoWRaidProgressAPI {
 			// Extract all Mythic achievements
 			$all_mythic_achievements = [];
 			foreach ($data['achievements'] as $ach) {
-				if (isset($ach['name']) && strpos($ach['name'], 'Mythic:') === 0) {
-					// Remove "Mythic: " prefix
+				if (isset($ach['name']) && str_starts_with($ach['name'], 'Mythic:')) {
 					$boss_name = trim(substr($ach['name'], 7));
 					$all_mythic_achievements[] = [
 						'id' => $ach['id'],
@@ -646,8 +639,6 @@ class WoWRaidProgressAPI {
 			foreach ($raid_info['encounters'] as $boss) {
 				$boss_slug = $boss['slug'];
 				$boss_name = $boss['name'];
-
-				// Check for override first
 				$lookup_name = $this->boss_name_overrides[$boss_slug] ?? $boss_name;
 
 				$this->debug_log("Matching boss: $boss_name (slug: $boss_slug, lookup: $lookup_name)");
@@ -664,7 +655,6 @@ class WoWRaidProgressAPI {
 				// If no exact match, try partial match
 				if (!isset($achievement_map[$boss_slug])) {
 					foreach ($all_mythic_achievements as $ach) {
-						// Check if achievement contains boss name or vice versa
 						if (
 							stripos($ach['boss_name'], $boss_name) !== false ||
 							stripos($boss_name, $ach['boss_name']) !== false
@@ -685,7 +675,7 @@ class WoWRaidProgressAPI {
 			$this->debug_log("Cached achievement map with " . count($achievement_map) . " entries");
 
 			return $achievement_map;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in get_achievement_map: ' . $e->getMessage());
 			return [];
 		}
@@ -694,17 +684,12 @@ class WoWRaidProgressAPI {
 	/**
 	 * Get boss icon attachment ID with strict duplicate prevention
 	 *
-	 * @param string $boss_slug Boss identifier
-	 * @param string $raid_slug Raid identifier
-	 * @param string|null $boss_name Boss display name for auto-download
-	 * @param int|null $expansion_id Expansion ID for auto-download
 	 * @return int|false Attachment ID or false if not found
 	 */
-	public function get_boss_icon_id($boss_slug, $raid_slug, $boss_name = null, $expansion_id = null) {
+	public function get_boss_icon_id(string $boss_slug, string $raid_slug, ?string $boss_name = null, ?int $expansion_id = null): int|false {
 		$boss_slug = sanitize_key($boss_slug);
 		$raid_slug = sanitize_key($raid_slug);
 
-		// Use a lock to prevent concurrent downloads
 		$lock_key = 'wow_icon_lock_' . $raid_slug . '_' . $boss_slug;
 		$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
 
@@ -712,12 +697,11 @@ class WoWRaidProgressAPI {
 		if (get_transient($lock_key) !== false) {
 			$this->debug_log("Icon download in progress for $boss_slug, waiting...");
 
-			// Wait up to 10 seconds for the other process to complete
 			for ($i = 0; $i < 20; $i++) {
-				usleep(500000); // 0.5 seconds
+				usleep(500000);
 				$cached_id = get_transient($cache_key);
 				if ($cached_id !== false && $cached_id > 0) {
-					return $cached_id;
+					return (int) $cached_id;
 				}
 			}
 			return false;
@@ -727,35 +711,34 @@ class WoWRaidProgressAPI {
 		$cached_id = get_transient($cache_key);
 		if ($cached_id !== false) {
 			if ($cached_id === 0) {
-				// We've already tried and failed recently
 				return false;
 			}
 			if (get_post($cached_id)) {
-				return $cached_id;
+				return (int) $cached_id;
 			}
-			// Cache is invalid, clear it
 			delete_transient($cache_key);
 		}
 
-		// Search for existing attachment - check ALL possible metadata combinations
+		// Search for existing attachment
 		global $wpdb;
 		$attachment_id = $wpdb->get_var($wpdb->prepare(
 			"SELECT p.ID
-         FROM {$wpdb->posts} p
-         INNER JOIN {$wpdb->postmeta} pm1 ON p.ID = pm1.post_id
-         INNER JOIN {$wpdb->postmeta} pm2 ON p.ID = pm2.post_id
-         WHERE p.post_type = 'attachment'
-         AND p.post_status = 'inherit'
-         AND pm1.meta_key = '_wow_raid_progress_boss'
-         AND pm1.meta_value = %s
-         AND pm2.meta_key = '_wow_raid_progress_raid'
-         AND pm2.meta_value = %s
-         LIMIT 1",
+			 FROM {$wpdb->posts} p
+			 INNER JOIN {$wpdb->postmeta} pm1 ON p.ID = pm1.post_id
+			 INNER JOIN {$wpdb->postmeta} pm2 ON p.ID = pm2.post_id
+			 WHERE p.post_type = 'attachment'
+			 AND p.post_status = 'inherit'
+			 AND pm1.meta_key = '_wow_raid_progress_boss'
+			 AND pm1.meta_value = %s
+			 AND pm2.meta_key = '_wow_raid_progress_raid'
+			 AND pm2.meta_value = %s
+			 LIMIT 1",
 			$boss_slug,
 			$raid_slug
 		));
 
 		if ($attachment_id) {
+			$attachment_id = (int) $attachment_id;
 			set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
 			$this->debug_log("Found existing icon for $boss_slug: attachment ID $attachment_id");
 			return $attachment_id;
@@ -765,15 +748,15 @@ class WoWRaidProgressAPI {
 		$expected_filename = "{$raid_slug}_{$boss_slug}";
 		$attachment_id = $wpdb->get_var($wpdb->prepare(
 			"SELECT ID FROM {$wpdb->posts}
-         WHERE post_type = 'attachment'
-         AND post_status = 'inherit'
-         AND post_name = %s
-         LIMIT 1",
+			 WHERE post_type = 'attachment'
+			 AND post_status = 'inherit'
+			 AND post_name = %s
+			 LIMIT 1",
 			$expected_filename
 		));
 
 		if ($attachment_id && get_post($attachment_id)) {
-			// Add missing metadata
+			$attachment_id = (int) $attachment_id;
 			update_post_meta($attachment_id, '_wow_raid_progress_icon', 'boss');
 			update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
 			update_post_meta($attachment_id, '_wow_raid_progress_boss', $boss_slug);
@@ -787,32 +770,33 @@ class WoWRaidProgressAPI {
 		$failure_key = 'wow_icon_fail_' . $raid_slug . '_' . $boss_slug;
 		if (get_transient($failure_key) !== false) {
 			$this->debug_log("Skipping download for $boss_slug (recent failure)");
-			set_transient($cache_key, 0, 300); // Cache the failure for 5 minutes
+			set_transient($cache_key, 0, 300);
 			return false;
 		}
 
 		// Attempt download if we have the necessary data
-		if ($boss_name && $expansion_id) {
+		if ($boss_name !== null && $expansion_id !== null) {
 			$client_id = get_option('wow_raid_progress_blizzard_client_id');
 			$client_secret = get_option('wow_raid_progress_blizzard_client_secret');
 
 			if (!empty($client_id) && !empty($client_secret)) {
-				// Set lock to prevent concurrent downloads
 				set_transient($lock_key, 1, 60);
 
 				$this->debug_log("Attempting to download icon for $boss_slug (locked)");
 				$result = $this->import_single_boss_icon($boss_slug, $boss_name, $raid_slug, $expansion_id);
 
-				// Remove lock
 				delete_transient($lock_key);
 
-				if ($result && is_numeric($result)) {
+				if (is_int($result)) {
 					set_transient($cache_key, $result, 30 * DAY_IN_SECONDS);
 					$this->debug_log("Successfully downloaded icon for $boss_slug: attachment ID $result");
 					return $result;
-				} else {
-					set_transient($failure_key, time(), 1800); // Don't retry for 30 minutes
-					set_transient($cache_key, 0, 300); // Cache the failure for 5 minutes
+				}
+
+				// $result === true means it already existed (handled above), false means failure
+				if ($result === false) {
+					set_transient($failure_key, time(), 1800);
+					set_transient($cache_key, 0, 300);
 					$this->debug_log("Failed to download icon for $boss_slug");
 				}
 			}
@@ -822,138 +806,96 @@ class WoWRaidProgressAPI {
 	}
 
 	/**
-	 * Find existing boss icon attachment
+	 * FIX #8: Batch-load all boss icon IDs for a raid in a single query.
 	 *
-	 * @param string $boss_slug Boss slug
-	 * @param string $raid_slug Raid slug
-	 * @return int|false Attachment ID or false
+	 * @return array<string, int> Map of boss_slug => attachment_id
 	 */
-	private function find_boss_icon_attachment($boss_slug, $raid_slug) {
-		// Search by meta data
-		$args = [
-			'post_type' => 'attachment',
-			'post_status' => 'any',
-			'posts_per_page' => 1,
-			'meta_query' => [
-				[
-					'key' => '_wow_raid_progress_boss',
-					'value' => $boss_slug,
-				],
-				[
-					'key' => '_wow_raid_progress_raid',
-					'value' => $raid_slug,
-				],
-			],
-			'fields' => 'ids',
-			'no_found_rows' => true,
-		];
+	public function get_all_boss_icon_ids(string $raid_slug): array {
+		global $wpdb;
 
-		$query = new WP_Query($args);
-		if (!empty($query->posts)) {
-			return (int) $query->posts[0];
+		$raid_slug = sanitize_key($raid_slug);
+
+		$results = $wpdb->get_results($wpdb->prepare(
+			"SELECT pm_boss.meta_value AS boss_slug, pm_boss.post_id
+			 FROM {$wpdb->postmeta} pm_boss
+			 INNER JOIN {$wpdb->postmeta} pm_raid
+			   ON pm_boss.post_id = pm_raid.post_id
+			 INNER JOIN {$wpdb->posts} p
+			   ON p.ID = pm_boss.post_id
+			 WHERE pm_boss.meta_key = '_wow_raid_progress_boss'
+			   AND pm_raid.meta_key = '_wow_raid_progress_raid'
+			   AND pm_raid.meta_value = %s
+			   AND p.post_type = 'attachment'
+			   AND p.post_status = 'inherit'",
+			$raid_slug
+		), OBJECT);
+
+		$map = [];
+		foreach ($results as $row) {
+			$map[$row->boss_slug] = (int) $row->post_id;
 		}
-
-		// Try by filename
-		$filename = sanitize_file_name("{$raid_slug}_{$boss_slug}.jpg");
-		return $this->find_attachment_by_filename($filename, [
-			'_wow_raid_progress_icon' => 'boss',
-			'_wow_raid_progress_raid' => $raid_slug,
-			'_wow_raid_progress_boss' => $boss_slug,
-		]);
-	}
-
-	/**
-	 * Check if we should attempt to download an icon
-	 *
-	 * @param string $boss_slug Boss slug
-	 * @param string $raid_slug Raid slug
-	 * @return bool True if download should be attempted
-	 */
-	private function should_attempt_icon_download($boss_slug, $raid_slug) {
-		$failure_key = $this->blizzard_cache_prefix . 'icon_fail_' . $raid_slug . '_' . $boss_slug;
-		$last_failure = get_transient($failure_key);
-
-		// Don't retry if failed recently
-		return $last_failure === false;
-	}
-
-	/**
-	 * Mark icon download as failed
-	 *
-	 * @param string $boss_slug Boss slug
-	 * @param string $raid_slug Raid slug
-	 */
-	private function mark_icon_download_failed($boss_slug, $raid_slug) {
-		$failure_key = $this->blizzard_cache_prefix . 'icon_fail_' . $raid_slug . '_' . $boss_slug;
-		set_transient($failure_key, time(), $this->icon_retry_interval);
+		return $map;
 	}
 
 	/**
 	 * Import single boss icon from Blizzard API
 	 *
-	 * @param string $boss_slug Boss slug
-	 * @param string $boss_name Boss name
-	 * @param string $raid_slug Raid slug
-	 * @param int $expansion_id Expansion ID
-	 * @return int|false Attachment ID or false on failure
+	 * FIX #4: Returns true for "already exists" (not the numeric ID),
+	 * so callers can distinguish new imports from skips.
+	 *
+	 * @return int|true|false New attachment ID, true if already exists, false on failure
 	 */
-	public function import_single_boss_icon($boss_slug, $boss_name, $raid_slug, $expansion_id) {
+	public function import_single_boss_icon(string $boss_slug, string $boss_name, string $raid_slug, int $expansion_id): int|bool {
 		try {
 			$boss_slug = sanitize_key($boss_slug);
 			$raid_slug = sanitize_key($raid_slug);
 
-			// CRITICAL: Check for existing attachment FIRST
+			// Check for existing attachment FIRST
 			global $wpdb;
 			$existing_id = $wpdb->get_var($wpdb->prepare(
 				"SELECT p.ID
-             FROM {$wpdb->posts} p
-             INNER JOIN {$wpdb->postmeta} pm1 ON p.ID = pm1.post_id
-             INNER JOIN {$wpdb->postmeta} pm2 ON p.ID = pm2.post_id
-             WHERE p.post_type = 'attachment'
-             AND p.post_status = 'inherit'
-             AND pm1.meta_key = '_wow_raid_progress_boss'
-             AND pm1.meta_value = %s
-             AND pm2.meta_key = '_wow_raid_progress_raid'
-             AND pm2.meta_value = %s
-             LIMIT 1",
+				 FROM {$wpdb->posts} p
+				 INNER JOIN {$wpdb->postmeta} pm1 ON p.ID = pm1.post_id
+				 INNER JOIN {$wpdb->postmeta} pm2 ON p.ID = pm2.post_id
+				 WHERE p.post_type = 'attachment'
+				 AND p.post_status = 'inherit'
+				 AND pm1.meta_key = '_wow_raid_progress_boss'
+				 AND pm1.meta_value = %s
+				 AND pm2.meta_key = '_wow_raid_progress_raid'
+				 AND pm2.meta_value = %s
+				 LIMIT 1",
 				$boss_slug,
 				$raid_slug
 			));
 
 			if ($existing_id && get_post($existing_id)) {
 				$this->debug_log("Icon already exists for $boss_slug: attachment ID $existing_id");
-
-				// Update cache
 				$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
-				set_transient($cache_key, $existing_id, 30 * DAY_IN_SECONDS);
-
-				return $existing_id;
+				set_transient($cache_key, (int) $existing_id, 30 * DAY_IN_SECONDS);
+				return true; // FIX #4: Signal "already existed"
 			}
 
 			// Also check by filename
 			$expected_filename = "{$raid_slug}_{$boss_slug}";
 			$existing_id = $wpdb->get_var($wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
-             WHERE post_type = 'attachment'
-             AND post_status = 'inherit'
-             AND post_name = %s
-             LIMIT 1",
+				 WHERE post_type = 'attachment'
+				 AND post_status = 'inherit'
+				 AND post_name = %s
+				 LIMIT 1",
 				$expected_filename
 			));
 
 			if ($existing_id && get_post($existing_id)) {
-				// Add metadata if missing
+				$existing_id = (int) $existing_id;
 				update_post_meta($existing_id, '_wow_raid_progress_icon', 'boss');
 				update_post_meta($existing_id, '_wow_raid_progress_raid', $raid_slug);
 				update_post_meta($existing_id, '_wow_raid_progress_boss', $boss_slug);
 
 				$this->debug_log("Found existing icon by filename for $boss_slug: attachment ID $existing_id");
-
-				// Update cache
 				$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
 				set_transient($cache_key, $existing_id, 30 * DAY_IN_SECONDS);
-
-				return $existing_id;
+				return true; // FIX #4: Signal "already existed"
 			}
 
 			// Get achievement map
@@ -978,7 +920,6 @@ class WoWRaidProgressAPI {
 				'locale' => 'en_US',
 			], "{$api_base}/data/wow/media/achievement/{$achievement_id}");
 
-			// Rate limit check
 			if (!$this->wait_for_rate_limit(10)) {
 				return false;
 			}
@@ -1037,13 +978,12 @@ class WoWRaidProgressAPI {
 			update_post_meta($attachment_id, '_wow_raid_progress_boss', $boss_slug);
 			update_post_meta($attachment_id, '_wow_raid_progress_expansion', $expansion_id);
 
-			// Update cache
 			$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
 			set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
 
 			$this->debug_log("Successfully imported NEW icon for $boss_slug: attachment ID $attachment_id");
-			return $attachment_id;
-		} catch (Exception $e) {
+			return (int) $attachment_id; // Explicit int for new imports
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in import_single_boss_icon: ' . $e->getMessage());
 			return false;
 		}
@@ -1052,66 +992,31 @@ class WoWRaidProgressAPI {
 	/**
 	 * Delete all plugin-imported icons
 	 *
-	 * @return int Number of deleted attachments
+	 * FIX #3: Removed dangerously broad regex that matched any `word_word` attachment.
+	 * Now only deletes attachments that have plugin metadata.
+	 * FIX #1: All SQL uses prepared statements.
 	 */
-	public function delete_all_icons() {
+	public function delete_all_icons(): int {
 		global $wpdb;
 
 		$deleted = 0;
 
-		// Method 1: Find by any plugin metadata
+		// Find all attachments with any plugin metadata
 		$attachment_ids = $wpdb->get_col(
 			"SELECT DISTINCT post_id
-         FROM {$wpdb->postmeta}
-         WHERE meta_key IN (
-             '_wow_raid_progress_icon',
-             '_wow_raid_progress_raid',
-             '_wow_raid_progress_boss',
-             '_wow_raid_progress_expansion'
-         )"
+			 FROM {$wpdb->postmeta}
+			 WHERE meta_key IN (
+				 '_wow_raid_progress_icon',
+				 '_wow_raid_progress_raid',
+				 '_wow_raid_progress_boss',
+				 '_wow_raid_progress_expansion'
+			 )"
 		);
 
-		// Method 2: Find by filename pattern
-		$pattern_ids = $wpdb->get_col(
-			"SELECT ID FROM {$wpdb->posts}
-         WHERE post_type = 'attachment'
-         AND post_status = 'inherit'
-         AND (
-             post_name LIKE 'raid_%'
-             OR post_name LIKE 'nerub-ar-palace_%'
-             OR post_name LIKE 'vault-of-the-incarnates_%'
-             OR post_name LIKE 'amirdrassil%'
-             OR post_name LIKE 'aberrus%'
-             OR post_name REGEXP '^[a-z-]+_[a-z-]+$'
-         )"
-		);
-
-		// Method 3: Find by title pattern
-		$title_ids = $wpdb->get_col(
-			"SELECT ID FROM {$wpdb->posts}
-         WHERE post_type = 'attachment'
-         AND post_status = 'inherit'
-         AND (
-             post_title LIKE '% Icon'
-             OR post_title LIKE '% Background'
-         )"
-		);
-
-		// Combine all IDs and deduplicate
-		$all_ids = array_unique(array_merge($attachment_ids, $pattern_ids, $title_ids));
-
-		foreach ($all_ids as $attachment_id) {
-			// Double-check this is a plugin attachment
-			$has_plugin_meta = $wpdb->get_var($wpdb->prepare(
-				"SELECT COUNT(*) FROM {$wpdb->postmeta}
-             WHERE post_id = %d
-             AND meta_key LIKE '_wow_raid_progress_%'",
-				$attachment_id
-			));
-
-			// Only delete if it has plugin metadata OR matches strict filename pattern
+		foreach ($attachment_ids as $attachment_id) {
+			$attachment_id = (int) $attachment_id;
 			$post = get_post($attachment_id);
-			if ($post && ($has_plugin_meta > 0 || preg_match('/^(raid_|[a-z-]+_[a-z-]+)/', $post->post_name))) {
+			if ($post && $post->post_type === 'attachment') {
 				if (wp_delete_attachment($attachment_id, true)) {
 					$deleted++;
 					$this->debug_log("Deleted attachment ID $attachment_id: " . $post->post_name);
@@ -1120,126 +1025,68 @@ class WoWRaidProgressAPI {
 		}
 
 		// Clear all icon-related caches
-		$wpdb->query(
-			"DELETE FROM {$wpdb->options}
-         WHERE option_name LIKE '_transient_wow_icon_%'
-         OR option_name LIKE '_transient_timeout_wow_icon_%'
-         OR option_name LIKE '_transient_wow_blizzard_%'
-         OR option_name LIKE '_transient_timeout_wow_blizzard_%'
-         OR option_name LIKE '_transient_wow_request_lock_%'
-         OR option_name LIKE '_transient_timeout_wow_request_lock_%'"
-		);
+		$this->delete_transients_by_prefix([
+			'_transient_wow_icon_',
+			'_transient_timeout_wow_icon_',
+			'_transient_wow_blizzard_',
+			'_transient_timeout_wow_blizzard_',
+			'_transient_wow_request_lock_',
+			'_transient_timeout_wow_request_lock_',
+		]);
 
 		$this->debug_log("Deleted $deleted icon attachments and cleared all caches");
 		return $deleted;
 	}
 
 	/**
-	 * Clear all icon-related caches
-	 */
-	private function clear_icon_caches() {
-		global $wpdb;
-		$wpdb->query(
-			"DELETE FROM {$wpdb->options}
-			 WHERE option_name LIKE '_transient_wow_blizzard_boss_icon_%'
-			 OR option_name LIKE '_transient_timeout_wow_blizzard_boss_icon_%'
-			 OR option_name LIKE '_transient_wow_blizzard_raid_icon_%'
-			 OR option_name LIKE '_transient_timeout_wow_blizzard_raid_icon_%'
-			 OR option_name LIKE '_transient_wow_blizzard_journal_img_%'
-			 OR option_name LIKE '_transient_timeout_wow_blizzard_journal_img_%'
-			 OR option_name LIKE '_transient_wow_blizzard_icon_fail_%'
-			 OR option_name LIKE '_transient_timeout_wow_blizzard_icon_fail_%'"
-		);
-	}
-
-	/**
 	 * Parse API error message for user-friendly display
-	 *
-	 * @param string $body Response body
-	 * @param int $code HTTP status code
-	 * @return string User-friendly error message
 	 */
-	private function parse_api_error($body, $code) {
+	private function parse_api_error(string $body, int $code): string {
 		$data = json_decode($body, true);
 
-		// Extract detailed error message
 		$error_detail = '';
 		if (isset($data['error'])) {
-			$error_detail = is_array($data['error']) ?
-				(isset($data['error']['message']) ? $data['error']['message'] : json_encode($data['error'])) :
-				$data['error'];
+			$error_detail = is_array($data['error'])
+				? ($data['error']['message'] ?? json_encode($data['error']))
+				: $data['error'];
 		} elseif (isset($data['message'])) {
 			$error_detail = $data['message'];
 		}
 
-		switch ($code) {
-			case 401:
-				return sprintf(
-					__('API authentication failed. Please check your API key. Details: %s', 'wow-raid-progress'),
-					$error_detail ?: __('Invalid or expired API key', 'wow-raid-progress')
-				);
-			case 403:
-				return sprintf(
-					__('Access forbidden. Please verify API key permissions. Details: %s', 'wow-raid-progress'),
-					$error_detail ?: __('Insufficient permissions', 'wow-raid-progress')
-				);
-			case 404:
-				return sprintf(
-					__('Resource not found. Please check raid name and parameters. Details: %s', 'wow-raid-progress'),
-					$error_detail ?: __('The requested raid or guild was not found', 'wow-raid-progress')
-				);
-			case 429:
-				return __('API rate limit exceeded. Please try again in a few minutes.', 'wow-raid-progress');
-			case 500:
-			case 502:
-			case 503:
-				return sprintf(
-					__('API server error. The service may be temporarily unavailable. Details: %s', 'wow-raid-progress'),
-					$error_detail ?: __('Please try again later', 'wow-raid-progress')
-				);
-			default:
-				return sprintf(
-					__('API Error (HTTP %d): %s', 'wow-raid-progress'),
-					$code,
-					$error_detail ?: __('Unknown error occurred', 'wow-raid-progress')
-				);
-		}
-	}
-
-	/**
-	 * Get error from cache
-	 *
-	 * @param string $key Cache key
-	 * @return WP_Error|false Cached error or false
-	 */
-	private function get_error_cache($key) {
-		$err = get_transient($key . '_error');
-		return $err ? new WP_Error('cached_error', $err) : false;
-	}
-
-	/**
-	 * Set error in cache
-	 *
-	 * @param string $key Cache key
-	 * @param string $message Error message
-	 * @param int $ttl Time to live in seconds
-	 */
-	private function set_error_cache($key, $message, $ttl = 120) {
-		set_transient($key . '_error', $message, $ttl);
+		return match (true) {
+			$code === 401 => sprintf(
+				__('API authentication failed. Please check your API key. Details: %s', 'wow-raid-progress'),
+				$error_detail ?: __('Invalid or expired API key', 'wow-raid-progress')
+			),
+			$code === 403 => sprintf(
+				__('Access forbidden. Please verify API key permissions. Details: %s', 'wow-raid-progress'),
+				$error_detail ?: __('Insufficient permissions', 'wow-raid-progress')
+			),
+			$code === 404 => sprintf(
+				__('Resource not found. Please check raid name and parameters. Details: %s', 'wow-raid-progress'),
+				$error_detail ?: __('The requested raid or guild was not found', 'wow-raid-progress')
+			),
+			$code === 429 => __('API rate limit exceeded. Please try again in a few minutes.', 'wow-raid-progress'),
+			$code >= 500 && $code <= 503 => sprintf(
+				__('API server error. The service may be temporarily unavailable. Details: %s', 'wow-raid-progress'),
+				$error_detail ?: __('Please try again later', 'wow-raid-progress')
+			),
+			default => sprintf(
+				__('API Error (HTTP %d): %s', 'wow-raid-progress'),
+				$code,
+				$error_detail ?: __('Unknown error occurred', 'wow-raid-progress')
+			),
+		};
 	}
 
 	/**
 	 * Normalize a realm string to the slug format expected by Raider.io
-	 *
-	 * @param string $realm Realm name
-	 * @return string Normalized realm slug
 	 */
-	public function sanitize_realm($realm) {
+	public function sanitize_realm(string $realm): string {
 		if (empty($realm)) {
 			return '';
 		}
 
-		// Validate realm name length
 		if (strlen($realm) > 50) {
 			return '';
 		}
@@ -1247,8 +1094,6 @@ class WoWRaidProgressAPI {
 		$realm = sanitize_text_field(stripslashes($realm));
 		$realm = remove_accents($realm);
 		$realm = strtolower($realm);
-
-		// Allow letters, numbers, spaces, and hyphens; convert spaces to hyphens
 		$realm = preg_replace('/[^a-z0-9\- ]+/', '', $realm);
 		$realm = preg_replace('/\s+/', '-', trim($realm));
 
@@ -1257,16 +1102,12 @@ class WoWRaidProgressAPI {
 
 	/**
 	 * Normalize guild IDs to a comma-separated list of numeric IDs
-	 *
-	 * @param string|array $guilds Guild IDs
-	 * @return string Comma-separated guild IDs
 	 */
-	public function sanitize_guilds($guilds) {
+	public function sanitize_guilds(string|array $guilds): string {
 		if (empty($guilds)) {
 			return '';
 		}
 
-		// Accept array or CSV string
 		if (!is_array($guilds)) {
 			$guilds = preg_split('/[,\s]+/', (string) $guilds, -1, PREG_SPLIT_NO_EMPTY);
 		}
@@ -1274,8 +1115,7 @@ class WoWRaidProgressAPI {
 		$guilds = array_map('sanitize_text_field', $guilds);
 		$guilds = array_map('trim', $guilds);
 
-		// Keep only numeric IDs
-		$guilds = array_filter($guilds, function ($g) {
+		$guilds = array_filter($guilds, static function (string $g): bool {
 			return (bool) preg_match('/^\d+$/', $g);
 		});
 
@@ -1283,7 +1123,6 @@ class WoWRaidProgressAPI {
 			return '';
 		}
 
-		// De-duplicate, maintain order, limit to 10 guilds
 		$guilds = array_values(array_unique($guilds));
 		$guilds = array_slice($guilds, 0, 10);
 
@@ -1293,10 +1132,9 @@ class WoWRaidProgressAPI {
 	/**
 	 * Get available realms from Blizzard API
 	 *
-	 * @param string $region Region code
-	 * @return array List of realms
+	 * @return array<array{slug: string, name: string, id: int}>
 	 */
-	public function get_realms_list($region = 'eu') {
+	public function get_realms_list(string $region = 'eu'): array {
 		try {
 			$cache_key = $this->blizzard_cache_prefix . 'realms_' . $region;
 			$cached_realms = get_transient($cache_key);
@@ -1317,7 +1155,6 @@ class WoWRaidProgressAPI {
 				'locale' => 'en_US'
 			], "{$api_base}/data/wow/realm/index");
 
-			// Wait for rate limit
 			if (!$this->wait_for_rate_limit(10)) {
 				$this->debug_log("Rate limit timeout for realms fetch");
 				return [];
@@ -1345,7 +1182,7 @@ class WoWRaidProgressAPI {
 
 			$realms = [];
 			foreach ($data['realms'] as $realm) {
-				if (isset($realm['slug']) && isset($realm['name'])) {
+				if (isset($realm['slug'], $realm['name'])) {
 					$realms[] = [
 						'slug' => $realm['slug'],
 						'name' => $realm['name'],
@@ -1354,8 +1191,7 @@ class WoWRaidProgressAPI {
 				}
 			}
 
-			// Sort realms alphabetically
-			usort($realms, function ($a, $b) {
+			usort($realms, static function (array $a, array $b): int {
 				return strcasecmp($a['name'], $b['name']);
 			});
 
@@ -1363,77 +1199,31 @@ class WoWRaidProgressAPI {
 			$this->debug_log("Cached " . count($realms) . " realms for region $region");
 
 			return $realms;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in get_realms_list: ' . $e->getMessage());
 			return [];
 		}
 	}
 
 	/**
-	 * Find attachment by filename and add metadata if missing
-	 *
-	 * @param string $filename Target filename
-	 * @param array $meta Metadata to add if missing
-	 * @return int|false Attachment ID or false
-	 */
-	private function find_attachment_by_filename($filename, array $meta) {
-		$name = sanitize_title(pathinfo($filename, PATHINFO_FILENAME));
-
-		$existing = get_posts([
-			'post_type' => 'attachment',
-			'name' => $name,
-			'post_status' => 'any',
-			'posts_per_page' => 1,
-			'fields' => 'ids',
-		]);
-
-		if (!empty($existing)) {
-			$attachment_id = (int) $existing[0];
-
-			// Add missing metadata
-			foreach ($meta as $key => $value) {
-				if (!metadata_exists('post', $attachment_id, $key)) {
-					update_post_meta($attachment_id, $key, $value);
-				}
-			}
-
-			return $attachment_id;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Get raid icon attachment ID with auto-download
-	 *
-	 * @param string $raid_slug Raid slug
-	 * @param int $expansion_id Expansion ID
-	 * @return int|false Attachment ID or false
 	 */
-	public function get_raid_icon_id($raid_slug, $expansion_id) {
+	public function get_raid_icon_id(string $raid_slug, int $expansion_id): int|false {
 		$raid_slug = sanitize_key($raid_slug);
 		$cache_key = $this->blizzard_cache_prefix . 'raid_icon_' . $raid_slug;
 
-		// Check cached attachment ID
 		$attachment_id = get_transient($cache_key);
 		if ($attachment_id && get_post($attachment_id)) {
-			return $attachment_id;
+			return (int) $attachment_id;
 		}
 
-		// Search for existing attachment
 		$q = new WP_Query([
 			'post_type' => 'attachment',
 			'post_status' => 'any',
 			'posts_per_page' => 1,
 			'meta_query' => [
-				[
-					'key' => '_wow_raid_progress_icon',
-					'value' => 'raid',
-				],
-				[
-					'key' => '_wow_raid_progress_raid',
-					'value' => $raid_slug,
-				],
+				['key' => '_wow_raid_progress_icon', 'value' => 'raid'],
+				['key' => '_wow_raid_progress_raid', 'value' => $raid_slug],
 			],
 			'fields' => 'ids',
 			'no_found_rows' => true,
@@ -1447,7 +1237,6 @@ class WoWRaidProgressAPI {
 			}
 		}
 
-		// Try to download if credentials are available
 		$client_id = get_option('wow_raid_progress_blizzard_client_id');
 		$client_secret = get_option('wow_raid_progress_blizzard_client_secret');
 
@@ -1467,17 +1256,13 @@ class WoWRaidProgressAPI {
 
 	/**
 	 * Get raid achievement ID
-	 *
-	 * @param string $raid_slug Raid slug
-	 * @param int $expansion_id Expansion ID
-	 * @return int|false Achievement ID or false
 	 */
-	public function get_raid_achievement_id($raid_slug, $expansion_id) {
+	public function get_raid_achievement_id(string $raid_slug, int $expansion_id): int|false {
 		try {
 			$cache_key = $this->blizzard_cache_prefix . 'raid_achieve_' . $raid_slug;
 			$cached_id = get_transient($cache_key);
 			if ($cached_id !== false) {
-				return $cached_id;
+				return (int) $cached_id;
 			}
 
 			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
@@ -1498,7 +1283,6 @@ class WoWRaidProgressAPI {
 				'locale' => 'en_US'
 			], "{$api_base}/data/wow/achievement-category/{$category_id}");
 
-			// Wait for rate limit
 			if (!$this->wait_for_rate_limit(10)) {
 				return false;
 			}
@@ -1535,19 +1319,18 @@ class WoWRaidProgressAPI {
 				return false;
 			}
 
-			// Look for achievement matching raid name
 			foreach ($data['achievements'] as $ach) {
 				if (isset($ach['name']) && (
 					stripos($ach['name'], $raid_name) !== false ||
 					(stripos($ach['name'], 'Glory of') !== false && stripos($ach['name'], 'Raider') !== false)
 				)) {
 					set_transient($cache_key, $ach['id'], 30 * DAY_IN_SECONDS);
-					return $ach['id'];
+					return (int) $ach['id'];
 				}
 			}
 
 			return false;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in get_raid_achievement_id: ' . $e->getMessage());
 			return false;
 		}
@@ -1555,13 +1338,8 @@ class WoWRaidProgressAPI {
 
 	/**
 	 * Download raid icon from Blizzard API
-	 *
-	 * @param string $raid_slug Raid slug
-	 * @param int $achievement_id Achievement ID
-	 * @param int $expansion_id Expansion ID
-	 * @return int|false Attachment ID or false
 	 */
-	private function download_raid_icon($raid_slug, $achievement_id, $expansion_id) {
+	private function download_raid_icon(string $raid_slug, int $achievement_id, int $expansion_id): int|false {
 		try {
 			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
 			$token = $this->get_blizzard_token($region);
@@ -1575,7 +1353,6 @@ class WoWRaidProgressAPI {
 				'locale' => 'en_US'
 			], "{$api_base}/data/wow/media/achievement/{$achievement_id}");
 
-			// Wait for rate limit
 			if (!$this->wait_for_rate_limit(10)) {
 				return false;
 			}
@@ -1621,7 +1398,6 @@ class WoWRaidProgressAPI {
 				'tmp_name' => $tmp
 			];
 
-			// Get raid name for description
 			$raid_name = $raid_slug;
 			$static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 1440);
 			if (!is_wp_error($static_data) && isset($static_data['raids'])) {
@@ -1640,158 +1416,138 @@ class WoWRaidProgressAPI {
 				return false;
 			}
 
-			// Mark as plugin attachment
 			update_post_meta($attachment_id, '_wow_raid_progress_icon', 'raid');
 			update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
 
-			return $attachment_id;
-		} catch (Exception $e) {
+			return (int) $attachment_id;
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in download_raid_icon: ' . $e->getMessage());
 			return false;
 		}
 	}
 
 	/**
-     * Get journal instance ID for a raid
-     *
-     * @param string $raid_slug Raid slug
-     * @param int $expansion_id Expansion ID
-     * @return int|false Journal instance ID or false
-     */
-    public function get_journal_instance_id($raid_slug, $expansion_id) {
-        try {
-            $cache_key = $this->blizzard_cache_prefix . 'journal_id_' . $raid_slug;
-            $cached_id = get_transient($cache_key);
-            if ($cached_id !== false) {
-                return $cached_id;
-            }
+	 * Get journal instance ID for a raid
+	 */
+	public function get_journal_instance_id(string $raid_slug, int $expansion_id): int|false {
+		try {
+			$cache_key = $this->blizzard_cache_prefix . 'journal_id_' . $raid_slug;
+			$cached_id = get_transient($cache_key);
+			if ($cached_id !== false) {
+				return (int) $cached_id;
+			}
 
-            $region = get_option('wow_raid_progress_blizzard_region', 'eu');
-            $token = $this->get_blizzard_token($region);
-            if (!$token) {
-                return false;
-            }
+			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+			$token = $this->get_blizzard_token($region);
+			if (!$token) {
+				return false;
+			}
 
-            $api_base = $this->regional_endpoints[$region]['api'];
-            $instances_url = add_query_arg([
-                'namespace' => 'static-' . $region,
-                'locale' => 'en_US'
-            ], "{$api_base}/data/wow/journal-instance/index");
+			$api_base = $this->regional_endpoints[$region]['api'];
+			$instances_url = add_query_arg([
+				'namespace' => 'static-' . $region,
+				'locale' => 'en_US'
+			], "{$api_base}/data/wow/journal-instance/index");
 
-            // Wait for rate limit
-            if (!$this->wait_for_rate_limit(10)) {
-                return false;
-            }
+			if (!$this->wait_for_rate_limit(10)) {
+				return false;
+			}
 
-            $response = wp_remote_get($instances_url, [
-                'timeout' => $this->http_timeout,
-                'headers' => array_merge($this->base_headers(), [
-                    'Authorization' => 'Bearer ' . $token
-                ]),
-            ]);
+			$response = wp_remote_get($instances_url, [
+				'timeout' => $this->http_timeout,
+				'headers' => array_merge($this->base_headers(), [
+					'Authorization' => 'Bearer ' . $token
+				]),
+			]);
 
-            if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-                return false;
-            }
+			if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+				return false;
+			}
 
-            $data = json_decode(wp_remote_retrieve_body($response), true);
-            if (!isset($data['instances'])) {
-                return false;
-            }
+			$data = json_decode(wp_remote_retrieve_body($response), true);
+			if (!isset($data['instances'])) {
+				return false;
+			}
 
-            // === TIER MAP: handle multi-raid tiers (e.g. Midnight tier-mn-1) ===
-            if (isset($this->tier_journal_map[$raid_slug])) {
-                $search_names = $this->tier_journal_map[$raid_slug];
-                $this->debug_log("Tier map active for $raid_slug, searching for: " . implode(', ', $search_names));
+			// Tier map: handle multi-raid tiers
+			if (isset($this->tier_journal_map[$raid_slug])) {
+				$search_names = $this->tier_journal_map[$raid_slug];
+				$this->debug_log("Tier map active for $raid_slug, searching for: " . implode(', ', $search_names));
 
-			foreach ($search_names as $search_name) {
-				foreach ($data['instances'] as $instance) {
-					if (!isset($instance['name']) || !isset($instance['id'])) {
-						continue;
+				foreach ($search_names as $search_name) {
+					foreach ($data['instances'] as $instance) {
+						if (!isset($instance['name'], $instance['id'])) {
+							continue;
+						}
+						if (
+							strcasecmp($instance['name'], $search_name) === 0 ||
+							stripos($instance['name'], $search_name) !== false
+						) {
+							$this->debug_log("Tier map match: {$instance['name']} (ID: {$instance['id']})");
+							set_transient($cache_key, $instance['id'], 30 * DAY_IN_SECONDS);
+							return (int) $instance['id'];
+						}
 					}
-                        if (
-                            strcasecmp($instance['name'], $search_name) === 0 ||
-                            stripos($instance['name'], $search_name) !== false
-                        ) {
-                            $this->debug_log("Tier map match: {$instance['name']} (ID: {$instance['id']})");
-                            set_transient($cache_key, $instance['id'], 30 * DAY_IN_SECONDS);
-                            return $instance['id'];
-                        }
-                    }
-                }
+				}
 
-                $this->debug_log("No journal instance found via tier map for: $raid_slug");
-                return false;
-            }
-            // === END TIER MAP ===
+				$this->debug_log("No journal instance found via tier map for: $raid_slug");
+				return false;
+			}
 
-            // Get raid name from static data
-            $static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 1440);
-            $raid_name = null;
-            if (!is_wp_error($static_data) && isset($static_data['raids'])) {
-                foreach ($static_data['raids'] as $raid) {
-                    if ($raid['slug'] === $raid_slug) {
-                        $raid_name = $raid['name'];
-                        break;
-                    }
-                }
-            }
+			// Get raid name from static data
+			$static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 1440);
+			$raid_name = null;
+			if (!is_wp_error($static_data) && isset($static_data['raids'])) {
+				foreach ($static_data['raids'] as $raid) {
+					if ($raid['slug'] === $raid_slug) {
+						$raid_name = $raid['name'];
+						break;
+					}
+				}
+			}
 
-            if (!$raid_name) {
-                return false;
-            }
+			if (!$raid_name) {
+				return false;
+			}
 
-            // Find matching journal instance
-            foreach ($data['instances'] as $instance) {
-                if (
-                    isset($instance['name']) &&
-                    (strcasecmp($instance['name'], $raid_name) === 0 ||
-                        stripos($instance['name'], $raid_name) !== false)
-                ) {
-                    set_transient($cache_key, $instance['id'], 30 * DAY_IN_SECONDS);
-                    return $instance['id'];
-                }
-            }
+			foreach ($data['instances'] as $instance) {
+				if (
+					isset($instance['name']) &&
+					(strcasecmp($instance['name'], $raid_name) === 0 ||
+						stripos($instance['name'], $raid_name) !== false)
+				) {
+					set_transient($cache_key, $instance['id'], 30 * DAY_IN_SECONDS);
+					return (int) $instance['id'];
+				}
+			}
 
-            return false;
-        } catch (Exception $e) {
-            $this->debug_log('Exception in get_journal_instance_id: ' . $e->getMessage());
-            return false;
-        }
-    }
+			return false;
+		} catch (\Exception $e) {
+			$this->debug_log('Exception in get_journal_instance_id: ' . $e->getMessage());
+			return false;
+		}
+	}
 
 	/**
 	 * Get raid background image attachment ID with auto-download
-	 *
-	 * @param string $raid_slug Raid identifier
-	 * @param int $expansion_id Expansion ID
-	 * @return int|false Attachment ID or false if unavailable
 	 */
-	public function get_journal_instance_image_id($raid_slug, $expansion_id) {
+	public function get_journal_instance_image_id(string $raid_slug, int $expansion_id): int|false {
 		try {
 			$raid_slug = sanitize_key($raid_slug);
 			$cache_key = $this->blizzard_cache_prefix . 'journal_img_' . $raid_slug;
 
-			// Check cached attachment ID
 			$attachment_id = get_transient($cache_key);
 			if ($attachment_id && get_post($attachment_id)) {
-				return $attachment_id;
+				return (int) $attachment_id;
 			}
 
-			// Search for existing attachment
 			$q = new WP_Query([
 				'post_type' => 'attachment',
 				'post_status' => 'any',
 				'posts_per_page' => 1,
 				'meta_query' => [
-					[
-						'key' => '_wow_raid_progress_icon',
-						'value' => 'raid_bg',
-					],
-					[
-						'key' => '_wow_raid_progress_raid',
-						'value' => $raid_slug,
-					],
+					['key' => '_wow_raid_progress_icon', 'value' => 'raid_bg'],
+					['key' => '_wow_raid_progress_raid', 'value' => $raid_slug],
 				],
 				'fields' => 'ids',
 				'no_found_rows' => true,
@@ -1805,7 +1561,6 @@ class WoWRaidProgressAPI {
 				}
 			}
 
-			// Try to download from Blizzard
 			$journal_id = $this->get_journal_instance_id($raid_slug, $expansion_id);
 			if (!$journal_id) {
 				return false;
@@ -1818,7 +1573,7 @@ class WoWRaidProgressAPI {
 			}
 
 			return false;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->debug_log('Exception in get_journal_instance_image_id: ' . $e->getMessage());
 			return false;
 		}
@@ -1826,13 +1581,8 @@ class WoWRaidProgressAPI {
 
 	/**
 	 * Download raid background image from Blizzard API
-	 *
-	 * @param string $raid_slug Raid identifier
-	 * @param int $journal_id Journal instance ID
-	 * @param int $expansion_id Expansion identifier
-	 * @return int|false Attachment ID or false on failure
 	 */
-	private function download_journal_instance_image($raid_slug, $journal_id, $expansion_id) {
+	private function download_journal_instance_image(string $raid_slug, int $journal_id, int $expansion_id): int|false {
 		$region = get_option('wow_raid_progress_blizzard_region', 'eu');
 		$token = $this->get_blizzard_token($region);
 		if (!$token) {
@@ -1845,7 +1595,6 @@ class WoWRaidProgressAPI {
 			'locale' => 'en_US',
 		], "{$api_base}/data/wow/media/journal-instance/{$journal_id}");
 
-		// Wait for rate limit
 		if (!$this->wait_for_rate_limit(10)) {
 			return false;
 		}
@@ -1891,7 +1640,6 @@ class WoWRaidProgressAPI {
 			'tmp_name' => $tmp,
 		];
 
-		// Get raid name for attachment title
 		$raid_name = $raid_slug;
 		$static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 1440);
 		if (!is_wp_error($static_data) && isset($static_data['raids'])) {
@@ -1913,43 +1661,39 @@ class WoWRaidProgressAPI {
 		update_post_meta($attachment_id, '_wow_raid_progress_icon', 'raid_bg');
 		update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
 
-		return $attachment_id;
+		return (int) $attachment_id;
 	}
 
 	/**
 	 * Get expansions list
 	 *
-	 * @return array Expansions
+	 * @return array<int, array{name: string, category_name: string}>
 	 */
-	public function get_expansions() {
+	public function get_expansions(): array {
 		return $this->expansions;
 	}
 
 	/**
 	 * Get regional endpoints
 	 *
-	 * @return array Regional endpoints
+	 * @return array<string, array{oauth: string, api: string}>
 	 */
-	public function get_regional_endpoints() {
+	public function get_regional_endpoints(): array {
 		return $this->regional_endpoints;
 	}
 
 	/**
 	 * Log debug message if debug mode is enabled
-	 *
-	 * @param string $message Message to log
 	 */
-	public function debug_log($message) {
+	public function debug_log(string $message): void {
 		$enabled = get_option('wow_raid_progress_debug_mode', 'false');
 
 		if ($enabled === 'true' || (defined('WOW_RAID_PROGRESS_DEBUG') && WOW_RAID_PROGRESS_DEBUG)) {
-			// Add to transient log for admin display
 			$log = get_transient('wow_raid_debug_log') ?: [];
 			$log[] = date('H:i:s') . ' - ' . $message;
-			$log = array_slice($log, -100); // Keep last 100 entries
+			$log = array_slice($log, -100);
 			set_transient('wow_raid_debug_log', $log, HOUR_IN_SECONDS);
 
-			// Also log to error_log if WP_DEBUG is enabled
 			if (defined('WP_DEBUG') && WP_DEBUG) {
 				error_log('WoW Raid Progress: ' . $message);
 			}

@@ -433,7 +433,7 @@ msgstr ""
 #: includes/class-wow-raid-progress-widget.php:517
 #, php-format
 msgid ""
-"No %s data found for your guild at this raid (and no lower-tier data either)."
+"No data found for your guild in this raid."
 msgstr ""
 
 #: includes/class-wow-raid-progress-widget.php:538
