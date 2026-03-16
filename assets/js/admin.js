@@ -347,17 +347,23 @@
 				}
 
 				// Validate cache time
-				var cacheTime = parseInt($('#wow_raid_progress_cache_time').val());
-				if (isNaN(cacheTime) || cacheTime < 0 || cacheTime > 1440) {
-					errors.push('Cache time must be between 0 and 1440 minutes.');
-					isValid = false;
+				var $cacheField = $('#wow_raid_progress_cache_time');
+				if ($cacheField.length) {
+					var cacheTime = parseInt($cacheField.val());
+					if (isNaN(cacheTime) || cacheTime < 0 || cacheTime > 1440) {
+						errors.push('Cache time must be between 0 and 1440 minutes.');
+						isValid = false;
+					}
 				}
 
 				// Validate limit
-				var limit = parseInt($('#wow_raid_progress_limit').val());
-				if (isNaN(limit) || limit < 1 || limit > 100) {
-					errors.push('Results limit must be between 1 and 100.');
-					isValid = false;
+				var $limitField = $('#wow_raid_progress_limit');
+				if ($limitField.length) {
+					var limit = parseInt($limitField.val());
+					if (isNaN(limit) || limit < 1 || limit > 100) {
+						errors.push('Results limit must be between 1 and 100.');
+						isValid = false;
+					}
 				}
 
 				// Show errors if any

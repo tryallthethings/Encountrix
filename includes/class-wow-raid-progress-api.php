@@ -77,6 +77,17 @@ class WoWRaidProgressAPI {
 		'sylvanas-windrunner' => 'Sylvanas Windrunner'
 	];
 
+    /**
+     * Multi-raid tier mappings.
+     *
+     * Raider.io sometimes groups several raids into one tier slug.
+     * This map resolves the tier slug to a Blizzard journal instance
+     * for fetching background images. 'primary' is tried first.
+     */
+    private $tier_journal_map = [
+        'tier-mn-1' => ['Voidspire', 'Dreamrift', 'March on Quel\'Danas'],
+    ];
+
 	/**
 	 * Check and enforce rate limiting
 	 *
@@ -1641,87 +1652,113 @@ class WoWRaidProgressAPI {
 	}
 
 	/**
-	 * Get journal instance ID for a raid
-	 *
-	 * @param string $raid_slug Raid slug
-	 * @param int $expansion_id Expansion ID
-	 * @return int|false Journal instance ID or false
-	 */
-	public function get_journal_instance_id($raid_slug, $expansion_id) {
-		try {
-			$cache_key = $this->blizzard_cache_prefix . 'journal_id_' . $raid_slug;
-			$cached_id = get_transient($cache_key);
-			if ($cached_id !== false) {
-				return $cached_id;
-			}
+     * Get journal instance ID for a raid
+     *
+     * @param string $raid_slug Raid slug
+     * @param int $expansion_id Expansion ID
+     * @return int|false Journal instance ID or false
+     */
+    public function get_journal_instance_id($raid_slug, $expansion_id) {
+        try {
+            $cache_key = $this->blizzard_cache_prefix . 'journal_id_' . $raid_slug;
+            $cached_id = get_transient($cache_key);
+            if ($cached_id !== false) {
+                return $cached_id;
+            }
 
-			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
-			$token = $this->get_blizzard_token($region);
-			if (!$token) {
-				return false;
-			}
+            $region = get_option('wow_raid_progress_blizzard_region', 'eu');
+            $token = $this->get_blizzard_token($region);
+            if (!$token) {
+                return false;
+            }
 
-			$api_base = $this->regional_endpoints[$region]['api'];
-			$instances_url = add_query_arg([
-				'namespace' => 'static-' . $region,
-				'locale' => 'en_US'
-			], "{$api_base}/data/wow/journal-instance/index");
+            $api_base = $this->regional_endpoints[$region]['api'];
+            $instances_url = add_query_arg([
+                'namespace' => 'static-' . $region,
+                'locale' => 'en_US'
+            ], "{$api_base}/data/wow/journal-instance/index");
 
-			// Wait for rate limit
-			if (!$this->wait_for_rate_limit(10)) {
-				return false;
-			}
+            // Wait for rate limit
+            if (!$this->wait_for_rate_limit(10)) {
+                return false;
+            }
 
-			$response = wp_remote_get($instances_url, [
-				'timeout' => $this->http_timeout,
-				'headers' => array_merge($this->base_headers(), [
-					'Authorization' => 'Bearer ' . $token
-				]),
-			]);
+            $response = wp_remote_get($instances_url, [
+                'timeout' => $this->http_timeout,
+                'headers' => array_merge($this->base_headers(), [
+                    'Authorization' => 'Bearer ' . $token
+                ]),
+            ]);
 
-			if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-				return false;
-			}
+            if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+                return false;
+            }
 
-			$data = json_decode(wp_remote_retrieve_body($response), true);
-			if (!isset($data['instances'])) {
-				return false;
-			}
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            if (!isset($data['instances'])) {
+                return false;
+            }
 
-			// Get raid name from static data
-			$static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 1440);
-			$raid_name = null;
-			if (!is_wp_error($static_data) && isset($static_data['raids'])) {
-				foreach ($static_data['raids'] as $raid) {
-					if ($raid['slug'] === $raid_slug) {
-						$raid_name = $raid['name'];
-						break;
+            // === TIER MAP: handle multi-raid tiers (e.g. Midnight tier-mn-1) ===
+            if (isset($this->tier_journal_map[$raid_slug])) {
+                $search_names = $this->tier_journal_map[$raid_slug];
+                $this->debug_log("Tier map active for $raid_slug, searching for: " . implode(', ', $search_names));
+
+			foreach ($search_names as $search_name) {
+				foreach ($data['instances'] as $instance) {
+					if (!isset($instance['name']) || !isset($instance['id'])) {
+						continue;
 					}
-				}
-			}
+                        if (
+                            strcasecmp($instance['name'], $search_name) === 0 ||
+                            stripos($instance['name'], $search_name) !== false
+                        ) {
+                            $this->debug_log("Tier map match: {$instance['name']} (ID: {$instance['id']})");
+                            set_transient($cache_key, $instance['id'], 30 * DAY_IN_SECONDS);
+                            return $instance['id'];
+                        }
+                    }
+                }
 
-			if (!$raid_name) {
-				return false;
-			}
+                $this->debug_log("No journal instance found via tier map for: $raid_slug");
+                return false;
+            }
+            // === END TIER MAP ===
 
-			// Find matching journal instance
-			foreach ($data['instances'] as $instance) {
-				if (
-					isset($instance['name']) &&
-					(strcasecmp($instance['name'], $raid_name) === 0 ||
-						stripos($instance['name'], $raid_name) !== false)
-				) {
-					set_transient($cache_key, $instance['id'], 30 * DAY_IN_SECONDS);
-					return $instance['id'];
-				}
-			}
+            // Get raid name from static data
+            $static_data = $this->fetch_static_raid_data_by_expansion($expansion_id, 1440);
+            $raid_name = null;
+            if (!is_wp_error($static_data) && isset($static_data['raids'])) {
+                foreach ($static_data['raids'] as $raid) {
+                    if ($raid['slug'] === $raid_slug) {
+                        $raid_name = $raid['name'];
+                        break;
+                    }
+                }
+            }
 
-			return false;
-		} catch (Exception $e) {
-			$this->debug_log('Exception in get_journal_instance_id: ' . $e->getMessage());
-			return false;
-		}
-	}
+            if (!$raid_name) {
+                return false;
+            }
+
+            // Find matching journal instance
+            foreach ($data['instances'] as $instance) {
+                if (
+                    isset($instance['name']) &&
+                    (strcasecmp($instance['name'], $raid_name) === 0 ||
+                        stripos($instance['name'], $raid_name) !== false)
+                ) {
+                    set_transient($cache_key, $instance['id'], 30 * DAY_IN_SECONDS);
+                    return $instance['id'];
+                }
+            }
+
+            return false;
+        } catch (Exception $e) {
+            $this->debug_log('Exception in get_journal_instance_id: ' . $e->getMessage());
+            return false;
+        }
+    }
 
 	/**
 	 * Get raid background image attachment ID with auto-download

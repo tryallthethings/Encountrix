@@ -333,6 +333,66 @@ if (!defined('ABSPATH')) {
 					</tr>
 					<tr>
 						<th scope="row">
+							<label for="wow_raid_progress_show_raid_icon">
+								<?php _e('Show Raid Background', 'wow-raid-progress'); ?>
+							</label>
+						</th>
+						<td>
+							<select id="wow_raid_progress_show_raid_icon" name="wow_raid_progress_show_raid_icon">
+								<option value="true" <?php selected($show_raid_icon, 'true'); ?>>
+									<?php _e('Yes', 'wow-raid-progress'); ?>
+								</option>
+								<option value="false" <?php selected($show_raid_icon, 'false'); ?>>
+									<?php _e('No', 'wow-raid-progress'); ?>
+								</option>
+							</select>
+							<p class="description">
+								<?php _e('Display the raid journal background image in the header (requires Blizzard API)', 'wow-raid-progress'); ?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="wow_raid_progress_show_killed">
+								<?php _e('Show Defeated Bosses', 'wow-raid-progress'); ?>
+							</label>
+						</th>
+						<td>
+							<select id="wow_raid_progress_show_killed" name="wow_raid_progress_show_killed">
+								<option value="true" <?php selected($show_killed, 'true'); ?>>
+									<?php _e('Yes', 'wow-raid-progress'); ?>
+								</option>
+								<option value="false" <?php selected($show_killed, 'false'); ?>>
+									<?php _e('No', 'wow-raid-progress'); ?>
+								</option>
+							</select>
+							<p class="description">
+								<?php _e('When set to No, defeated bosses will be hidden from the list', 'wow-raid-progress'); ?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="wow_raid_progress_use_blizzard_icons">
+								<?php _e('Use Blizzard Icons', 'wow-raid-progress'); ?>
+							</label>
+						</th>
+						<td>
+							<select id="wow_raid_progress_use_blizzard_icons" name="wow_raid_progress_use_blizzard_icons">
+								<option value="true" <?php selected($use_blizzard_icons, 'true'); ?>>
+									<?php _e('Yes', 'wow-raid-progress'); ?>
+								</option>
+								<option value="false" <?php selected($use_blizzard_icons, 'false'); ?>>
+									<?php _e('No', 'wow-raid-progress'); ?>
+								</option>
+							</select>
+							<p class="description">
+								<?php _e('Download and display official Blizzard achievement icons', 'wow-raid-progress'); ?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
 							<label for="wow_raid_progress_cache_time">
 								<?php _e('Cache Duration', 'wow-raid-progress'); ?>
 							</label>
@@ -348,6 +408,25 @@ if (!defined('ABSPATH')) {
 							<?php _e('minutes', 'wow-raid-progress'); ?>
 							<p class="description">
 								<?php _e('How long to cache API data (0 to disable caching, max 1440)', 'wow-raid-progress'); ?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="wow_raid_progress_limit">
+								<?php _e('Results Limit', 'wow-raid-progress'); ?>
+							</label>
+						</th>
+						<td>
+							<input type="number"
+								id="wow_raid_progress_limit"
+								name="wow_raid_progress_limit"
+								value="<?php echo esc_attr($limit); ?>"
+								min="1"
+								max="100"
+								class="small-text" />
+							<p class="description">
+								<?php _e('Maximum number of guilds to display (1-100)', 'wow-raid-progress'); ?>
 							</p>
 						</td>
 					</tr>
