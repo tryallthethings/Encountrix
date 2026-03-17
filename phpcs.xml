@@ -2,25 +2,121 @@
 <ruleset name="Encountrix WordPress Plugin Standards">
 	<description>PHPCS rules for WordPress plugin development best practices.</description>
 
+	<!-- Configuration -->
 	<arg name="basepath" value="."/>
 	<arg name="colors"/>
 	<arg name="parallel" value="4"/>
 	<arg value="sp"/>
 	<arg name="extensions" value="php"/>
 
+	<!-- Scan paths -->
 	<file>encountrix.php</file>
 	<file>includes</file>
+	<file>templates</file>
+
+	<!-- Exclusions -->
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
 
+	<!-- ============================================ -->
+	<!-- WordPress Coding Standards                   -->
+	<!-- ============================================ -->
 	<rule ref="WordPress-Core"/>
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra"/>
-	<rule ref="WordPress.Utils.I18nTextDomainFixer"/>
+
+	<!-- Security-focused rules -->
+	<rule ref="WordPress.Security"/>
+
+	<!-- ============================================ -->
+	<!-- PHP Compatibility                            -->
+	<!-- ============================================ -->
 	<rule ref="PHPCompatibilityWP">
 		<include-pattern>*\.php$</include-pattern>
 	</rule>
 
+	<!-- ============================================ -->
+	<!-- WordPress Configuration                      -->
+	<!-- ============================================ -->
 	<config name="minimum_supported_wp_version" value="6.4"/>
 	<config name="testVersion" value="8.0-"/>
+
+	<!-- Text domain for i18n -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="encountrix"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Prefix all globals (functions, classes, hooks) -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="encountrix"/>
+				<element value="Encountrix"/>
+				<element value="ENCOUNTRIX"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- ============================================ -->
+	<!-- Rule Adjustments                             -->
+	<!-- ============================================ -->
+
+	<!-- Allow hyphenated class file names (class-encountrix-admin.php) -->
+	<rule ref="WordPress.Files.FileName">
+		<properties>
+			<property name="strict_class_file_names" value="false"/>
+		</properties>
+	</rule>
+
+	<!-- Allow short ternaries ($var ?: 'default') - common modern PHP pattern -->
+	<rule ref="Universal.Operators.DisallowShortTernary">
+		<severity>0</severity>
+	</rule>
+
+	<!-- Allow base64_encode for legitimate API authentication use cases -->
+	<!-- Review each usage manually for security -->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode">
+		<type>warning</type>
+	</rule>
+
+	<!-- Allow error_log in development/debug contexts -->
+	<!-- Should be wrapped in WP_DEBUG checks -->
+	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_error_log">
+		<type>warning</type>
+	</rule>
+
+	<!-- json_encode is acceptable in REST API responses and internal use -->
+	<rule ref="WordPress.WP.AlternativeFunctions.json_encode_json_encode">
+		<type>warning</type>
+	</rule>
+
+	<!-- Allow date() when timezone is explicitly handled -->
+	<rule ref="WordPress.DateTime.RestrictedFunctions.date_date">
+		<type>warning</type>
+	</rule>
+
+	<!-- ============================================ -->
+	<!-- Template Files                               -->
+	<!-- ============================================ -->
+
+	<!-- Templates may output directly -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>templates/*</exclude-pattern>
+	</rule>
+
+	<!-- ============================================ -->
+	<!-- Inline Comment Formatting                    -->
+	<!-- ============================================ -->
+
+	<!-- Relax inline comment punctuation requirement -->
+	<!-- Valid comments don't always need terminal punctuation -->
+	<rule ref="Squiz.Commenting.InlineComment.InvalidEndChar">
+		<severity>0</severity>
+	</rule>
+
 </ruleset>
