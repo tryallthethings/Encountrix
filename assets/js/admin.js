@@ -25,7 +25,7 @@
 			$('.encountrix-tabs .nav-tab').on('click', function (e) {
 				e.preventDefault();
 
-				var targetId = $(this).attr('href');
+				const targetId = $(this).attr('href');
 
 				// Validate target
 				if (!targetId || !$(targetId).length) {
@@ -49,7 +49,7 @@
 
 			// Restore last active tab
 			if (typeof (Storage) !== 'undefined') {
-				var lastTab = localStorage.getItem('encountrix_active_tab');
+				const lastTab = localStorage.getItem('encountrix_active_tab');
 				if (lastTab && $(lastTab).length) {
 					$('.encountrix-tabs .nav-tab[href="' + lastTab + '"]').trigger('click');
 				}
@@ -63,8 +63,8 @@
 
 		// Load raids for current expansion
 		function loadRaidsForExpansion() {
-			var expansionId = $('#encountrix_expansion').val();
-			var currentRaid = $('#encountrix_raid').data('current-value') ||
+			const expansionId = $('#encountrix_expansion').val();
+			const currentRaid = $('#encountrix_raid').data('current-value') ||
 				$('#encountrix_raid').val();
 
 			if (!expansionId) {
@@ -72,7 +72,7 @@
 				return;
 			}
 
-			var $raidSelect = $('#encountrix_raid');
+			const $raidSelect = $('#encountrix_raid');
 			$raidSelect.prop('disabled', true);
 			$raidSelect.html('<option value="">' + encountrix_admin.strings.loading + '</option>');
 
@@ -86,10 +86,10 @@
 				},
 				success: function (response) {
 					if (response.success && response.data) {
-						var options = '<option value="">-- Select a Raid --</option>';
+						let options = '<option value="">-- Select a Raid --</option>';
 
 						$.each(response.data, function (index, raid) {
-							var selected = (raid.slug === currentRaid) ? ' selected' : '';
+							const selected = (raid.slug === currentRaid) ? ' selected' : '';
 							options += '<option value="' + escapeHtml(raid.slug) + '"' + selected + '>' +
 								escapeHtml(raid.name) + '</option>';
 						});
@@ -112,8 +112,8 @@
 		// Refresh raids button
 		function initRaidRefresh() {
 			$('#refresh-raids-btn').on('click', function () {
-				var $btn = $(this);
-				var originalText = $btn.text();
+				const $btn = $(this);
+				const originalText = $btn.text();
 
 				$btn.prop('disabled', true);
 				$btn.text(encountrix_admin.strings.loading);
@@ -148,8 +148,8 @@
 		function initIconImport() {
 			$('#import-icons-btn').on('click', function () {
 				// Check if Blizzard API is configured
-				var clientId = $('#encountrix_blizzard_client_id').val();
-				var clientSecret = $('#encountrix_blizzard_client_secret').val();
+				const clientId = $('#encountrix_blizzard_client_id').val();
+				const clientSecret = $('#encountrix_blizzard_client_secret').val();
 
 				if (!clientId || !clientSecret) {
 					showNotice(encountrix_admin.strings.configure_blizzard_api_first, 'error');
@@ -158,7 +158,7 @@
 				}
 
 				// Check if a raid is selected
-				var selectedRaid = $('#encountrix_raid').val();
+				const selectedRaid = $('#encountrix_raid').val();
 				if (!selectedRaid) {
 					showNotice(encountrix_admin.strings.select_raid_first, 'error');
 					$('.nav-tab[href="#general"]').trigger('click');
@@ -169,9 +169,9 @@
 					return;
 				}
 
-				var $btn = $(this);
-				var $status = $('#import-status');
-				var originalText = $btn.text();
+				const $btn = $(this);
+				const $status = $('#import-status');
+				const originalText = $btn.text();
 
 				$btn.prop('disabled', true);
 				$btn.text(encountrix_admin.strings.importing);
@@ -190,10 +190,10 @@
 						$btn.text(originalText);
 
 						if (response.success && response.data.log) {
-							var logHtml = '<strong>' + encountrix_admin.strings.import_complete + '</strong><br>';
+							let logHtml = '<strong>' + encountrix_admin.strings.import_complete + '</strong><br>';
 
 							$.each(response.data.log, function (index, entry) {
-								var className = 'log-entry';
+								let className = 'log-entry';
 								if (entry.indexOf('SUCCESS') === 0) {
 									className += ' log-success';
 								} else if (entry.indexOf('INFO') === 0) {
@@ -232,9 +232,9 @@
 					return;
 				}
 
-				var $btn = $(this);
-				var $message = $('#delete-icons-message');
-				var originalText = $btn.text();
+				const $btn = $(this);
+				const $message = $('#delete-icons-message');
+				const originalText = $btn.text();
 
 				$btn.prop('disabled', true);
 				$btn.text(encountrix_admin.strings.deleting);
@@ -271,8 +271,8 @@
 					return;
 				}
 
-				var $btn = $(this);
-				var $message = $('#cache-clear-message');
+				const $btn = $(this);
+				const $message = $('#cache-clear-message');
 
 				$btn.prop('disabled', true);
 
@@ -303,11 +303,11 @@
 		// Form validation
 		function initFormValidation() {
 			$('form').on('submit', function (e) {
-				var isValid = true;
-				var errors = [];
+				let isValid = true;
+				const errors = [];
 
 				// Validate API key
-				var apiKey = $('#encountrix_api_key').val();
+				const apiKey = $('#encountrix_api_key').val();
 				if (!apiKey) {
 					if (!confirm(encountrix_admin.strings.no_api_key_continue)) {
 						e.preventDefault();
@@ -316,10 +316,10 @@
 				}
 
 				// Validate guild IDs format
-				var guildIds = $('#encountrix_guild_ids').val();
+				const guildIds = $('#encountrix_guild_ids').val();
 				if (guildIds) {
-					var guilds = guildIds.split(',');
-					var invalidGuilds = [];
+					const guilds = guildIds.split(',');
+					const invalidGuilds = [];
 
 					guilds.forEach(function (guild) {
 						guild = guild.trim();
@@ -340,16 +340,16 @@
 				}
 
 				// Validate realm name
-				var realm = $('#encountrix_realm').val();
+				const realm = $('#encountrix_realm').val();
 				if (realm && realm.length > 50) {
 					errors.push(encountrix_admin.strings.realm_too_long);
 					isValid = false;
 				}
 
 				// Validate cache time
-				var $cacheField = $('#encountrix_cache_time');
+				const $cacheField = $('#encountrix_cache_time');
 				if ($cacheField.length) {
-					var cacheTime = parseInt($cacheField.val());
+					const cacheTime = parseInt($cacheField.val());
 					if (isNaN(cacheTime) || cacheTime < 0 || cacheTime > 1440) {
 						errors.push(encountrix_admin.strings.cache_time_invalid);
 						isValid = false;
@@ -357,9 +357,9 @@
 				}
 
 				// Validate limit
-				var $limitField = $('#encountrix_limit');
+				const $limitField = $('#encountrix_limit');
 				if ($limitField.length) {
-					var limit = parseInt($limitField.val());
+					const limit = parseInt($limitField.val());
 					if (isNaN(limit) || limit < 1 || limit > 100) {
 						errors.push(encountrix_admin.strings.limit_invalid);
 						isValid = false;
@@ -369,7 +369,7 @@
 				// Show errors if any
 				if (!isValid) {
 					e.preventDefault();
-					var errorMsg = encountrix_admin.strings.please_fix_errors + '\n\n' + errors.join('\n');
+					const errorMsg = encountrix_admin.strings.please_fix_errors + '\n\n' + errors.join('\n');
 					alert(errorMsg);
 					return false;
 				}
@@ -384,7 +384,7 @@
 				return '';
 			}
 
-			var map = {
+			const map = {
 				'&': '&amp;',
 				'<': '&lt;',
 				'>': '&gt;',
@@ -399,8 +399,8 @@
 
 		// Helper function to show notices
 		function showNotice(message, type) {
-			var noticeClass = type === 'error' ? 'notice-error' : 'notice-success';
-			var $notice = $('<div class="notice ' + noticeClass + ' is-dismissible">' +
+			const noticeClass = type === 'error' ? 'notice-error' : 'notice-success';
+			const $notice = $('<div class="notice ' + noticeClass + ' is-dismissible">' +
 				'<p>' + escapeHtml(message) + '</p>' +
 				'<button type="button" class="notice-dismiss">' +
 				'<span class="screen-reader-text">' + encountrix_admin.strings.dismiss_notice + '</span>' +
@@ -430,18 +430,18 @@
 			if (!$select || !$select.length) return;
 
 			try {
-				var el = $select[0];
-				var cs = window.getComputedStyle(el); // Changed from getComputedStyle to window.getComputedStyle
+				const el = $select[0];
+				const cs = window.getComputedStyle(el); // Changed from getComputedStyle to window.getComputedStyle
 
 				// Create temporary span for measurement
-				var span = document.createElement('span');
+				const span = document.createElement('span');
 				span.style.position = 'absolute';
 				span.style.visibility = 'hidden';
 				span.style.whiteSpace = 'pre';
 				span.style.font = cs.font;
 				document.body.appendChild(span);
 
-				var max = 0;
+				let max = 0;
 				$select.find('option').each(function () {
 					span.textContent = this.text;
 					max = Math.max(max, span.getBoundingClientRect().width);
@@ -449,12 +449,12 @@
 				document.body.removeChild(span);
 
 				// Calculate total width with padding and arrow
-				var extra =
+				const extra =
 					parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) +
 					parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth) +
 					(parseFloat(cs.fontSize) * 1.6);
 
-				var px = Math.ceil(max + extra);
+				const px = Math.ceil(max + extra);
 				$select.css({ width: px + 'px', maxWidth: '100%' });
 			} catch (e) {
 				console.error('Error adjusting select width:', e);
@@ -468,19 +468,19 @@
 		}
 
 		function initRealmSelector() {
-			var $regionSelect = $('#encountrix_region');
-			var $realmInput = $('#encountrix_realm');
-			var $dropdown = $('#realm-dropdown');
-			var $realmList = $('#realm-list');
-			var realmsData = [];
-			var selectedRealm = $realmInput.val();
+			const $regionSelect = $('#encountrix_region');
+			const $realmInput = $('#encountrix_realm');
+			const $dropdown = $('#realm-dropdown');
+			const $realmList = $('#realm-list');
+			let realmsData = [];
+			let selectedRealm = $realmInput.val();
 
 			// Load realms on page load
 			loadRealmsForRegion($regionSelect.val());
 
 			// Update realms when region changes
 			$regionSelect.on('change', function () {
-				var region = $(this).val();
+				const region = $(this).val();
 				loadRealmsForRegion(region);
 			});
 
@@ -506,16 +506,15 @@
 
 			// Select realm on click
 			$(document).on('click', '.encountrix-realm-item', function () {
-				var slug = $(this).data('slug');
-				var name = $(this).data('name');
+				const slug = $(this).data('slug');
 				$realmInput.val(slug);
 				$dropdown.hide();
 			});
 
 			// Keyboard navigation
 			$realmInput.on('keydown', function (e) {
-				var $items = $('.encountrix-realm-item:visible');
-				var $active = $('.encountrix-realm-item.active');
+				const $items = $('.encountrix-realm-item:visible');
+				const $active = $('.encountrix-realm-item.active');
 
 				if (e.key === 'ArrowDown') {
 					e.preventDefault();
@@ -523,7 +522,7 @@
 						$items.first().addClass('active');
 					} else {
 						$active.removeClass('active');
-						var $next = $active.nextAll(':visible').first();
+						const $next = $active.nextAll(':visible').first();
 						if ($next.length) {
 							$next.addClass('active');
 						} else {
@@ -537,7 +536,7 @@
 						$items.last().addClass('active');
 					} else {
 						$active.removeClass('active');
-						var $prev = $active.prevAll(':visible').first();
+						const $prev = $active.prevAll(':visible').first();
 						if ($prev.length) {
 							$prev.addClass('active');
 						} else {
@@ -574,7 +573,7 @@
 
 							// If there was a selected realm, try to keep it if it exists in new region
 							if (selectedRealm) {
-								var realmExists = realmsData.some(function (realm) {
+								const realmExists = realmsData.some(function (realm) {
 									return realm.slug === selectedRealm;
 								});
 								if (!realmExists) {
@@ -585,7 +584,7 @@
 						} else {
 							// For KR/TW regions, provide helpful message
 							realmsData = [];
-							var message = encountrix_admin.strings.error_loading_realms;
+							let message = encountrix_admin.strings.error_loading_realms;
 							if (region === 'kr' || region === 'tw') {
 								message += ' ' + encountrix_admin.strings.asian_region_note;
 							}
@@ -597,7 +596,7 @@
 					},
 					error: function (xhr, status, error) {
 						realmsData = [];
-						var message = encountrix_admin.strings.error_loading_realms;
+						let message = encountrix_admin.strings.error_loading_realms;
 
 						// Add specific message for Asian regions
 						if (region === 'kr' || region === 'tw') {
@@ -626,7 +625,7 @@
 					return;
 				}
 
-				var html = '';
+				let html = '';
 				realms.forEach(function (realm) {
 					html += '<div class="encountrix-realm-item" data-slug="' + escapeHtml(realm.slug) +
 						'" data-name="' + escapeHtml(realm.name) + '">' +
@@ -646,9 +645,9 @@
 				}
 
 				$('.encountrix-realm-item').each(function () {
-					var $item = $(this);
-					var name = $item.data('name').toLowerCase();
-					var slug = $item.data('slug').toLowerCase();
+					const $item = $(this);
+					const name = $item.data('name').toLowerCase();
+					const slug = $item.data('slug').toLowerCase();
 
 					if (name.indexOf(query) !== -1 || slug.indexOf(query) !== -1) {
 						$item.show();
@@ -670,13 +669,13 @@
 			}
 
 			function scrollToActive() {
-				var $active = $('.encountrix-realm-item.active');
+				const $active = $('.encountrix-realm-item.active');
 				if ($active.length) {
-					var container = $realmList[0];
-					var activeTop = $active.position().top;
-					var activeBottom = activeTop + $active.outerHeight();
-					var scrollTop = container.scrollTop;
-					var containerHeight = $(container).height();
+					const container = $realmList[0];
+					const activeTop = $active.position().top;
+					const activeBottom = activeTop + $active.outerHeight();
+					const scrollTop = container.scrollTop;
+					const containerHeight = $(container).height();
 
 					if (activeTop < 0) {
 						container.scrollTop = scrollTop + activeTop;
@@ -691,17 +690,17 @@
 			$('.copy-shortcode').on('click', function (e) {
 				e.preventDefault();
 
-				var $btn = $(this);
-				var $code = $btn.siblings('.shortcode-example');
-				var shortcode = $code.data('shortcode') || $code.text();
+				const $btn = $(this);
+				const $code = $btn.siblings('.shortcode-example');
+				const shortcode = $code.data('shortcode') || $code.text();
 
 				// Create temporary textarea
-				var $temp = $('<textarea>');
+				const $temp = $('<textarea>');
 				$('body').append($temp);
 				$temp.val(shortcode).select();
 
 				// Copy to clipboard
-				var success = false;
+				let success = false;
 				try {
 					success = document.execCommand('copy');
 				} catch (err) {
@@ -712,7 +711,7 @@
 
 				// Update button feedback
 				if (success) {
-					var originalText = $btn.find('.copy-text').text();
+					const originalText = $btn.find('.copy-text').text();
 					$btn.find('.copy-text').text(encountrix_admin.strings.copied);
 					$btn.addClass('success');
 
@@ -734,7 +733,7 @@
 		}
 
 		function selectText(element) {
-			var range, selection;
+			let range, selection;
 
 			if (document.body.createTextRange) {
 				range = document.body.createTextRange();
@@ -770,7 +769,7 @@
 
 			// Test Blizzard API
 			$('#test-blizzard-api').on('click', function () {
-				var $btn = $(this);
+				const $btn = $(this);
 				$btn.prop('disabled', true);
 
 				$.ajax({
@@ -800,7 +799,7 @@
 					},
 					success: function (response) {
 						if (response.success && response.data) {
-							var html = response.data.join('<br>');
+							const html = response.data.join('<br>');
 							$('.debug-log-content').html(html || encountrix_admin.strings.no_log_entries);
 						}
 					}
@@ -820,21 +819,21 @@
 		});
 
 		// Store current raid value
-		var currentRaidValue = $('#encountrix_raid').val();
+		const currentRaidValue = $('#encountrix_raid').val();
 		if (currentRaidValue) {
 			$('#encountrix_raid').data('current-value', currentRaidValue);
 		}
 
 		// Add tooltips for help icons
 		$('.encountrix-help').on('mouseenter', function () {
-			var $this = $(this);
-			var helpText = $this.data('help');
+			const $this = $(this);
+			const helpText = $this.data('help');
 
 			if (helpText) {
-				var $tooltip = $('<div class="encountrix-tooltip">' + helpText + '</div>');
+				const $tooltip = $('<div class="encountrix-tooltip">' + helpText + '</div>');
 				$('body').append($tooltip);
 
-				var offset = $this.offset();
+				const offset = $this.offset();
 				$tooltip.css({
 					position: 'absolute',
 					background: 'rgba(0, 0, 0, 0.8)',
@@ -851,7 +850,7 @@
 				$this.data('tooltip', $tooltip);
 			}
 		}).on('mouseleave', function () {
-			var $tooltip = $(this).data('tooltip');
+			const $tooltip = $(this).data('tooltip');
 			if ($tooltip) {
 				$tooltip.fadeOut(200, function () {
 					$(this).remove();
@@ -868,7 +867,7 @@
 		});
 
 		// Monitor for settings changes
-		var settingsChanged = false;
+		let settingsChanged = false;
 		$('input, select, textarea').on('change', function () {
 			settingsChanged = true;
 		});
@@ -885,5 +884,4 @@
 			settingsChanged = false;
 		});
 	});
-
 })(jQuery);
