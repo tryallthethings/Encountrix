@@ -9,7 +9,11 @@
   "scripts": {
     "lint": "npm run lint:js && npm run lint:css",
     "lint:js": "eslint . --max-warnings=0",
+    "lint:js:fix": "eslint . --fix",
     "lint:css": "stylelint \"assets/css/**/*.css\"",
+    "lint:css:fix": "stylelint \"assets/css/**/*.css\" --fix",
+    "lint:fix": "npm run lint:js:fix && npm run lint:css:fix",
+    "format": "prettier --write \"**/*.{js,css,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{js,css,json,md,yml,yaml}\""
   },
   "devDependencies": {

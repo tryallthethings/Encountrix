@@ -18,6 +18,9 @@
       "@lint:phpcs",
       "@lint:phpstan"
     ],
+    "lint:fix": [
+      "@lint:phpcbf"
+    ],
     "lint:phpcs": "phpcs --standard=phpcs.xml",
     "lint:phpcbf": "phpcbf --standard=phpcs.xml",
     "lint:phpstan": "phpstan analyse --configuration=phpstan.neon.dist"
