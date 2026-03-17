@@ -22,7 +22,7 @@
       "@lint:phpcbf"
     ],
     "lint:phpcs": "phpcs --standard=phpcs.xml",
-    "lint:phpcbf": "phpcbf --standard=phpcs.xml",
+    "lint:phpcbf": "phpcbf --standard=phpcs.xml || test $? -eq 1",
     "lint:phpstan": "phpstan analyse --configuration=phpstan.neon.dist"
   },
   "config": {
