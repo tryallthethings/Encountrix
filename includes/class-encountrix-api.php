@@ -26,7 +26,6 @@ class EncountrixApi {
 	// Rate limiting configuration
 	private string $rate_limit_key = 'encountrix_api_rate_limit';
 	private int $max_requests_per_minute = 30;
-	private int $icon_retry_interval = 1800; // 30 minutes
 
 	/**
 	 * Get base headers for all API requests
@@ -38,6 +37,37 @@ class EncountrixApi {
 			'User-Agent' => 'Encountrix/' . (defined('ENCOUNTRIX_VERSION') ? ENCOUNTRIX_VERSION : 'dev') .
 				' WordPress/' . get_bloginfo('version') . ' (' . home_url() . ')'
 		];
+	}
+
+
+	/**
+	 * Validate remote media URL host before downloading to avoid SSRF-style abuse.
+	 */
+	private function is_allowed_media_url(string $url): bool {
+		if (!wp_http_validate_url($url)) {
+			return false;
+		}
+
+		$host = wp_parse_url($url, PHP_URL_HOST);
+		if (!is_string($host) || $host === '') {
+			return false;
+		}
+
+		$allowed_hosts = [
+			'assets.worldofwarcraft.blizzard.com',
+			'blz-contentstack-assets.akamaized.net',
+		];
+
+		return in_array(strtolower($host), $allowed_hosts, true);
+	}
+
+	/**
+	 * Delete temporary files created by download_url().
+	 */
+	private function cleanup_temp_file(string $tmp_file): void {
+		if (is_file($tmp_file)) {
+			wp_delete_file($tmp_file);
+		}
 	}
 
 	/** @var array<int, array{name: string, category_name: string}> */
@@ -166,15 +196,15 @@ class EncountrixApi {
 		try {
 			// Check if cron mode is enabled
 			if (function_exists('encountrix_should_use_cron') && encountrix_should_use_cron() && !defined('DOING_CRON')) {
-				$request_key = md5(serialize([
+				$request_key = hash('sha256', (string) wp_json_encode([
 					'raid' => $raid,
 					'difficulty' => $difficulty,
 					'region' => $region,
 					'realm' => $realm,
 					'guilds' => $guilds,
 					'limit' => $limit,
-					'page' => $page
-				]));
+					'page' => $page,
+				], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
 				$cache_key = $this->cache_prefix . $request_key;
 				$cached_data = get_transient($cache_key);
@@ -209,15 +239,15 @@ class EncountrixApi {
 			$page = max(0, absint($page));
 
 			// Create unique request key
-			$request_key = md5(serialize([
+			$request_key = hash('sha256', (string) wp_json_encode([
 				'raid' => $raid,
 				'difficulty' => $difficulty,
 				'region' => $region,
 				'realm' => $realm,
 				'guilds' => $guilds,
 				'limit' => $limit,
-				'page' => $page
-			]));
+				'page' => $page,
+			], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
 			$cache_key = $this->cache_prefix . $request_key;
 
@@ -954,7 +984,7 @@ class EncountrixApi {
 				}
 			}
 
-			if (!$icon_url) {
+			if (!$icon_url || !$this->is_allowed_media_url($icon_url)) {
 				return false;
 			}
 
@@ -962,7 +992,7 @@ class EncountrixApi {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 			require_once ABSPATH . 'wp-admin/includes/image.php';
 
-			$tmp = download_url($icon_url);
+			$tmp = download_url($icon_url, $this->http_timeout, true);
 			if (is_wp_error($tmp)) {
 				return false;
 			}
@@ -973,7 +1003,7 @@ class EncountrixApi {
 			];
 
 			$attachment_id = media_handle_sideload($file_array, 0, $boss_name . ' Icon');
-			@unlink($tmp);
+			$this->cleanup_temp_file($tmp);
 
 			if (is_wp_error($attachment_id)) {
 				return false;
@@ -1388,7 +1418,7 @@ class EncountrixApi {
 				}
 			}
 
-			if (!$icon_url) {
+			if (!$icon_url || !$this->is_allowed_media_url($icon_url)) {
 				return false;
 			}
 
@@ -1396,7 +1426,7 @@ class EncountrixApi {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 			require_once ABSPATH . 'wp-admin/includes/image.php';
 
-			$tmp = download_url($icon_url);
+			$tmp = download_url($icon_url, $this->http_timeout, true);
 			if (is_wp_error($tmp)) {
 				return false;
 			}
@@ -1418,7 +1448,7 @@ class EncountrixApi {
 			}
 
 			$attachment_id = media_handle_sideload($file_array, 0, $raid_name . ' Icon');
-			@unlink($tmp);
+			$this->cleanup_temp_file($tmp);
 
 			if (is_wp_error($attachment_id)) {
 				return false;
@@ -1630,7 +1660,7 @@ class EncountrixApi {
 			}
 		}
 
-		if (!$image_url) {
+		if (!$image_url || !$this->is_allowed_media_url($image_url)) {
 			return false;
 		}
 
@@ -1638,7 +1668,7 @@ class EncountrixApi {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		$tmp = download_url($image_url);
+		$tmp = download_url($image_url, $this->http_timeout, true);
 		if (is_wp_error($tmp)) {
 			return false;
 		}
@@ -1660,7 +1690,7 @@ class EncountrixApi {
 		}
 
 		$attachment_id = media_handle_sideload($file_array, 0, $raid_name . ' Background');
-		@unlink($tmp);
+		$this->cleanup_temp_file($tmp);
 
 		if (is_wp_error($attachment_id)) {
 			return false;
