@@ -1,0 +1,25 @@
+{
+  "name": "encountrix",
+  "version": "5.1.0",
+  "private": true,
+  "description": "Validation tooling for the Encountrix WordPress plugin.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "npm run lint:js && npm run lint:css",
+    "lint:js": "eslint . --max-warnings=0",
+    "lint:css": "stylelint \"assets/css/**/*.css\"",
+    "format:check": "prettier --check \"**/*.{js,css,json,md,yml,yaml}\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@stylistic/eslint-plugin": "^3.1.0",
+    "eslint": "^9.22.0",
+    "globals": "^16.0.0",
+    "neostandard": "^0.12.1",
+    "prettier": "^3.5.3",
+    "stylelint": "^16.16.0",
+    "stylelint-config-standard": "^37.0.0"
+  }
+}

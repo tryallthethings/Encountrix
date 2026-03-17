@@ -110,6 +110,40 @@ encountrix/
    - Configure default settings
    - Optional: Add Blizzard API credentials for icons
 
+## 🧪 Development Quality Gates
+
+Encountrix now ships with a strict, modern linting setup tuned for WordPress plugin development.
+
+### Tooling included
+
+- **PHP_CodeSniffer (WPCS + PHPCompatibilityWP):** WordPress coding standards, inline docs, and PHP compatibility checks.
+- **PHPStan + phpstan-wordpress:** Static analysis for stricter type and runtime-safety validation.
+- **ESLint (flat config):** JavaScript code quality checks.
+- **Stylelint:** CSS linting using standard community rules.
+- **Prettier (check mode):** Consistency checks for formatting-sensitive files.
+
+### Install dependencies
+
+```bash
+make install
+```
+
+### Run all lints
+
+```bash
+make lint
+```
+
+### Run individual checks
+
+```bash
+composer lint:phpcs
+composer lint:phpstan
+npm run lint:js
+npm run lint:css
+npm run format:check
+```
+
 ## ⚙️ Configuration
 
 ### Required Settings
