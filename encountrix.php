@@ -115,10 +115,10 @@ function encountrix_uninstall(): void {
 		)
 	);
 
-	// Drop the cache table created by the plugin.
+	// Drop the cache table created by the plugin (%i requires WP 6.2+).
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'encountrix_cache';
-	$wpdb->query( "DROP TABLE IF EXISTS $table_name" );
+	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table_name ) );
 }
 
 /**
