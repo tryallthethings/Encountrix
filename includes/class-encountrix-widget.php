@@ -557,14 +557,10 @@ class EncountrixWidget {
 				}
 			}
 
-			if ( empty( $guild_display_name ) && $guild_id !== '' ) {
-				$guild_display_name = $guild_id;
-			}
-
 			if ( $guild_display_name !== '' ) {
 				return $this->render_error_inline(
 					sprintf(
-						/* translators: %s: guild name or ID */
+						/* translators: %s: guild name */
 						__( 'No data found for guild %s in this raid.', 'encountrix' ),
 						esc_html( $guild_display_name )
 					)

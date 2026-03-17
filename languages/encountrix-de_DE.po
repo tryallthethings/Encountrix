@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Encountrix 5.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-16 00:54+0000\n"
-"PO-Revision-Date: 2026-03-16 00:56+0000\n"
+"POT-Creation-Date: 2026-03-17 00:00+0000\n"
+"PO-Revision-Date: 2026-03-17 00:00+0000\n"
 "Last-Translator: Encountrix Team <team@example.com>\n"
 "Language-Team: de_DE\n"
 "Language: de_DE\n"
@@ -364,7 +364,7 @@ msgstr "API-Ratenlimit überschritten. Bitte versuche es in ein paar Minuten ern
 #, php-format
 msgid ""
 "API server error. The service may be temporarily unavailable. Details: %s"
-msgstr "API server error. The service may be temporarily unavailable. Details: %s"
+msgstr "API-Serverfehler. Der Dienst ist möglicherweise vorübergehend nicht verfügbar. Details: %s"
 
 #: includes/class-encountrix-api.php:1198
 msgid "Please try again later"
@@ -432,7 +432,7 @@ msgstr "Für diese Gilde sind keine Raid-Daten verfügbar."
 #: includes/class-encountrix-widget.php
 #, php-format
 msgid "No data found for guild %s in this raid."
-msgstr "Für deine Gilde %s gibt es in diesem Raid keine Daten."
+msgstr "Für die Gilde %s gibt es in diesem Raid keine Daten."
 
 #: includes/class-encountrix-widget.php
 msgid "No data found for your guild in this raid."
@@ -482,365 +482,467 @@ msgstr "Werkzeuge"
 msgid "Documentation"
 msgstr "Dokumentation"
 
-#: templates/admin-page.php:34
+#: templates/admin-page.php
 msgid "Raider.io API Configuration"
 msgstr "Raider.io-API-Konfiguration"
 
-#: templates/admin-page.php:39
+#: templates/admin-page.php
+msgid ""
+"The Raider.io API key is required for the plugin to fetch raid rankings and "
+"guild progress data. Without it, the plugin cannot display any content."
+msgstr "Der Raider.io-API-Schlüssel wird benötigt, um Raid-Ranglisten und Gildenfortschrittsdaten abzurufen. Ohne ihn kann das Plugin keine Inhalte anzeigen."
+
+#: templates/admin-page.php
 msgid "Raider.io API Key"
 msgstr "Raider.io-API-Schlüssel"
 
-#: templates/admin-page.php:51
+#: templates/admin-page.php
 #, php-format
-msgid "Get your API key from %s"
-msgstr "Hol dir deinen API-Schlüssel bei %s"
+msgid ""
+"Get your API key from %s. After entering your key, save the settings to "
+"unlock the remaining options."
+msgstr "Hol dir deinen API-Schlüssel bei %s. Nach der Eingabe speichere die Einstellungen, um die übrigen Optionen freizuschalten."
 
-#: templates/admin-page.php:63
+#: templates/admin-page.php
 msgid "Blizzard API Configuration"
 msgstr "Blizzard-API-Konfiguration"
 
-#: templates/admin-page.php:67
+#: templates/admin-page.php
 #, php-format
-msgid "Required for boss icons and realm list. Get credentials from %s"
-msgstr "Erforderlich für Boss-Icons und Realm-Liste. Zugangsdaten erhältst du bei %s"
+msgid ""
+"Optional. Enables boss icons, raid background images, and realm "
+"autocompletion. Get credentials from %s"
+msgstr "Optional. Aktiviert Boss-Icons, Raid-Hintergrundbilder und Realm-Autovervollständigung. Zugangsdaten erhältst du bei %s"
 
-#: templates/admin-page.php:76
+#: templates/admin-page.php
 msgid "Blizzard Region"
 msgstr "Blizzard-Region"
 
-#: templates/admin-page.php:81 templates/admin-page.php:179
+#: templates/admin-page.php
+msgid "Must match the region of your Blizzard API application."
+msgstr "Muss mit der Region deiner Blizzard-API-Anwendung übereinstimmen."
+
+#: templates/admin-page.php
 msgid "US"
 msgstr "US"
 
-#: templates/admin-page.php:82 templates/admin-page.php:180
+#: templates/admin-page.php
 msgid "EU"
 msgstr "EU"
 
-#: templates/admin-page.php:83 templates/admin-page.php:181
+#: templates/admin-page.php
 msgid "KR"
 msgstr "KR"
 
-#: templates/admin-page.php:84 templates/admin-page.php:182
+#: templates/admin-page.php
 msgid "TW"
 msgstr "TW"
 
-#: templates/admin-page.php:91
+#: templates/admin-page.php
 msgid "Client ID"
 msgstr "Client-ID"
 
-#: templates/admin-page.php:105
+#: templates/admin-page.php
+msgid "Found in your Battle.net application details under \"Client ID\"."
+msgstr "Zu finden in deinen Battle.net-Anwendungsdetails unter \"Client-ID\"."
+
+#: templates/admin-page.php
 msgid "Client Secret"
 msgstr "Client-Secret"
 
-#: templates/admin-page.php:119
+#: templates/admin-page.php
+msgid ""
+"Found in your Battle.net application details under \"Client Secret\". "
+"Stored securely in your database."
+msgstr "Zu finden in deinen Battle.net-Anwendungsdetails unter \"Client-Secret\". Wird sicher in deiner Datenbank gespeichert."
+
+#: templates/admin-page.php
 msgid "Debug Mode"
 msgstr "Debug-Modus"
 
-#: templates/admin-page.php:125
+#: templates/admin-page.php
 msgid "Disabled"
 msgstr "Deaktiviert"
 
-#: templates/admin-page.php:128
+#: templates/admin-page.php
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: templates/admin-page.php:132
-msgid "Enable debug logging for API calls (admin only)"
-msgstr "Debug-Logging für API-Aufrufe aktivieren (nur Admin)"
+#: templates/admin-page.php
+msgid ""
+"Logs all Blizzard API requests and responses. Useful for troubleshooting "
+"connectivity or authentication issues. Only visible to admins."
+msgstr "Protokolliert alle Blizzard-API-Anfragen und -Antworten. Nützlich zur Fehlersuche bei Verbindungs- oder Authentifizierungsproblemen. Nur für Admins sichtbar."
 
-#: templates/admin-page.php:138
+#: templates/admin-page.php
 msgid "Debug Log"
 msgstr "Debug-Log"
 
-#: templates/admin-page.php:143
+#: templates/admin-page.php
 msgid "Clear Log"
 msgstr "Log leeren"
 
-#: templates/admin-page.php:144
+#: templates/admin-page.php
 msgid "Test Blizzard API"
 msgstr "Blizzard-API testen"
 
-#: templates/admin-page.php:152
+#: templates/admin-page.php
 msgid "Default Guild Settings"
 msgstr "Standard-Gildeneinstellungen"
 
-#: templates/admin-page.php:157
+#: templates/admin-page.php
+msgid ""
+"Configure which guilds to display by default. These defaults are used when "
+"no parameters are specified in the shortcode."
+msgstr "Lege fest, welche Gilden standardmäßig angezeigt werden. Diese Standardwerte werden verwendet, wenn im Shortcode keine Parameter angegeben sind."
+
+#: templates/admin-page.php
 msgid "Guild IDs"
 msgstr "Gilden-IDs"
 
-#: templates/admin-page.php:167
+#: templates/admin-page.php
 msgid ""
-"Comma-separated Raider.io guild IDs (max 10). Leave empty to show realm "
-"rankings."
-msgstr "Kommagetrennte Raider.io-Gilden-IDs (max. 10). Leer lassen, um Realm-Ranglisten anzuzeigen."
+"Comma-separated numeric Raider.io guild IDs (max 10). Find your guild ID in "
+"the URL on your Raider.io guild page. Leave empty to show realm or region "
+"rankings instead."
+msgstr "Kommagetrennte numerische Raider.io-Gilden-IDs (max. 10). Die Gilden-ID findest du in der URL auf deiner Raider.io-Gildenseite. Leer lassen, um stattdessen Realm- oder Regionranglisten anzuzeigen."
 
-#: templates/admin-page.php:174
+#: templates/admin-page.php
 msgid "Default Region"
 msgstr "Standardregion"
 
-#: templates/admin-page.php:189
+#: templates/admin-page.php
+msgid "The WoW region used for rankings and realm lists."
+msgstr "Die WoW-Region für Ranglisten und Realm-Listen."
+
+#: templates/admin-page.php
 msgid "Default Realm"
 msgstr "Standard-Realm"
 
-#: templates/admin-page.php:199
+#: templates/admin-page.php
 msgid "Type to search realms..."
 msgstr "Zum Suchen von Realms tippen ..."
 
-#: templates/admin-page.php:208
-msgid "Select a realm or leave empty for region-wide rankings."
-msgstr "Wähle einen Realm oder lass das Feld leer für regionweite Ranglisten."
+#: templates/admin-page.php
+msgid ""
+"Start typing to search available realms. Leave empty for region-wide "
+"rankings."
+msgstr "Beginne zu tippen, um verfügbare Realms zu suchen. Leer lassen für regionweite Ranglisten."
 
-#: templates/admin-page.php:216
+#: templates/admin-page.php
+msgid ""
+"Enter the realm slug manually (e.g., eredar). Realm autocompletion requires "
+"Blizzard API credentials. Leave empty for region-wide rankings."
+msgstr "Gib den Realm-Slug manuell ein (z. B. eredar). Realm-Autovervollständigung erfordert Blizzard-API-Zugangsdaten. Leer lassen für regionweite Ranglisten."
+
+#: templates/admin-page.php
 msgid "Default Raid Settings"
 msgstr "Standard-Raid-Einstellungen"
 
-#: templates/admin-page.php:221
+#: templates/admin-page.php
+msgid ""
+"Choose which raid and difficulty to display by default. Can be overridden "
+"per shortcode."
+msgstr "Wähle, welcher Raid und Schwierigkeitsgrad standardmäßig angezeigt wird. Kann pro Shortcode überschrieben werden."
+
+#: templates/admin-page.php
 msgid "Expansion"
 msgstr "Erweiterung"
 
-#: templates/admin-page.php:237
+#: templates/admin-page.php
+msgid "Determines which raids are available in the dropdown below."
+msgstr "Bestimmt, welche Raids im Dropdown unten verfügbar sind."
+
+#: templates/admin-page.php
 msgid "Default Raid"
 msgstr "Standard-Raid"
 
-#: templates/admin-page.php:245
+#: templates/admin-page.php
 msgid "Loading raids..."
 msgstr "Raids werden geladen ..."
 
-#: templates/admin-page.php:248
+#: templates/admin-page.php
 msgid "Refresh Raids"
 msgstr "Raids aktualisieren"
 
-#: templates/admin-page.php:252
-msgid "Select a raid from the chosen expansion"
-msgstr "Wähle einen Raid aus der gewählten Erweiterung"
+#: templates/admin-page.php
+msgid ""
+"The raid to display when none is specified in the shortcode. Use \"Refresh "
+"Raids\" to update the list from the API."
+msgstr "Der Raid, der angezeigt wird, wenn im Shortcode keiner angegeben ist. Verwende \"Raids aktualisieren\", um die Liste von der API zu aktualisieren."
 
-#: templates/admin-page.php:259
+#: templates/admin-page.php
 msgid "Default Difficulty"
 msgstr "Standardschwierigkeit"
 
-#: templates/admin-page.php:265
+#: templates/admin-page.php
 msgid "Highest Progress"
 msgstr "Höchster Fortschritt"
 
-#: templates/admin-page.php:268
+#: templates/admin-page.php
 msgid "All Difficulties"
 msgstr "Alle Schwierigkeitsgrade"
 
-#: templates/admin-page.php:271
+#: templates/admin-page.php
 msgid "Normal"
 msgstr "Normal"
 
-#: templates/admin-page.php:274
+#: templates/admin-page.php
 msgid "Heroic"
 msgstr "Heroisch"
 
-#: templates/admin-page.php:277
+#: templates/admin-page.php
 msgid "Mythic"
 msgstr "Mythisch"
 
-#: templates/admin-page.php:287 templates/admin-page.php:437
+#: templates/admin-page.php
+msgid ""
+"\"Highest Progress\" shows only the highest difficulty the guild has "
+"progressed in. \"All Difficulties\" shows a section for each difficulty."
+msgstr "\"Höchster Fortschritt\" zeigt nur den höchsten Schwierigkeitsgrad, in dem die Gilde Fortschritte gemacht hat. \"Alle Schwierigkeitsgrade\" zeigt einen Abschnitt für jeden Schwierigkeitsgrad."
+
+#: templates/admin-page.php
+msgid ""
+"Enter and save a valid Raider.io API key above to configure guild, raid, "
+"display, and tool settings."
+msgstr "Gib oben einen gültigen Raider.io-API-Schlüssel ein und speichere, um Gilden-, Raid-, Anzeige- und Werkzeugeinstellungen zu konfigurieren."
+
+#: templates/admin-page.php
 msgid "Save Changes"
 msgstr "Änderungen speichern"
 
-#: templates/admin-page.php:295
+#: templates/admin-page.php
 msgid "Display Options"
 msgstr "Anzeigeoptionen"
 
-#: templates/admin-page.php:300
+#: templates/admin-page.php
+msgid ""
+"Control how raid progress is displayed on the frontend. These are the "
+"defaults used by the [encountrix] shortcode."
+msgstr "Steuere, wie der Raid-Fortschritt im Frontend angezeigt wird. Dies sind die Standardwerte des [encountrix]-Shortcodes."
+
+#: templates/admin-page.php
 msgid "Show Raid Name"
 msgstr "Raid-Namen anzeigen"
 
-#: templates/admin-page.php:306 templates/admin-page.php:326
-#: templates/admin-page.php:343 templates/admin-page.php:363
-#: templates/admin-page.php:383
+#: templates/admin-page.php
 msgid "Yes"
 msgstr "Ja"
 
-#: templates/admin-page.php:309 templates/admin-page.php:329
-#: templates/admin-page.php:346 templates/admin-page.php:366
-#: templates/admin-page.php:386
+#: templates/admin-page.php
 msgid "No"
 msgstr "Nein"
 
-#: templates/admin-page.php:313
-msgid "Display the raid name as a header in the widget"
-msgstr "Den Raid-Namen als Überschrift im Widget anzeigen"
+#: templates/admin-page.php
+msgid ""
+"Displays the raid name (e.g., \"Nerub-ar Palace\") as a header above the "
+"boss list."
+msgstr "Zeigt den Raid-Namen (z. B. \"Nerub-ar Palace\") als Überschrift über der Boss-Liste an."
 
-#: templates/admin-page.php:320
+#: templates/admin-page.php
 msgid "Show Boss Icons"
 msgstr "Boss-Icons anzeigen"
 
-#: templates/admin-page.php:337
+#: templates/admin-page.php
+msgid ""
+"Shows an icon next to each boss name. Icons must be imported via the Tools "
+"tab first."
+msgstr "Zeigt ein Icon neben jedem Boss-Namen. Icons müssen zuerst über den Werkzeuge-Tab importiert werden."
+
+#: templates/admin-page.php
 msgid "Show Raid Background"
 msgstr "Raid-Hintergrund anzeigen"
 
-#: templates/admin-page.php:350
+#: templates/admin-page.php
 msgid ""
-"Display the raid journal background image in the header (requires Blizzard "
-"API)"
-msgstr "Raidjournal-Hintergrundbild im Header anzeigen (erfordert Blizzard-API)"
+"Fetches and displays the official raid journal background image from "
+"Blizzard in the widget header."
+msgstr "Ruft das offizielle Raidjournal-Hintergrundbild von Blizzard ab und zeigt es im Widget-Header an."
 
-#: templates/admin-page.php:357
+#: templates/admin-page.php
 msgid "Show Defeated Bosses"
 msgstr "Besiegte Bosse anzeigen"
 
-#: templates/admin-page.php:370
-msgid "When set to No, defeated bosses will be hidden from the list"
-msgstr "Wenn auf Nein gesetzt, werden besiegte Bosse in der Liste ausgeblendet"
+#: templates/admin-page.php
+msgid ""
+"When set to No, only bosses that have not yet been defeated are shown. "
+"Useful to highlight remaining progress."
+msgstr "Wenn auf Nein gesetzt, werden nur noch nicht besiegte Bosse angezeigt. Nützlich, um den verbleibenden Fortschritt hervorzuheben."
 
-#: templates/admin-page.php:377
+#: templates/admin-page.php
 msgid "Use Blizzard Icons"
 msgstr "Blizzard-Icons verwenden"
 
-#: templates/admin-page.php:390
-msgid "Download and display official Blizzard achievement icons"
-msgstr "Offizielle Blizzard-Erfolgsicons herunterladen und anzeigen"
+#: templates/admin-page.php
+msgid ""
+"Uses official Blizzard achievement icons for bosses. When disabled, generic "
+"icons are shown. Icons must be imported first via the Tools tab."
+msgstr "Verwendet offizielle Blizzard-Erfolgsicons für Bosse. Wenn deaktiviert, werden generische Icons angezeigt. Icons müssen zuerst über den Werkzeuge-Tab importiert werden."
 
-#: templates/admin-page.php:397
+#: templates/admin-page.php
 msgid "Cache Duration"
 msgstr "Cache-Dauer"
 
-#: templates/admin-page.php:408
+#: templates/admin-page.php
 msgid "minutes"
 msgstr "Minuten"
 
-#: templates/admin-page.php:410
-msgid "How long to cache API data (0 to disable caching, max 1440)"
-msgstr "Wie lange API-Daten zwischengespeichert werden (0 = Cache aus, max. 1440)"
+#: templates/admin-page.php
+msgid ""
+"How long API responses are cached locally. Higher values reduce API calls "
+"but delay updates. Set to 0 to always fetch fresh data (not recommended for "
+"production). Maximum: 1440 minutes (24 hours)."
+msgstr "Wie lange API-Antworten lokal zwischengespeichert werden. Höhere Werte reduzieren API-Aufrufe, verzögern aber Aktualisierungen. Auf 0 setzen für immer frische Daten (nicht empfohlen für Produktion). Maximum: 1440 Minuten (24 Stunden)."
 
-#: templates/admin-page.php:417
+#: templates/admin-page.php
 msgid "Results Limit"
 msgstr "Ergebnislimit"
 
-#: templates/admin-page.php:429
-msgid "Maximum number of guilds to display (1-100)"
-msgstr "Maximale Anzahl anzuzeigender Gilden (1–100)"
+#: templates/admin-page.php
+msgid ""
+"Maximum number of guilds shown in realm/region rankings (1-100). Only "
+"applies when no specific guild IDs are set."
+msgstr "Maximale Anzahl der Gilden in Realm-/Regionranglisten (1–100). Gilt nur, wenn keine spezifischen Gilden-IDs gesetzt sind."
 
-#: templates/admin-page.php:446
+#: templates/admin-page.php
 msgid "Icon Management"
 msgstr "Icon-Verwaltung"
 
-#: templates/admin-page.php:448
+#: templates/admin-page.php
+msgid ""
+"Import and manage boss achievement icons from the Blizzard API. Icons are "
+"stored in your WordPress media library."
+msgstr "Importiere und verwalte Boss-Erfolgsicons von der Blizzard-API. Icons werden in deiner WordPress-Mediathek gespeichert."
+
+#: templates/admin-page.php
 msgid "Import Boss Icons"
 msgstr "Boss-Icons importieren"
 
-#: templates/admin-page.php:449
+#: templates/admin-page.php
 msgid ""
-"Download and import boss achievement icons for the selected raid from "
-"Blizzard API."
-msgstr "Download and import boss achievement icons for the selected raid from Blizzard API."
+"Downloads boss achievement icons for the currently selected raid from the "
+"Blizzard API and saves them to your media library. Already imported icons "
+"are skipped."
+msgstr "Lädt Boss-Erfolgsicons für den aktuell ausgewählten Raid von der Blizzard-API herunter und speichert sie in deiner Mediathek. Bereits importierte Icons werden übersprungen."
 
-#: templates/admin-page.php:451
+#: templates/admin-page.php
 msgid "Import Icons"
 msgstr "Icons importieren"
 
-#: templates/admin-page.php:457 templates/admin-page.php:460
+#: templates/admin-page.php
 msgid "Delete All Icons"
 msgstr "Alle Icons löschen"
 
-#: templates/admin-page.php:458
+#: templates/admin-page.php
 msgid "Warning:"
 msgstr "Warnung:"
 
-#: templates/admin-page.php:458
+#: templates/admin-page.php
 msgid ""
 "This will permanently delete ALL imported boss and raid icons from your "
 "media library."
 msgstr "Dadurch werden ALLE importierten Boss- und Raid-Icons dauerhaft aus deiner Mediathek gelöscht."
 
-#: templates/admin-page.php:467
+#: templates/admin-page.php
+msgid ""
+"Enter and save valid Blizzard API credentials in the General Settings tab "
+"to import boss icons."
+msgstr "Gib gültige Blizzard-API-Zugangsdaten im Tab \"Allgemeine Einstellungen\" ein und speichere sie, um Boss-Icons zu importieren."
+
+#: templates/admin-page.php
 msgid "Cache Management"
 msgstr "Cache-Verwaltung"
 
-#: templates/admin-page.php:469
+#: templates/admin-page.php
 msgid "Clear All Cache"
 msgstr "Gesamten Cache leeren"
 
-#: templates/admin-page.php:470
-msgid "Remove all cached API data and force fresh data retrieval."
-msgstr "Alle zwischengespeicherten API-Daten entfernen und neue Daten erzwingen."
+#: templates/admin-page.php
+msgid ""
+"Removes all cached API responses. The next page load will fetch fresh data "
+"from the APIs. Useful after changing API keys or when data appears outdated."
+msgstr "Entfernt alle zwischengespeicherten API-Antworten. Der nächste Seitenaufruf ruft frische Daten von den APIs ab. Nützlich nach dem Ändern von API-Schlüsseln oder wenn Daten veraltet erscheinen."
 
-#: templates/admin-page.php:472
+#: templates/admin-page.php
 msgid "Clear Cache"
 msgstr "Cache leeren"
 
-#: templates/admin-page.php:475
+#: templates/admin-page.php
 msgid "Cache cleared successfully!"
 msgstr "Cache erfolgreich geleert!"
 
-#: templates/admin-page.php:484
+#: templates/admin-page.php
 msgid "Shortcode Documentation"
 msgstr "Shortcode-Dokumentation"
 
-#: templates/admin-page.php:487
+#: templates/admin-page.php
 msgid "Basic Usage"
 msgstr "Grundlegende Verwendung"
 
-#: templates/admin-page.php:488
+#: templates/admin-page.php
 msgid "Use the following shortcode to display raid progress:"
 msgstr "Verwende den folgenden Shortcode, um den Raid-Fortschritt anzuzeigen:"
 
-#: templates/admin-page.php:491
+#: templates/admin-page.php
 msgid "Copy to clipboard"
 msgstr "In Zwischenablage kopieren"
 
-#: templates/admin-page.php:493 templates/admin-page.php:522
-#: templates/admin-page.php:531
+#: templates/admin-page.php
 msgid "Copy"
 msgstr "Kopieren"
 
-#: templates/admin-page.php:496
+#: templates/admin-page.php
 msgid "This will use all default settings configured above."
 msgstr "Dabei werden alle oben konfigurierten Standardeinstellungen verwendet."
 
-#: templates/admin-page.php:500
+#: templates/admin-page.php
 msgid "Available Parameters"
 msgstr "Verfügbare Parameter"
 
-#: templates/admin-page.php:502
+#: templates/admin-page.php
 msgid "Raid slug (e.g., nerub-ar-palace)"
 msgstr "Raid-Slug (z. B. nerub-ar-palace)"
 
-#: templates/admin-page.php:503
+#: templates/admin-page.php
 msgid "Difficulty to display: highest, all, normal, heroic, or mythic"
 msgstr "Anzuzeigender Schwierigkeitsgrad: highest, all, normal, heroic oder mythic"
 
-#: templates/admin-page.php:504
+#: templates/admin-page.php
 msgid "Region: us, eu, kr, or tw"
 msgstr "Region: us, eu, kr oder tw"
 
-#: templates/admin-page.php:505
+#: templates/admin-page.php
 msgid "Specific realm name"
 msgstr "Spezifischer Realm-Name"
 
-#: templates/admin-page.php:506
+#: templates/admin-page.php
 msgid "Comma-separated guild IDs (max 10)"
 msgstr "Kommagetrennte Gilden-IDs (max. 10)"
 
-#: templates/admin-page.php:507
+#: templates/admin-page.php
 msgid "Cache duration in minutes"
 msgstr "Cache-Dauer in Minuten"
 
-#: templates/admin-page.php:508
+#: templates/admin-page.php
 msgid "Show raid name header: true or false"
 msgstr "Raid-Namenkopf anzeigen: true oder false"
 
-#: templates/admin-page.php:509
+#: templates/admin-page.php
 msgid "Show boss icons: true or false"
 msgstr "Boss-Icons anzeigen: true oder false"
 
-#: templates/admin-page.php:510
+#: templates/admin-page.php
 msgid "Maximum number of guilds to display"
 msgstr "Maximale Anzahl anzuzeigender Gilden"
 
-#: templates/admin-page.php:515
+#: templates/admin-page.php
 msgid "Example Shortcodes"
 msgstr "Beispiel-Shortcodes"
 
-#: templates/admin-page.php:517
+#: templates/admin-page.php
 msgid "Display specific guild progress:"
 msgstr "Fortschritt einer bestimmten Gilde anzeigen:"
 
-#: templates/admin-page.php:526
+#: templates/admin-page.php
 msgid "Display realm rankings:"
 msgstr "Realm-Ranglisten anzeigen:"

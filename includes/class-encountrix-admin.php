@@ -913,6 +913,10 @@ class EncountrixAdmin {
 		// Get expansions
 		$expansions = $this->api->get_expansions();
 
+		// API key availability flags for conditional UI rendering.
+		$has_raiderio_key = ! empty( $api_key );
+		$has_blizzard_api = ! empty( $blizzard_client_id ) && ! empty( $blizzard_client_secret );
+
 		include ENCOUNTRIX_PLUGIN_DIR . 'templates/admin-page.php';
 	}
 }
