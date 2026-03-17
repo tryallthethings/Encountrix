@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Plugin Name: Encountrix
- * Plugin URI: https://example.com/encountrix
- * Description: Display World of Warcraft raid progress from Raider.io API with Blizzard achievement icons
- * Version: 5.0.1
- * Author: Your Name
+ * Plugin Name: Encountrix - WoW Raid Progress
+ * Plugin URI: https://github.com/tryallthethings/Encountrix
+ * Description: Display a guilds World of Warcraft raid progression via widget or shortcode with data from Raider.io and boss / raid background images from Blizzard's API (if enabled). Supports caching, multiple guilds, and all raid difficulties.
+ * Version: 5.1.0
+ * Author: Tryallthethings
  * License: GPL v2 or later
- * Text Domain: encountrix
+ * Text Domain: wow-raid-progress
  * Domain Path: /languages
  * Requires PHP: 8.0
  */
