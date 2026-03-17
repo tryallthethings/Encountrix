@@ -11,7 +11,7 @@
  * @since   1.0.0
  */
 
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
@@ -29,7 +29,7 @@ class EncountrixWidget {
 	 *
 	 * @param EncountrixApi $api API handler instance.
 	 */
-	public function __construct(EncountrixApi $api) {
+	public function __construct( EncountrixApi $api ) {
 		$this->api = $api;
 	}
 
@@ -42,125 +42,146 @@ class EncountrixWidget {
 	 * @param array $atts Shortcode attributes.
 	 * @return string Rendered HTML.
 	 */
-	public function render_shortcode(array $atts): string {
+	public function render_shortcode( array $atts ): string {
 
-		if (defined('ENCOUNTRIX_PLUGIN_URL')) {
+		if ( defined( 'ENCOUNTRIX_PLUGIN_URL' ) ) {
 			wp_enqueue_style(
 				'encountrix',
 				ENCOUNTRIX_PLUGIN_URL . 'assets/css/encountrix.css',
-				[],
-				defined('ENCOUNTRIX_VERSION') ? ENCOUNTRIX_VERSION : null
+				array(),
+				defined( 'ENCOUNTRIX_VERSION' ) ? ENCOUNTRIX_VERSION : null
 			);
 			wp_enqueue_script(
 				'encountrix',
 				ENCOUNTRIX_PLUGIN_URL . 'assets/js/encountrix.js',
-				['jquery'],
-				defined('ENCOUNTRIX_VERSION') ? ENCOUNTRIX_VERSION : null,
+				array( 'jquery' ),
+				defined( 'ENCOUNTRIX_VERSION' ) ? ENCOUNTRIX_VERSION : null,
 				true
 			);
 		}
 
 		// Get default values from settings
-		$defaults = [
-			'raid' => get_option('encountrix_raid', ''),
-			'difficulty' => get_option('encountrix_difficulty', 'highest'),
-			'region' => get_option('encountrix_region', 'eu'),
-			'realm' => get_option('encountrix_realm', ''),
-			'guilds' => get_option('encountrix_guild_ids', ''),
-			'cache' => get_option('encountrix_cache_time', 60),
-			'show_icons' => get_option('encountrix_show_icons', 'true'),
-			'show_killed' => get_option('encountrix_show_killed', 'false'),
-			'use_blizzard_icons' => get_option('encountrix_use_blizzard_icons', 'true'),
-			'show_raid_name' => get_option('encountrix_show_raid_name', 'false'),
-			'show_raid_icon' => get_option('encountrix_show_raid_icon', 'false'),
-			'limit' => get_option('encountrix_limit', 50),
-			'page' => 0
-		];
+		$defaults = array(
+			'raid'               => get_option( 'encountrix_raid', '' ),
+			'difficulty'         => get_option( 'encountrix_difficulty', 'highest' ),
+			'region'             => get_option( 'encountrix_region', 'eu' ),
+			'realm'              => get_option( 'encountrix_realm', '' ),
+			'guilds'             => get_option( 'encountrix_guild_ids', '' ),
+			'cache'              => get_option( 'encountrix_cache_time', 60 ),
+			'show_icons'         => get_option( 'encountrix_show_icons', 'true' ),
+			'show_killed'        => get_option( 'encountrix_show_killed', 'false' ),
+			'use_blizzard_icons' => get_option( 'encountrix_use_blizzard_icons', 'true' ),
+			'show_raid_name'     => get_option( 'encountrix_show_raid_name', 'false' ),
+			'show_raid_icon'     => get_option( 'encountrix_show_raid_icon', 'false' ),
+			'limit'              => get_option( 'encountrix_limit', 50 ),
+			'page'               => 0,
+		);
 
-		$atts = shortcode_atts($defaults, $atts, 'encountrix');
+		$atts = shortcode_atts( $defaults, $atts, 'encountrix' );
 
-		if (empty($atts['raid'])) {
-			return $this->render_error(__('No raid specified. Please configure a default raid in the plugin settings or specify one in the shortcode.', 'encountrix'));
+		if ( empty( $atts['raid'] ) ) {
+			return $this->render_error( __( 'No raid specified. Please configure a default raid in the plugin settings or specify one in the shortcode.', 'encountrix' ) );
 		}
 
-		if (empty($atts['region'])) {
-			return $this->render_error(__('No region specified. Please configure a default region in the plugin settings or specify one in the shortcode.', 'encountrix'));
+		if ( empty( $atts['region'] ) ) {
+			return $this->render_error( __( 'No region specified. Please configure a default region in the plugin settings or specify one in the shortcode.', 'encountrix' ) );
 		}
 
 		// Sanitize inputs
-		$raid_slug = sanitize_text_field($atts['raid']);
-		$difficulty = $this->validate_difficulty($atts['difficulty']);
-		$region = sanitize_text_field($atts['region']);
-		$realm = $this->api->sanitize_realm($atts['realm']);
-		$guilds = $this->api->sanitize_guilds($atts['guilds']);
-		$cache_minutes = absint($atts['cache']);
-		$show_icons = filter_var($atts['show_icons'], FILTER_VALIDATE_BOOLEAN);
-		$show_killed = filter_var($atts['show_killed'], FILTER_VALIDATE_BOOLEAN);
-		$use_blizzard_icons = filter_var($atts['use_blizzard_icons'], FILTER_VALIDATE_BOOLEAN);
-		$show_raid_name = filter_var($atts['show_raid_name'], FILTER_VALIDATE_BOOLEAN);
-		$show_raid_icon = filter_var($atts['show_raid_icon'], FILTER_VALIDATE_BOOLEAN);
-		$limit = max(1, min(100, absint($atts['limit'])));
-		$page = max(0, absint($atts['page']));
+		$raid_slug          = sanitize_text_field( $atts['raid'] );
+		$difficulty         = $this->validate_difficulty( $atts['difficulty'] );
+		$region             = sanitize_text_field( $atts['region'] );
+		$realm              = $this->api->sanitize_realm( $atts['realm'] );
+		$guilds             = $this->api->sanitize_guilds( $atts['guilds'] );
+		$cache_minutes      = absint( $atts['cache'] );
+		$show_icons         = filter_var( $atts['show_icons'], FILTER_VALIDATE_BOOLEAN );
+		$show_killed        = filter_var( $atts['show_killed'], FILTER_VALIDATE_BOOLEAN );
+		$use_blizzard_icons = filter_var( $atts['use_blizzard_icons'], FILTER_VALIDATE_BOOLEAN );
+		$show_raid_name     = filter_var( $atts['show_raid_name'], FILTER_VALIDATE_BOOLEAN );
+		$show_raid_icon     = filter_var( $atts['show_raid_icon'], FILTER_VALIDATE_BOOLEAN );
+		$limit              = max( 1, min( 100, absint( $atts['limit'] ) ) );
+		$page               = max( 0, absint( $atts['page'] ) );
 
-		$expansion_id = get_option('encountrix_expansion', 10);
+		$expansion_id = get_option( 'encountrix_expansion', 10 );
 
-		$static_data = $this->api->fetch_static_raid_data_by_expansion($expansion_id, $cache_minutes);
-		if (is_wp_error($static_data)) {
+		$static_data = $this->api->fetch_static_raid_data_by_expansion( $expansion_id, $cache_minutes );
+		if ( is_wp_error( $static_data ) ) {
 			return $this->render_error(
 				sprintf(
-					__('Error fetching raid information: %s', 'encountrix'),
+					__( 'Error fetching raid information: %s', 'encountrix' ),
 					$static_data->get_error_message()
 				)
 			);
 		}
 
-		$raid_info = $this->find_raid_info($static_data, $raid_slug);
-		if (!$raid_info) {
+		$raid_info = $this->find_raid_info( $static_data, $raid_slug );
+		if ( ! $raid_info ) {
 			return $this->render_error(
 				sprintf(
-					__('Raid "%s" not found. Please check the raid name.', 'encountrix'),
-					esc_html($raid_slug)
+					__( 'Raid "%s" not found. Please check the raid name.', 'encountrix' ),
+					esc_html( $raid_slug )
 				)
 			);
 		}
 
 		// Batch-load all boss icons for this raid in a single query.
-		$icon_map = [];
-		if ($show_icons && $use_blizzard_icons) {
-			$icon_map = $this->api->get_all_boss_icon_ids($raid_slug);
+		$icon_map = array();
+		if ( $show_icons && $use_blizzard_icons ) {
+			$icon_map = $this->api->get_all_boss_icon_ids( $raid_slug );
 		}
 
 		// Handle multiple guilds
-		$guild_ids = !empty($guilds) ? explode(',', $guilds) : [];
-		$guild_ids = array_map('trim', $guild_ids);
-		$guild_ids = array_filter($guild_ids);
+		$guild_ids = ! empty( $guilds ) ? explode( ',', $guilds ) : array();
+		$guild_ids = array_map( 'trim', $guild_ids );
+		$guild_ids = array_filter( $guild_ids );
 
-		if (empty($guild_ids)) {
+		if ( empty( $guild_ids ) ) {
 			return $this->render_rankings(
-				$raid_info, $raid_slug, $difficulty, $region, $realm, '',
-				$cache_minutes, $limit, $page,
-				$show_icons, $show_killed, $use_blizzard_icons,
-				$show_raid_name, $show_raid_icon, $expansion_id, $icon_map
+				$raid_info,
+				$raid_slug,
+				$difficulty,
+				$region,
+				$realm,
+				'',
+				$cache_minutes,
+				$limit,
+				$page,
+				$show_icons,
+				$show_killed,
+				$use_blizzard_icons,
+				$show_raid_name,
+				$show_raid_icon,
+				$expansion_id,
+				$icon_map
 			);
 		}
 
 		$output = '<div class="encountrix-container">';
 
-		if ($show_raid_name || $show_raid_icon) {
-			$output .= $this->render_raid_header($raid_info, $show_raid_name, $show_raid_icon, $use_blizzard_icons, $expansion_id);
+		if ( $show_raid_name || $show_raid_icon ) {
+			$output .= $this->render_raid_header( $raid_info, $show_raid_name, $show_raid_icon, $use_blizzard_icons, $expansion_id );
 		}
 
-		foreach ($guild_ids as $guild_id) {
+		foreach ( $guild_ids as $guild_id ) {
 			$output .= $this->render_guild_progress(
-				$raid_info, $raid_slug, $difficulty, $region, $realm, $guild_id,
-				$cache_minutes, $show_icons, $show_killed, $use_blizzard_icons,
-				$expansion_id, $icon_map
+				$raid_info,
+				$raid_slug,
+				$difficulty,
+				$region,
+				$realm,
+				$guild_id,
+				$cache_minutes,
+				$show_icons,
+				$show_killed,
+				$use_blizzard_icons,
+				$expansion_id,
+				$icon_map
 			);
 		}
 
-		if ($use_blizzard_icons) {
+		if ( $use_blizzard_icons ) {
 			$output .= '<div class="encountrix-attribution">';
-			$output .= '<small>' . __('Boss artwork © Blizzard Entertainment', 'encountrix') . '</small>';
+			$output .= '<small>' . __( 'Boss artwork © Blizzard Entertainment', 'encountrix' ) . '</small>';
 			$output .= '</div>';
 		}
 
@@ -172,11 +193,11 @@ class EncountrixWidget {
 	/**
 	 * Render the raid header with optional hero image.
 	 *
-	 * @param array  $raid_info          Raid static data (name, slug, encounters).
-	 * @param bool   $show_raid_name     Whether to display the raid name.
-	 * @param bool   $show_raid_icon     Whether to display the raid background image.
-	 * @param bool   $use_blizzard_icons Whether to fetch Blizzard media assets.
-	 * @param int    $expansion_id       Current expansion ID.
+	 * @param array $raid_info          Raid static data (name, slug, encounters).
+	 * @param bool  $show_raid_name     Whether to display the raid name.
+	 * @param bool  $show_raid_icon     Whether to display the raid background image.
+	 * @param bool  $use_blizzard_icons Whether to fetch Blizzard media assets.
+	 * @param int   $expansion_id       Current expansion ID.
 	 * @return string Rendered HTML.
 	 */
 	private function render_raid_header(
@@ -186,32 +207,32 @@ class EncountrixWidget {
 		bool $use_blizzard_icons,
 		int $expansion_id
 	): string {
-		if (!$show_raid_name && !$show_raid_icon) {
+		if ( ! $show_raid_name && ! $show_raid_icon ) {
 			return '';
 		}
 
-		$raid_name = !empty($raid_info['name']) ? $raid_info['name'] : '';
-		$raid_slug = !empty($raid_info['slug']) ? $raid_info['slug'] : '';
+		$raid_name = ! empty( $raid_info['name'] ) ? $raid_info['name'] : '';
+		$raid_slug = ! empty( $raid_info['slug'] ) ? $raid_info['slug'] : '';
 
 		$bg_image_url = '';
-		if ($show_raid_icon && $use_blizzard_icons) {
-			$bg_image_id = $this->api->get_journal_instance_image_id($raid_slug, $expansion_id);
-			if ($bg_image_id) {
-				$bg_image_url = wp_get_attachment_image_url($bg_image_id, 'full');
+		if ( $show_raid_icon && $use_blizzard_icons ) {
+			$bg_image_id = $this->api->get_journal_instance_image_id( $raid_slug, $expansion_id );
+			if ( $bg_image_id ) {
+				$bg_image_url = wp_get_attachment_image_url( $bg_image_id, 'full' );
 			}
 		}
 
 		$output = '<div class="encountrix-header-container">';
 
-		if ($bg_image_url) {
-			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url($bg_image_url) . ');">';
+		if ( $bg_image_url ) {
+			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url( $bg_image_url ) . ');">';
 			$output .= '<div class="encountrix-header-overlay">';
-			$output .= '<h2 class="encountrix-header-title">' . esc_html($raid_name) . '</h2>';
+			$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_name ) . '</h2>';
 			$output .= '</div>';
 			$output .= '</div>';
 		} else {
 			$output .= '<div class="encountrix-header-simple">';
-			$output .= '<h2 class="encountrix-header-title">' . esc_html($raid_name) . '</h2>';
+			$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_name ) . '</h2>';
 			$output .= '</div>';
 		}
 
@@ -260,84 +281,102 @@ class EncountrixWidget {
 		array $icon_map
 	): string {
 		$bg_image_url = '';
-		if ($show_raid_icon && $use_blizzard_icons) {
-			$bg_image_id = $this->api->get_journal_instance_image_id($raid_slug, $expansion_id);
-			if ($bg_image_id) {
-				$bg_image_url = wp_get_attachment_image_url($bg_image_id, 'full');
+		if ( $show_raid_icon && $use_blizzard_icons ) {
+			$bg_image_id = $this->api->get_journal_instance_image_id( $raid_slug, $expansion_id );
+			if ( $bg_image_id ) {
+				$bg_image_url = wp_get_attachment_image_url( $bg_image_id, 'full' );
 			}
 		}
 
 		$output = '<div class="encountrix">';
 
-		if ($bg_image_url && $show_raid_name) {
-			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url($bg_image_url) . ');">';
+		if ( $bg_image_url && $show_raid_name ) {
+			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url( $bg_image_url ) . ');">';
 			$output .= '<div class="encountrix-header-overlay">';
-			$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr($raid_info['name']) . '">';
-			$output .= '<span>' . esc_html($raid_info['name']) . '</span>';
+			$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr( $raid_info['name'] ) . '">';
+			$output .= '<span>' . esc_html( $raid_info['name'] ) . '</span>';
 			$output .= '</h2>';
 			$output .= '</div>';
 			$output .= '</div>';
-		} elseif ($show_raid_name) {
+		} elseif ( $show_raid_name ) {
 			$output .= '<div class="encountrix-header-simple">';
-			$output .= '<h2 class="encountrix-header-title">' . esc_html($raid_info['name']) . '</h2>';
+			$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_info['name'] ) . '</h2>';
 			$output .= '</div>';
 		}
 
-		if ($difficulty === 'highest') {
-			$all = [
-				'normal' => $this->api->fetch_raid_data($raid_slug, 'normal', $region, $realm, $guilds, $cache_minutes, $limit, $page),
-				'heroic' => $this->api->fetch_raid_data($raid_slug, 'heroic', $region, $realm, $guilds, $cache_minutes, $limit, $page),
-				'mythic' => $this->api->fetch_raid_data($raid_slug, 'mythic', $region, $realm, $guilds, $cache_minutes, $limit, $page),
-			];
+		if ( $difficulty === 'highest' ) {
+			$all = array(
+				'normal' => $this->api->fetch_raid_data( $raid_slug, 'normal', $region, $realm, $guilds, $cache_minutes, $limit, $page ),
+				'heroic' => $this->api->fetch_raid_data( $raid_slug, 'heroic', $region, $realm, $guilds, $cache_minutes, $limit, $page ),
+				'mythic' => $this->api->fetch_raid_data( $raid_slug, 'mythic', $region, $realm, $guilds, $cache_minutes, $limit, $page ),
+			);
 
-			$target = $this->find_highest_progress_difficulty($all, $raid_info);
-			$data = $all[$target] ?? ['raidRankings' => []];
+			$target = $this->find_highest_progress_difficulty( $all, $raid_info );
+			$data   = $all[ $target ] ?? array( 'raidRankings' => array() );
 
-			if (is_wp_error($data)) {
-				if (!$this->is_rate_limit_error($data)) {
+			if ( is_wp_error( $data ) ) {
+				if ( ! $this->is_rate_limit_error( $data ) ) {
 					$output .= $this->render_error_inline(
-						sprintf(__('Error loading %s data: %s', 'encountrix'), ucfirst($target), $data->get_error_message())
+						sprintf( __( 'Error loading %1$s data: %2$s', 'encountrix' ), ucfirst( $target ), $data->get_error_message() )
 					);
 				}
 			} else {
 				$output .= $this->render_difficulty_section(
-					is_array($data) ? $data : ['raidRankings' => []],
-					$target, $raid_info, $all,
-					$show_icons, $show_killed, $use_blizzard_icons,
-					$expansion_id, $icon_map
+					is_array( $data ) ? $data : array( 'raidRankings' => array() ),
+					$target,
+					$raid_info,
+					$all,
+					$show_icons,
+					$show_killed,
+					$use_blizzard_icons,
+					$expansion_id,
+					$icon_map
 				);
 			}
 		} else {
-			$difficulties_to_render = is_array($difficulty) ? $difficulty : [$difficulty];
+			$difficulties_to_render = is_array( $difficulty ) ? $difficulty : array( $difficulty );
 
-			foreach ($difficulties_to_render as $diff) {
+			foreach ( $difficulties_to_render as $diff ) {
 				[$data, $used_diff, $all_attempts] = $this->fetch_with_fallback(
-					$raid_slug, $diff, $region, $realm, $guilds, $cache_minutes, $limit, $page
+					$raid_slug,
+					$diff,
+					$region,
+					$realm,
+					$guilds,
+					$cache_minutes,
+					$limit,
+					$page
 				);
 
-				if (is_wp_error($data)) {
-					if (!$this->is_rate_limit_error($data)) {
+				if ( is_wp_error( $data ) ) {
+					if ( ! $this->is_rate_limit_error( $data ) ) {
 						$output .= $this->render_error_inline(
-							sprintf(__('Error loading %s data: %s', 'encountrix'), ucfirst($diff), $data->get_error_message())
+							sprintf( __( 'Error loading %1$s data: %2$s', 'encountrix' ), ucfirst( $diff ), $data->get_error_message() )
 						);
 					}
 					continue;
 				}
 
-				$current_tier_data = (isset($all_attempts[$diff]) && is_array($all_attempts[$diff]))
-					? $all_attempts[$diff]
-					: ['raidRankings' => []];
+				$current_tier_data = ( isset( $all_attempts[ $diff ] ) && is_array( $all_attempts[ $diff ] ) )
+					? $all_attempts[ $diff ]
+					: array( 'raidRankings' => array() );
 
 				$output .= $this->render_difficulty_section(
-					$current_tier_data, $diff, $raid_info, $all_attempts,
-					$show_icons, $show_killed, $use_blizzard_icons,
-					$expansion_id, $icon_map
+					$current_tier_data,
+					$diff,
+					$raid_info,
+					$all_attempts,
+					$show_icons,
+					$show_killed,
+					$use_blizzard_icons,
+					$expansion_id,
+					$icon_map
 				);
 			}
 		}
 
-		if ($use_blizzard_icons) {
-			$output .= '<div class="encountrix-attribution"><small>' . __('Data and media © Blizzard Entertainment', 'encountrix') . '</small></div>';
+		if ( $use_blizzard_icons ) {
+			$output .= '<div class="encountrix-attribution"><small>' . __( 'Data and media © Blizzard Entertainment', 'encountrix' ) . '</small></div>';
 		}
 
 		$output .= '</div>';
@@ -379,25 +418,32 @@ class EncountrixWidget {
 		array $icon_map
 	): string {
 
-		if (!preg_match('/^\d+$/', $guild_id)) {
+		if ( ! preg_match( '/^\d+$/', $guild_id ) ) {
 			return $this->render_error_inline(
-				sprintf(__('Invalid guild ID: %s', 'encountrix'), esc_html($guild_id))
+				sprintf( __( 'Invalid guild ID: %s', 'encountrix' ), esc_html( $guild_id ) )
 			);
 		}
 
-		$all_difficulties_data = [];
-		foreach (['normal', 'heroic', 'mythic'] as $diff_key) {
-			$all_difficulties_data[$diff_key] = $this->api->fetch_raid_data(
-				$raid_slug, $diff_key, $region, $realm, $guild_id, $cache_minutes, 50, 0
+		$all_difficulties_data = array();
+		foreach ( array( 'normal', 'heroic', 'mythic' ) as $diff_key ) {
+			$all_difficulties_data[ $diff_key ] = $this->api->fetch_raid_data(
+				$raid_slug,
+				$diff_key,
+				$region,
+				$realm,
+				$guild_id,
+				$cache_minutes,
+				50,
+				0
 			);
 		}
 
-		$difficulties_to_render = [];
+		$difficulties_to_render = array();
 
-		if ($difficulty === 'all') {
-			$difficulties_to_render = ['normal', 'heroic', 'mythic'];
-		} elseif ($difficulty === 'highest') {
-			$target_diff = $this->find_highest_progress_difficulty($all_difficulties_data, $raid_info);
+		if ( $difficulty === 'all' ) {
+			$difficulties_to_render = array( 'normal', 'heroic', 'mythic' );
+		} elseif ( $difficulty === 'highest' ) {
+			$target_diff              = $this->find_highest_progress_difficulty( $all_difficulties_data, $raid_info );
 			$difficulties_to_render[] = $target_diff;
 		} else {
 			$difficulties_to_render[] = $difficulty;
@@ -405,15 +451,15 @@ class EncountrixWidget {
 
 		$output = '';
 
-		foreach ($difficulties_to_render as $diff) {
-			$data = $all_difficulties_data[$diff] ?? null;
+		foreach ( $difficulties_to_render as $diff ) {
+			$data = $all_difficulties_data[ $diff ] ?? null;
 
-			if (is_wp_error($data)) {
-				$this->api->debug_log('Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message());
+			if ( is_wp_error( $data ) ) {
+				$this->api->debug_log( 'Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message() );
 				$output .= $this->render_error_inline(
 					sprintf(
-						__('Error loading %s data for guild %s: %s', 'encountrix'),
-						ucfirst($diff),
+						__( 'Error loading %1$s data for guild %2$s: %3$s', 'encountrix' ),
+						ucfirst( $diff ),
 						$guild_id,
 						$data->get_error_message()
 					)
@@ -421,25 +467,38 @@ class EncountrixWidget {
 				continue;
 			}
 
-			if (empty($data) || empty($data['raidRankings'])) {
+			if ( empty( $data ) || empty( $data['raidRankings'] ) ) {
 				$output .= $this->render_difficulty_section(
-					(is_array($data) ? $data : ['raidRankings' => []]),
-					$diff, $raid_info, $all_difficulties_data,
-					$show_icons, $show_killed, $use_blizzard_icons,
-					$expansion_id, $icon_map, $guild_id
+					( is_array( $data ) ? $data : array( 'raidRankings' => array() ) ),
+					$diff,
+					$raid_info,
+					$all_difficulties_data,
+					$show_icons,
+					$show_killed,
+					$use_blizzard_icons,
+					$expansion_id,
+					$icon_map,
+					$guild_id
 				);
 				continue;
 			}
 
 			$output .= $this->render_difficulty_section(
-				$data, $diff, $raid_info, $all_difficulties_data,
-				$show_icons, $show_killed, $use_blizzard_icons,
-				$expansion_id, $icon_map, $guild_id
+				$data,
+				$diff,
+				$raid_info,
+				$all_difficulties_data,
+				$show_icons,
+				$show_killed,
+				$use_blizzard_icons,
+				$expansion_id,
+				$icon_map,
+				$guild_id
 			);
 		}
 
-		if ($output === '') {
-			$output = $this->render_error_inline(__('No raid data available for this guild.', 'encountrix'));
+		if ( $output === '' ) {
+			$output = $this->render_error_inline( __( 'No raid data available for this guild.', 'encountrix' ) );
 		}
 
 		return $output;
@@ -472,120 +531,120 @@ class EncountrixWidget {
 		bool $show_killed,
 		bool $use_blizzard_icons,
 		int $expansion_id,
-		array $icon_map = [],
+		array $icon_map = array(),
 		string $guild_id = ''
 	): string {
 
-		$all_bosses = $raid_info['encounters'] ?? [];
+		$all_bosses    = $raid_info['encounters'] ?? array();
 		$ranking_entry = $data['raidRankings'][0] ?? null;
 
-		$encounters_defeated = $ranking_entry['encountersDefeated'] ?? [];
-		$pulled_encounters = array_column($ranking_entry['encountersPulled'] ?? [], null, 'slug');
+		$encounters_defeated = $ranking_entry['encountersDefeated'] ?? array();
+		$pulled_encounters   = array_column( $ranking_entry['encountersPulled'] ?? array(), null, 'slug' );
 
 		$guild_info = $ranking_entry['guild'] ?? null;
-		$rank = $ranking_entry['rank'] ?? null;
+		$rank       = $ranking_entry['rank'] ?? null;
 		$world_rank = $data['worldRanking'] ?? null;
 
-		if (empty($guild_info) || !is_numeric($rank)) {
-			$source_data = $this->find_fallback_data($all_difficulties_data, $difficulty);
-			if ($source_data && !is_wp_error($source_data) && !empty($source_data['raidRankings'][0])) {
+		if ( empty( $guild_info ) || ! is_numeric( $rank ) ) {
+			$source_data = $this->find_fallback_data( $all_difficulties_data, $difficulty );
+			if ( $source_data && ! is_wp_error( $source_data ) && ! empty( $source_data['raidRankings'][0] ) ) {
 				$src = $source_data['raidRankings'][0];
-				if (empty($guild_info)) {
+				if ( empty( $guild_info ) ) {
 					$guild_info = $src['guild'] ?? null;
 				}
-				if (!is_numeric($rank)) {
+				if ( ! is_numeric( $rank ) ) {
 					$rank = $src['rank'] ?? null;
 				}
-				if (empty($world_rank)) {
+				if ( empty( $world_rank ) ) {
 					$world_rank = $source_data['worldRanking'] ?? null;
 				}
 			}
 		}
 
-		if (empty($guild_info)) {
+		if ( empty( $guild_info ) ) {
 			// Attempt to find a guild name from any difficulty for the error message.
 			$guild_display_name = '';
-			foreach ($all_difficulties_data as $diff_data) {
-				if (!is_wp_error($diff_data) && !empty($diff_data['raidRankings'][0]['guild']['name'])) {
+			foreach ( $all_difficulties_data as $diff_data ) {
+				if ( ! is_wp_error( $diff_data ) && ! empty( $diff_data['raidRankings'][0]['guild']['name'] ) ) {
 					$guild_display_name = $diff_data['raidRankings'][0]['guild']['name'];
 					break;
 				}
 			}
 
-			if (empty($guild_display_name) && $guild_id !== '') {
+			if ( empty( $guild_display_name ) && $guild_id !== '' ) {
 				$guild_display_name = $guild_id;
 			}
 
-			if ($guild_display_name !== '') {
+			if ( $guild_display_name !== '' ) {
 				return $this->render_error_inline(
 					sprintf(
 						/* translators: %s: guild name or ID */
-						__('No data found for guild %s in this raid.', 'encountrix'),
-						esc_html($guild_display_name)
+						__( 'No data found for guild %s in this raid.', 'encountrix' ),
+						esc_html( $guild_display_name )
 					)
 				);
 			}
 
 			return $this->render_error_inline(
-				__('No data found for your guild in this raid.', 'encountrix')
+				__( 'No data found for your guild in this raid.', 'encountrix' )
 			);
 		}
 
 		ob_start();
-?>
+		?>
 		<div class="encountrix-section">
 			<div class="encountrix-header">
 				<h3 class="encountrix-title">
-					<?php echo esc_html($guild_info['name']); ?>
-					<span class="encountrix-difficulty-badge <?php echo esc_attr($difficulty); ?>">
-						<?php echo esc_html(ucfirst($difficulty)); ?>
+					<?php echo esc_html( $guild_info['name'] ); ?>
+					<span class="encountrix-difficulty-badge <?php echo esc_attr( $difficulty ); ?>">
+						<?php echo esc_html( ucfirst( $difficulty ) ); ?>
 					</span>
 				</h3>
 				<div class="encountrix-meta">
-					<span class="encountrix-realm"><?php echo esc_html($guild_info['realm']['name']); ?></span>
-					<span class="encountrix-region"><?php echo esc_html(strtoupper($guild_info['region']['short_name'])); ?></span>
+					<span class="encountrix-realm"><?php echo esc_html( $guild_info['realm']['name'] ); ?></span>
+					<span class="encountrix-region"><?php echo esc_html( strtoupper( $guild_info['region']['short_name'] ) ); ?></span>
 				</div>
 				<div class="encountrix-ranks">
-					<span class="encountrix-rank realm"><?php esc_html_e('Realm:', 'encountrix'); ?> <strong>#<?php echo esc_html($rank); ?></strong></span>
-					<?php if (!empty($world_rank)): ?>
-						<span class="encountrix-rank world"><?php esc_html_e('World:', 'encountrix'); ?> <strong>#<?php echo esc_html($world_rank); ?></strong></span>
+					<span class="encountrix-rank realm"><?php esc_html_e( 'Realm:', 'encountrix' ); ?> <strong>#<?php echo esc_html( $rank ); ?></strong></span>
+					<?php if ( ! empty( $world_rank ) ) : ?>
+						<span class="encountrix-rank world"><?php esc_html_e( 'World:', 'encountrix' ); ?> <strong>#<?php echo esc_html( $world_rank ); ?></strong></span>
 					<?php endif; ?>
 				</div>
 			</div>
 			<div class="encountrix">
 				<?php
-				$progress_percent = count($all_bosses) > 0 ?
-					(count($encounters_defeated) / count($all_bosses)) * 100 : 0;
+				$progress_percent = count( $all_bosses ) > 0 ?
+					( count( $encounters_defeated ) / count( $all_bosses ) ) * 100 : 0;
 				?>
 				<div class="encountrix-progress-bar">
-					<div class="encountrix-progress-fill <?php echo esc_attr($difficulty); ?>"
-						style="width: <?php echo esc_attr($progress_percent); ?>%"></div>
+					<div class="encountrix-progress-fill <?php echo esc_attr( $difficulty ); ?>"
+						style="width: <?php echo esc_attr( $progress_percent ); ?>%"></div>
 					<div class="encountrix-progress-text">
-						<?php echo esc_html(count($encounters_defeated) . '/' . count($all_bosses)); ?>
-						<?php esc_html_e('Bosses', 'encountrix'); ?>
+						<?php echo esc_html( count( $encounters_defeated ) . '/' . count( $all_bosses ) ); ?>
+						<?php esc_html_e( 'Bosses', 'encountrix' ); ?>
 					</div>
 				</div>
 				<div class="encountrix-boss-list">
 					<?php
-					$defeated_slugs = array_column($encounters_defeated, 'slug');
-					foreach ($all_bosses as $boss):
-						$is_defeated = in_array($boss['slug'], $defeated_slugs, true);
+					$defeated_slugs = array_column( $encounters_defeated, 'slug' );
+					foreach ( $all_bosses as $boss ) :
+						$is_defeated = in_array( $boss['slug'], $defeated_slugs, true );
 
-						if (!$show_killed && $is_defeated) {
+						if ( ! $show_killed && $is_defeated ) {
 							continue;
 						}
 
-						$status_class = $is_defeated ? 'defeated' : (isset($pulled_encounters[$boss['slug']]) ? 'in-progress' : 'not-started');
-					?>
-						<div class="encountrix-boss-item <?php echo esc_attr($status_class); ?>">
-							<?php if ($show_icons): ?>
+						$status_class = $is_defeated ? 'defeated' : ( isset( $pulled_encounters[ $boss['slug'] ] ) ? 'in-progress' : 'not-started' );
+						?>
+						<div class="encountrix-boss-item <?php echo esc_attr( $status_class ); ?>">
+							<?php if ( $show_icons ) : ?>
 								<div class="encountrix-boss-icon encountrix-boss-portrait">
 									<?php
-									if ($use_blizzard_icons) {
-										$attachment_id = $icon_map[$boss['slug']] ?? null;
+									if ( $use_blizzard_icons ) {
+										$attachment_id = $icon_map[ $boss['slug'] ] ?? null;
 
 										// Fall back to individual lookup if not in the batch map.
-										if (!$attachment_id) {
+										if ( ! $attachment_id ) {
 											$attachment_id = $this->api->get_boss_icon_id(
 												$boss['slug'],
 												$raid_info['slug'],
@@ -594,12 +653,12 @@ class EncountrixWidget {
 											);
 										}
 
-										if ($attachment_id) {
+										if ( $attachment_id ) {
 											echo wp_get_attachment_image(
 												$attachment_id,
-												[40, 40],
+												array( 40, 40 ),
 												false,
-												['alt' => esc_attr($boss['name'])]
+												array( 'alt' => esc_attr( $boss['name'] ) )
 											);
 										} else {
 											echo '<span>-</span>';
@@ -611,21 +670,21 @@ class EncountrixWidget {
 								</div>
 							<?php endif; ?>
 							<div class="encountrix-boss-info">
-								<div class="encountrix-boss-name"><?php echo esc_html($boss['name']); ?></div>
+								<div class="encountrix-boss-name"><?php echo esc_html( $boss['name'] ); ?></div>
 								<div class="encountrix-boss-stats">
-									<?php if ($is_defeated): ?>
-										<span class="encountrix-defeated-label"><?php esc_html_e('Defeated', 'encountrix'); ?></span>
-									<?php elseif (isset($pulled_encounters[$boss['slug']])): ?>
+									<?php if ( $is_defeated ) : ?>
+										<span class="encountrix-defeated-label"><?php esc_html_e( 'Defeated', 'encountrix' ); ?></span>
+									<?php elseif ( isset( $pulled_encounters[ $boss['slug'] ] ) ) : ?>
 										<span class="encountrix-pulls">
-											<?php esc_html_e('Pulls:', 'encountrix'); ?>
-											<?php echo esc_html($pulled_encounters[$boss['slug']]['numPulls']); ?>
+											<?php esc_html_e( 'Pulls:', 'encountrix' ); ?>
+											<?php echo esc_html( $pulled_encounters[ $boss['slug'] ]['numPulls'] ); ?>
 										</span>
 										<span class="encountrix-percent">
-											<?php esc_html_e('Best:', 'encountrix'); ?>
-											<?php echo esc_html(number_format($pulled_encounters[$boss['slug']]['bestPercent'], 1)); ?>%
+											<?php esc_html_e( 'Best:', 'encountrix' ); ?>
+											<?php echo esc_html( number_format( $pulled_encounters[ $boss['slug'] ]['bestPercent'], 1 ) ); ?>%
 										</span>
-									<?php else: ?>
-										<span class="encountrix-not-started"><?php esc_html_e('Not Started', 'encountrix'); ?></span>
+									<?php else : ?>
+										<span class="encountrix-not-started"><?php esc_html_e( 'Not Started', 'encountrix' ); ?></span>
 									<?php endif; ?>
 								</div>
 							</div>
@@ -634,7 +693,7 @@ class EncountrixWidget {
 				</div>
 			</div>
 		</div>
-<?php
+		<?php
 		return ob_get_clean();
 	}
 
@@ -648,44 +707,48 @@ class EncountrixWidget {
 	 * @param array $raid_info             Raid static data including encounters.
 	 * @return string Difficulty key (normal, heroic, or mythic).
 	 */
-	private function find_highest_progress_difficulty(array $all_difficulties_data, array $raid_info): string {
-		$total_bosses = count($raid_info['encounters']);
-		$target_diff = 'normal';
+	private function find_highest_progress_difficulty( array $all_difficulties_data, array $raid_info ): string {
+		$total_bosses = count( $raid_info['encounters'] );
+		$target_diff  = 'normal';
 
 		$normal_kills = 0;
 		if (
-			!is_wp_error($all_difficulties_data['normal']) &&
-			!empty($all_difficulties_data['normal']['raidRankings'][0])
+			! is_wp_error( $all_difficulties_data['normal'] ) &&
+			! empty( $all_difficulties_data['normal']['raidRankings'][0] )
 		) {
-			$normal_kills = count($all_difficulties_data['normal']['raidRankings'][0]['encountersDefeated'] ?? []);
+			$normal_kills = count( $all_difficulties_data['normal']['raidRankings'][0]['encountersDefeated'] ?? array() );
 		}
 
 		$heroic_kills = 0;
 		if (
-			!is_wp_error($all_difficulties_data['heroic']) &&
-			!empty($all_difficulties_data['heroic']['raidRankings'][0])
+			! is_wp_error( $all_difficulties_data['heroic'] ) &&
+			! empty( $all_difficulties_data['heroic']['raidRankings'][0] )
 		) {
-			$heroic_kills = count($all_difficulties_data['heroic']['raidRankings'][0]['encountersDefeated'] ?? []);
+			$heroic_kills = count( $all_difficulties_data['heroic']['raidRankings'][0]['encountersDefeated'] ?? array() );
 		}
 
 		$mythic_kills = 0;
 		if (
-			!is_wp_error($all_difficulties_data['mythic']) &&
-			!empty($all_difficulties_data['mythic']['raidRankings'][0])
+			! is_wp_error( $all_difficulties_data['mythic'] ) &&
+			! empty( $all_difficulties_data['mythic']['raidRankings'][0] )
 		) {
-			$mythic_kills = count($all_difficulties_data['mythic']['raidRankings'][0]['encountersDefeated'] ?? []);
+			$mythic_kills = count( $all_difficulties_data['mythic']['raidRankings'][0]['encountersDefeated'] ?? array() );
 		}
 
-		if ($normal_kills > 0) $target_diff = 'heroic';
-		if ($heroic_kills >= $total_bosses) $target_diff = 'mythic';
+		if ( $normal_kills > 0 ) {
+			$target_diff = 'heroic';
+		}
+		if ( $heroic_kills >= $total_bosses ) {
+			$target_diff = 'mythic';
+		}
 
-		foreach (['mythic', 'heroic', 'normal'] as $diff) {
+		foreach ( array( 'mythic', 'heroic', 'normal' ) as $diff ) {
 			if (
-				!is_wp_error($all_difficulties_data[$diff]) &&
-				!empty($all_difficulties_data[$diff]['raidRankings'][0])
+				! is_wp_error( $all_difficulties_data[ $diff ] ) &&
+				! empty( $all_difficulties_data[ $diff ]['raidRankings'][0] )
 			) {
-				$kills = count($all_difficulties_data[$diff]['raidRankings'][0]['encountersDefeated'] ?? []);
-				if ($kills > 0 && $kills < $total_bosses) {
+				$kills = count( $all_difficulties_data[ $diff ]['raidRankings'][0]['encountersDefeated'] ?? array() );
+				if ( $kills > 0 && $kills < $total_bosses ) {
 					$target_diff = $diff;
 					break;
 				}
@@ -705,22 +768,22 @@ class EncountrixWidget {
 	 * @param string $current_difficulty    The difficulty that lacked data.
 	 * @return array|null Ranking data array or null if nothing found.
 	 */
-	private function find_fallback_data(array $all_difficulties_data, string $current_difficulty): ?array {
-		$fallback_order = [
-			'mythic' => ['heroic', 'normal'],
-			'heroic' => ['normal'],
-			'normal' => [],
-		];
+	private function find_fallback_data( array $all_difficulties_data, string $current_difficulty ): ?array {
+		$fallback_order = array(
+			'mythic' => array( 'heroic', 'normal' ),
+			'heroic' => array( 'normal' ),
+			'normal' => array(),
+		);
 
-		$order = $fallback_order[$current_difficulty] ?? [];
+		$order = $fallback_order[ $current_difficulty ] ?? array();
 
-		foreach ($order as $diff) {
+		foreach ( $order as $diff ) {
 			if (
-				isset($all_difficulties_data[$diff]) &&
-				!is_wp_error($all_difficulties_data[$diff]) &&
-				!empty($all_difficulties_data[$diff]['raidRankings'][0])
+				isset( $all_difficulties_data[ $diff ] ) &&
+				! is_wp_error( $all_difficulties_data[ $diff ] ) &&
+				! empty( $all_difficulties_data[ $diff ]['raidRankings'][0] )
 			) {
-				return $all_difficulties_data[$diff];
+				return $all_difficulties_data[ $diff ];
 			}
 		}
 		return null;
@@ -732,10 +795,10 @@ class EncountrixWidget {
 	 * @param string $difficulty Raw difficulty input.
 	 * @return string Sanitized difficulty key; defaults to 'normal' if invalid.
 	 */
-	private function validate_difficulty(string $difficulty): string {
-		$valid = ['all', 'normal', 'heroic', 'mythic', 'highest'];
-		$difficulty = strtolower(sanitize_text_field($difficulty));
-		return in_array($difficulty, $valid, true) ? $difficulty : 'normal';
+	private function validate_difficulty( string $difficulty ): string {
+		$valid      = array( 'all', 'normal', 'heroic', 'mythic', 'highest' );
+		$difficulty = strtolower( sanitize_text_field( $difficulty ) );
+		return in_array( $difficulty, $valid, true ) ? $difficulty : 'normal';
 	}
 
 	/**
@@ -745,13 +808,13 @@ class EncountrixWidget {
 	 * @param string $raid_slug   The raid slug to search for.
 	 * @return array|null Raid data array or null if not found.
 	 */
-	private function find_raid_info(array $static_data, string $raid_slug): ?array {
-		if (!isset($static_data['raids'])) {
+	private function find_raid_info( array $static_data, string $raid_slug ): ?array {
+		if ( ! isset( $static_data['raids'] ) ) {
 			return null;
 		}
 
-		foreach ($static_data['raids'] as $raid_data) {
-			if ($raid_data['slug'] === $raid_slug) {
+		foreach ( $static_data['raids'] as $raid_data ) {
+			if ( $raid_data['slug'] === $raid_slug ) {
 				return $raid_data;
 			}
 		}
@@ -765,10 +828,10 @@ class EncountrixWidget {
 	 * @param string $message Error text to display.
 	 * @return string HTML div with the error.
 	 */
-	private function render_error(string $message): string {
+	private function render_error( string $message ): string {
 		return sprintf(
 			'<div class="encountrix-error">%s</div>',
-			esc_html($message)
+			esc_html( $message )
 		);
 	}
 
@@ -778,10 +841,10 @@ class EncountrixWidget {
 	 * @param string $message Error text to display.
 	 * @return string HTML div with the inline error.
 	 */
-	private function render_error_inline(string $message): string {
+	private function render_error_inline( string $message ): string {
 		return sprintf(
 			'<div class="encountrix-error-inline">%s</div>',
-			esc_html($message)
+			esc_html( $message )
 		);
 	}
 
@@ -791,11 +854,11 @@ class EncountrixWidget {
 	 * @param string $difficulty Starting difficulty.
 	 * @return array<string> Ordered list of difficulties to try.
 	 */
-	private function difficulty_fallback_order(string $difficulty): array {
-		return match ($difficulty) {
-			'mythic' => ['mythic', 'heroic', 'normal'],
-			'heroic' => ['heroic', 'normal'],
-			default => ['normal'],
+	private function difficulty_fallback_order( string $difficulty ): array {
+		return match ( $difficulty ) {
+			'mythic' => array( 'mythic', 'heroic', 'normal' ),
+			'heroic' => array( 'heroic', 'normal' ),
+			default => array( 'normal' ),
 		};
 	}
 
@@ -825,17 +888,17 @@ class EncountrixWidget {
 		int $limit,
 		int $page
 	): array {
-		$results = [];
-		foreach ($this->difficulty_fallback_order($difficulty) as $diff) {
-			$data = $this->api->fetch_raid_data($raid_slug, $diff, $region, $realm, $guilds, $cache_minutes, $limit, $page);
-			$results[$diff] = $data;
-			if (!is_wp_error($data) && !empty($data['raidRankings'])) {
-				return [$data, $diff, $results];
+		$results = array();
+		foreach ( $this->difficulty_fallback_order( $difficulty ) as $diff ) {
+			$data             = $this->api->fetch_raid_data( $raid_slug, $diff, $region, $realm, $guilds, $cache_minutes, $limit, $page );
+			$results[ $diff ] = $data;
+			if ( ! is_wp_error( $data ) && ! empty( $data['raidRankings'] ) ) {
+				return array( $data, $diff, $results );
 			}
 		}
-		$first = reset($results);
-		$first_diff = array_key_first($results);
-		return [$first, $first_diff, $results];
+		$first      = reset( $results );
+		$first_diff = array_key_first( $results );
+		return array( $first, $first_diff, $results );
 	}
 
 	/**
@@ -844,9 +907,11 @@ class EncountrixWidget {
 	 * @param mixed $err Value to inspect (typically a WP_Error).
 	 * @return bool True if the error indicates a 429 / rate-limit condition.
 	 */
-	private function is_rate_limit_error(mixed $err): bool {
-		if (!is_wp_error($err)) return false;
+	private function is_rate_limit_error( mixed $err ): bool {
+		if ( ! is_wp_error( $err ) ) {
+			return false;
+		}
 		$msg = $err->get_error_message();
-		return stripos($msg, '429') !== false || stripos($msg, 'rate limit') !== false;
+		return stripos( $msg, '429' ) !== false || stripos( $msg, 'rate limit' ) !== false;
 	}
 }
