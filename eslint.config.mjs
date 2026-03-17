@@ -1,7 +1,6 @@
 import globals from "globals";
 import js from "@eslint/js";
 import neostandard, { resolveIgnoresFromGitignore } from 'neostandard';
-import stylistic from '@stylistic/eslint-plugin';
 
 export default [
 	{
@@ -9,6 +8,9 @@ export default [
 		languageOptions: {
 			globals: {
 				...globals.browser,
+				jQuery: "readonly",
+				encountrix_admin: "readonly",
+				encountrix_ajax: "readonly",
 			},
 			sourceType: "script",
 		},
@@ -25,9 +27,6 @@ export default [
 	// stylistic.configs['recommended-flat'],
 	...neostandard(),
 	{
-		plugins: {
-			"@stylistic": stylistic,
-		},
 		rules: {
 			"camelcase": "off",
 			"eqeqeq": "off",

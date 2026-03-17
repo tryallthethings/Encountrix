@@ -7,7 +7,6 @@
 	'use strict';
 
 	$(document).ready(function () {
-
 		// Initialize boss item hover effects
 		initBossHoverEffects();
 
@@ -17,9 +16,12 @@
 		// Initialize tooltips
 		initTooltips();
 
+		// Initialize optional auto-refresh
+		initAutoRefresh();
+
 		adjustRaidTitleSize();
 
-		var resizeTimer;
+		let resizeTimer;
 		$(window).on('resize', function () {
 			clearTimeout(resizeTimer);
 			resizeTimer = setTimeout(adjustRaidTitleSize, 250);
@@ -29,17 +31,20 @@
 		 * Initialize boss item hover effects
 		 */
 		function initBossHoverEffects() {
-			$('.encountrix-boss-item').on('mouseenter', function () {
+			const $bossItems = $('.encountrix-boss-item');
+			$bossItems.off('.encountrix');
+
+			$bossItems.on('mouseenter.encountrix', function () {
 				$(this).addClass('hover');
-			}).on('mouseleave', function () {
+			}).on('mouseleave.encountrix', function () {
 				$(this).removeClass('hover');
 			});
 
 			// Add click handler for mobile devices
-			$('.encountrix-boss-item').on('click', function (e) {
+			$bossItems.on('click.encountrix', function (e) {
 				if ($(window).width() <= 768) {
 					e.preventDefault();
-					var $this = $(this);
+					const $this = $(this);
 
 					// Remove active from others
 					$('.encountrix-boss-item').not($this).removeClass('active');
@@ -54,7 +59,7 @@
 		 * Initialize lazy loading for boss icons
 		 */
 		function initLazyLoading() {
-			var lazyImages = $('.encountrix-boss-icon img[data-src]');
+			const lazyImages = $('.encountrix-boss-icon img[data-src]');
 
 			if (lazyImages.length === 0) {
 				return;
@@ -64,7 +69,7 @@
 				var imageObserver = new IntersectionObserver(function (entries) {
 					entries.forEach(function (entry) {
 						if (entry.isIntersecting) {
-							var img = entry.target;
+							const img = entry.target;
 							img.src = img.dataset.src;
 							img.removeAttribute('data-src');
 							imageObserver.unobserve(img);
@@ -78,7 +83,7 @@
 			} else {
 				// Fallback: load all images immediately
 				lazyImages.each(function () {
-					var $img = $(this);
+					const $img = $(this);
 					$img.attr('src', $img.data('src'));
 					$img.removeAttr('data-src');
 				});
@@ -94,36 +99,36 @@
 				$('body').append('<div id="encountrix-tooltip" class="encountrix-tooltip"></div>');
 			}
 
-			var $tooltip = $('#encountrix-tooltip');
+			const $tooltip = $('#encountrix-tooltip');
 
 			// Tooltip for pulls
-			$('.encountrix-pulls').on('mouseenter', function () {
-				var $this = $(this);
-				var text = 'Number of attempts on this boss';
+			$('.encountrix-pulls').off('.encountrix').on('mouseenter.encountrix', function () {
+				const $this = $(this);
+				const text = 'Number of attempts on this boss';
 				showTooltip($this, text, $tooltip);
-			}).on('mouseleave', function () {
+			}).on('mouseleave.encountrix', function () {
 				hideTooltip($tooltip);
 			});
 
 			// Tooltip for best percentage
-			$('.encountrix-percent').on('mouseenter', function () {
-				var $this = $(this);
-				var percent = $this.text().match(/[\d.]+/);
+			$('.encountrix-percent').off('.encountrix').on('mouseenter.encountrix', function () {
+				const $this = $(this);
+				const percent = $this.text().match(/[\d.]+/);
 				if (percent) {
-					var remaining = (100 - parseFloat(percent[0])).toFixed(1);
-					var text = 'Boss health remaining: ' + remaining + '%';
+					const remaining = (100 - parseFloat(percent[0])).toFixed(1);
+					const text = 'Boss health remaining: ' + remaining + '%';
 					showTooltip($this, text, $tooltip);
 				}
-			}).on('mouseleave', function () {
+			}).on('mouseleave.encountrix', function () {
 				hideTooltip($tooltip);
 			});
 
 			// Tooltip for world rank
-			$('.encountrix-rank:contains("World")').on('mouseenter', function () {
-				var $this = $(this);
-				var text = 'Global ranking across all regions';
+			$('.encountrix-rank:contains("World")').off('.encountrix').on('mouseenter.encountrix', function () {
+				const $this = $(this);
+				const text = 'Global ranking across all regions';
 				showTooltip($this, text, $tooltip);
-			}).on('mouseleave', function () {
+			}).on('mouseleave.encountrix', function () {
 				hideTooltip($tooltip);
 			});
 		}
@@ -134,13 +139,13 @@
 		function showTooltip($element, text, $tooltip) {
 			$tooltip.text(text);
 
-			var offset = $element.offset();
-			var tooltipWidth = $tooltip.outerWidth();
-			var tooltipHeight = $tooltip.outerHeight();
+			const offset = $element.offset();
+			const tooltipWidth = $tooltip.outerWidth();
+			const tooltipHeight = $tooltip.outerHeight();
 
 			// Position above the element by default
-			var top = offset.top - tooltipHeight - 5;
-			var left = offset.left + ($element.outerWidth() / 2) - (tooltipWidth / 2);
+			let top = offset.top - tooltipHeight - 5;
+			let left = offset.left + ($element.outerWidth() / 2) - (tooltipWidth / 2);
 
 			// Check if tooltip would go off screen
 			if (top < $(window).scrollTop()) {
@@ -175,18 +180,32 @@
 		 * Auto-refresh functionality (optional)
 		 */
 		function initAutoRefresh() {
-			var $containers = $('.encountrix-container[data-refresh]');
+			const $containers = $('.encountrix-container[data-refresh]');
 
 			$containers.each(function () {
-				var $container = $(this);
-				var refreshInterval = parseInt($container.data('refresh'), 10);
+				const $container = $(this);
+				let $currentContainer = $container;
+				let refreshInterval = parseInt($container.data('refresh'), 10);
 
 				if (refreshInterval && refreshInterval > 0) {
 					// Minimum 5 minutes
 					refreshInterval = Math.max(refreshInterval, 300) * 1000;
 
 					setInterval(function () {
-						refreshWidget($container);
+						if (!$currentContainer || !$currentContainer.length || !$currentContainer.closest('body').length) {
+							const shortcodeAttrs = $container.data('shortcode-attrs');
+							if (shortcodeAttrs) {
+								$currentContainer = $('.encountrix-container').filter(function () {
+									return $(this).data('shortcode-attrs') === shortcodeAttrs;
+								}).first();
+							}
+						}
+
+						if ($currentContainer && $currentContainer.length) {
+							refreshWidget($currentContainer, function ($replacement) {
+								$currentContainer = $replacement;
+							});
+						}
 					}, refreshInterval);
 				}
 			});
@@ -195,8 +214,8 @@
 		/**
 		 * Refresh widget via AJAX
 		 */
-		function refreshWidget($container) {
-			var shortcodeAttrs = $container.data('shortcode-attrs');
+		function refreshWidget($container, onReplace) {
+			const shortcodeAttrs = $container.data('shortcode-attrs');
 
 			if (!shortcodeAttrs) {
 				return;
@@ -215,11 +234,14 @@
 				},
 				success: function (response) {
 					if (response.success && response.data) {
-						var $newContent = $(response.data);
+						const $newContent = $(response.data);
 						$container.replaceWith($newContent);
+						if (typeof onReplace === 'function') {
+							onReplace($newContent);
+						}
 
 						// Reinitialize features for new content
-						initProgressAnimations();
+						adjustRaidTitleSize();
 						initBossHoverEffects();
 						initLazyLoading();
 						initTooltips();
@@ -235,8 +257,8 @@
 		 * Handle responsive behavior
 		 */
 		function handleResponsive() {
-			var $window = $(window);
-			var $containers = $('.encountrix-container');
+			const $window = $(window);
+			const $containers = $('.encountrix-container');
 
 			function checkWidth() {
 				if ($window.width() <= 768) {
@@ -254,9 +276,9 @@
 		 * Debounce function for resize events
 		 */
 		function debounce(func, wait) {
-			var timeout;
+			let timeout;
 			return function () {
-				var context = this, args = arguments;
+				const context = this; const args = arguments;
 				clearTimeout(timeout);
 				timeout = setTimeout(function () {
 					func.apply(context, args);
@@ -277,10 +299,10 @@
 			// Add ARIA labels
 			$('.encountrix-progress-bar').attr('role', 'progressbar');
 			$('.encountrix-progress-fill').each(function () {
-				var $fill = $(this);
-				var width = parseInt($fill.css('width'), 10);
-				var maxWidth = $fill.parent().width();
-				var percentage = Math.round((width / maxWidth) * 100);
+				const $fill = $(this);
+				const width = parseInt($fill.css('width'), 10);
+				const maxWidth = $fill.parent().width();
+				const percentage = Math.round((width / maxWidth) * 100);
 
 				$fill.attr({
 					'aria-valuenow': percentage,
@@ -307,15 +329,15 @@
 		 */
 		function adjustRaidTitleSize() {
 			$('.encountrix-header-title[data-text]').each(function () {
-				var $title = $(this);
-				var $span = $title.find('span');
-				var containerWidth = $title.width();
-				var text = $title.data('text');
+				const $title = $(this);
+				const $span = $title.find('span');
+				const containerWidth = $title.width();
+				const text = $title.data('text');
 
 				// Reset to maximum size
-				var maxSize = 32;
-				var minSize = 18;
-				var currentSize = maxSize;
+				const maxSize = 32;
+				const minSize = 18;
+				let currentSize = maxSize;
 
 				$span.css('font-size', currentSize + 'px');
 
@@ -326,13 +348,13 @@
 				}
 
 				// Ensure no word breaks in the middle
-				var words = text.split(' ');
-				var longestWord = words.reduce(function (a, b) {
+				const words = text.split(' ');
+				const longestWord = words.reduce(function (a, b) {
 					return a.length > b.length ? a : b;
 				}, '');
 
 				// Create temporary element to measure longest word
-				var $temp = $('<span>')
+				const $temp = $('<span>')
 					.text(longestWord)
 					.css({
 						'position': 'absolute',
@@ -367,32 +389,31 @@
 			$('.encountrix-container').removeClass('print-mode');
 			$('.encountrix-boss-item').removeClass('expanded');
 		});
+
+		// Public API for external use
+		window.Encountrix = {
+			refresh: function (selector) {
+				const $container = $(selector);
+				if ($container.length) {
+					refreshWidget($container);
+				}
+			},
+
+			updateProgress: function (selector, data) {
+				// Allow external scripts to update progress data
+				const $container = $(selector);
+				if ($container.length && data) {
+					// Implementation would go here
+					console.log('Updating progress for:', selector, data);
+				}
+			}
+		};
 	});
-
-	// Public API for external use
-	window.Encountrix = {
-		refresh: function (selector) {
-			var $container = $(selector);
-			if ($container.length) {
-				refreshWidget($container);
-			}
-		},
-
-		updateProgress: function (selector, data) {
-			// Allow external scripts to update progress data
-			var $container = $(selector);
-			if ($container.length && data) {
-				// Implementation would go here
-				console.log('Updating progress for:', selector, data);
-			}
-		}
-	};
-
 })(jQuery);
 
 // Tooltip styles (injected dynamically)
 (function () {
-	var style = document.createElement('style');
+	const style = document.createElement('style');
 	style.textContent = `
         .encountrix-tooltip {
             position: absolute;
