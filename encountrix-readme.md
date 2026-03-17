@@ -1,4 +1,4 @@
-# WoW Raid Progress Tracker - WordPress Plugin
+# Encountrix - WordPress Plugin
 
 ## Version 5.0.0 - Complete Rewrite
 
@@ -7,25 +7,25 @@ A WordPress plugin to display World of Warcraft raid progress from Raider.io API
 ## 📁 File Structure
 
 ```
-wow-raid-progress/
-├── wow-raid-progress.php           # Main plugin file
+encountrix/
+├── encountrix.php           # Main plugin file
 ├── README.md                        # This file
 ├── LICENSE                          # GPL v2 license
 ├── includes/                        # PHP class files
-│   ├── class-wow-raid-progress.php         # Main plugin class
-│   ├── class-wow-raid-progress-admin.php   # Admin settings class
-│   ├── class-wow-raid-progress-api.php     # API handler class
-│   └── class-wow-raid-progress-widget.php  # Widget/shortcode class
+│   ├── class-encountrix.php         # Main plugin class
+│   ├── class-encountrix-admin.php   # Admin settings class
+│   ├── class-encountrix-api.php     # API handler class
+│   └── class-encountrix-widget.php  # Widget/shortcode class
 ├── assets/                          # Frontend assets
 │   ├── css/
-│   │   ├── wow-raid-progress.css   # Frontend styles
+│   │   ├── encountrix.css   # Frontend styles
 │   │   └── admin.css                # Admin panel styles
 │   └── js/
-│       ├── wow-raid-progress.js    # Frontend JavaScript
+│       ├── encountrix.js    # Frontend JavaScript
 │       └── admin.js                 # Admin panel JavaScript
 └── languages/                       # Translation files
-    ├── wow-raid-progress.pot       # Translation template
-    └── wow-raid-progress-de_DE.mo  # German translation (example)
+    ├── encountrix.pot       # Translation template
+    └── encountrix-de_DE.mo  # German translation (example)
 ```
 
 ## 🚀 Key Improvements
@@ -55,7 +55,7 @@ wow-raid-progress/
 - Refresh button to update cache
 
 ### 5. ✅ Full Internationalization
-- Text domain: `wow-raid-progress`
+- Text domain: `encountrix`
 - All strings translatable
 - POT file included
 - Translation-ready architecture
@@ -97,15 +97,15 @@ wow-raid-progress/
 ## 📋 Installation
 
 1. **Upload Plugin**
-   - Upload the `wow-raid-progress` folder to `/wp-content/plugins/`
+   - Upload the `encountrix` folder to `/wp-content/plugins/`
    - Or install via WordPress admin panel
 
 2. **Activate Plugin**
    - Go to Plugins page in WordPress admin
-   - Click "Activate" for WoW Raid Progress Tracker
+   - Click "Activate" for Encountrix
 
 3. **Configure Settings**
-   - Navigate to Settings → WoW Raid Progress
+   - Navigate to Settings → Encountrix
    - Enter your Raider.io API key
    - Configure default settings
    - Optional: Add Blizzard API credentials for icons
@@ -134,12 +134,12 @@ wow-raid-progress/
 
 ### Basic Usage
 ```
-[wow_raid_progress]
+[encountrix]
 ```
 
 ### With Parameters
 ```
-[wow_raid_progress raid="nerub-ar-palace" difficulty="mythic" guilds="12345,67890"]
+[encountrix raid="nerub-ar-palace" difficulty="mythic" guilds="12345,67890"]
 ```
 
 ### All Parameters
@@ -173,11 +173,11 @@ wow-raid-progress/
 
 1. Use the POT file in `/languages/` folder
 2. Create translation with tools like Poedit
-3. Save as `wow-raid-progress-{locale}.po` and `.mo`
+3. Save as `encountrix-{locale}.po` and `.mo`
 4. Place in `/languages/` folder
 
 ### Available Text Domains
-- Plugin Name: `wow-raid-progress`
+- Plugin Name: `encountrix`
 - All strings use `__()` or `_e()` functions
 
 ## 🐛 Error Handling
@@ -204,18 +204,18 @@ wow-raid-progress/
 
 ### CSS Classes Structure
 ```css
-.wow-raid-progress-container     /* Main container */
-.wow-raid-section                /* Each difficulty section */
-.wow-raid-header                 /* Section header */
-.wow-raid-title                  /* Guild/raid name */
-.wow-difficulty-badge            /* Difficulty indicator */
-.wow-progress-bar                /* Progress bar container */
-.wow-progress-fill               /* Progress bar fill */
-.wow-boss-list                   /* Boss list container */
-.wow-boss-item                   /* Individual boss */
-.wow-boss-item.defeated          /* Defeated boss */
-.wow-boss-item.in-progress       /* Boss being attempted */
-.wow-boss-item.not-started       /* Not attempted boss */
+.encountrix-container     /* Main container */
+.encountrix-section                /* Each difficulty section */
+.encountrix-header                 /* Section header */
+.encountrix-title                  /* Guild/raid name */
+.encountrix-difficulty-badge            /* Difficulty indicator */
+.encountrix-progress-bar                /* Progress bar container */
+.encountrix-progress-fill               /* Progress bar fill */
+.encountrix-boss-list                   /* Boss list container */
+.encountrix-boss-item                   /* Individual boss */
+.encountrix-boss-item.defeated          /* Defeated boss */
+.encountrix-boss-item.in-progress       /* Boss being attempted */
+.encountrix-boss-item.not-started       /* Not attempted boss */
 ```
 
 ### Customization

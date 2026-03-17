@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: WoW Raid Progress Tracker 5.0.0\n"
+"Project-Id-Version: Encountrix 5.0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-16 00:54+0000\n"
 "PO-Revision-Date: 2026-03-16 00:56+0000\n"
@@ -16,39 +16,39 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: includes/class-wow-raid-progress-admin.php:33
-msgid "WoW Raid Progress Settings"
-msgstr "WoW Raid Progress Settings"
+#: includes/class-encountrix-admin.php:33
+msgid "Encountrix Settings"
+msgstr "Encountrix Settings"
 
-#: includes/class-wow-raid-progress-admin.php:34
-msgid "WoW Raid Progress"
-msgstr "WoW Raid Progress"
+#: includes/class-encountrix-admin.php:34
+msgid "Encountrix"
+msgstr "Encountrix"
 
-#: includes/class-wow-raid-progress-admin.php:300
+#: includes/class-encountrix-admin.php:300
 msgid "Loading..."
 msgstr "Loading..."
 
-#: includes/class-wow-raid-progress-admin.php:301
+#: includes/class-encountrix-admin.php:301
 msgid "Success!"
 msgstr "Success!"
 
-#: includes/class-wow-raid-progress-admin.php:302
+#: includes/class-encountrix-admin.php:302
 msgid "Error:"
 msgstr "Error:"
 
-#: includes/class-wow-raid-progress-admin.php:303
+#: includes/class-encountrix-admin.php:303
 msgid "Unknown error"
 msgstr "Unknown error"
 
-#: includes/class-wow-raid-progress-admin.php:304
+#: includes/class-encountrix-admin.php:304
 msgid "Are you sure you want to clear the cache?"
 msgstr "Are you sure you want to clear the cache?"
 
-#: includes/class-wow-raid-progress-admin.php:305
+#: includes/class-encountrix-admin.php:305
 msgid "This will import boss icons for the selected raid. Continue?"
 msgstr "This will import boss icons for the selected raid. Continue?"
 
-#: includes/class-wow-raid-progress-admin.php:306
+#: includes/class-encountrix-admin.php:306
 msgid ""
 "WARNING: This will permanently delete ALL imported icons from your media "
 "library. This cannot be undone. Are you sure?"
@@ -56,7 +56,7 @@ msgstr ""
 "WARNING: This will permanently delete ALL imported icons from your media "
 "library. This cannot be undone. Are you sure?"
 
-#: includes/class-wow-raid-progress-admin.php:307
+#: includes/class-encountrix-admin.php:307
 msgid ""
 "No API key is set. The plugin will not be able to fetch raid data. Continue "
 "anyway?"
@@ -64,327 +64,327 @@ msgstr ""
 "No API key is set. The plugin will not be able to fetch raid data. Continue "
 "anyway?"
 
-#: includes/class-wow-raid-progress-admin.php:308
+#: includes/class-encountrix-admin.php:308
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr "You have unsaved changes. Are you sure you want to leave?"
 
-#: includes/class-wow-raid-progress-admin.php:309
-#: includes/class-wow-raid-progress-admin.php:695
+#: includes/class-encountrix-admin.php:309
+#: includes/class-encountrix-admin.php:695
 msgid "Settings saved successfully!"
 msgstr "Settings saved successfully!"
 
-#: includes/class-wow-raid-progress-admin.php:310
+#: includes/class-encountrix-admin.php:310
 msgid "-- Select a Raid --"
 msgstr "-- Select a Raid --"
 
-#: includes/class-wow-raid-progress-admin.php:311
+#: includes/class-encountrix-admin.php:311
 msgid "Error loading raids"
 msgstr "Error loading raids"
 
-#: includes/class-wow-raid-progress-admin.php:312
+#: includes/class-encountrix-admin.php:312
 msgid "Failed to load raids"
 msgstr "Failed to load raids"
 
-#: includes/class-wow-raid-progress-admin.php:313
+#: includes/class-encountrix-admin.php:313
 msgid "Raids refreshed successfully!"
 msgstr "Raids refreshed successfully!"
 
-#: includes/class-wow-raid-progress-admin.php:314
+#: includes/class-encountrix-admin.php:314
 msgid "Failed to refresh raids"
 msgstr "Failed to refresh raids"
 
-#: includes/class-wow-raid-progress-admin.php:315
+#: includes/class-encountrix-admin.php:315
 msgid "Please configure Blizzard API credentials first"
 msgstr "Please configure Blizzard API credentials first"
 
-#: includes/class-wow-raid-progress-admin.php:316
+#: includes/class-encountrix-admin.php:316
 msgid "Please select a raid first"
 msgstr "Please select a raid first"
 
-#: includes/class-wow-raid-progress-admin.php:317
+#: includes/class-encountrix-admin.php:317
 msgid "Importing..."
 msgstr "Importing..."
 
-#: includes/class-wow-raid-progress-admin.php:318
+#: includes/class-encountrix-admin.php:318
 msgid "Deleting..."
 msgstr "Deleting..."
 
-#: includes/class-wow-raid-progress-admin.php:319
+#: includes/class-encountrix-admin.php:319
 msgid "Starting import process..."
 msgstr "Starting import process..."
 
-#: includes/class-wow-raid-progress-admin.php:320
+#: includes/class-encountrix-admin.php:320
 msgid "Import Complete!"
 msgstr "Import Complete!"
 
-#: includes/class-wow-raid-progress-admin.php:321
+#: includes/class-encountrix-admin.php:321
 msgid "Failed to delete icons"
 msgstr "Failed to delete icons"
 
-#: includes/class-wow-raid-progress-admin.php:322
+#: includes/class-encountrix-admin.php:322
 msgid "Failed to clear cache"
 msgstr "Failed to clear cache"
 
-#: includes/class-wow-raid-progress-admin.php:323
+#: includes/class-encountrix-admin.php:323
 msgid "Invalid guild IDs:"
 msgstr "Invalid guild IDs:"
 
-#: includes/class-wow-raid-progress-admin.php:324
+#: includes/class-encountrix-admin.php:324
 msgid "Guild IDs must be numeric."
 msgstr "Guild IDs must be numeric."
 
-#: includes/class-wow-raid-progress-admin.php:325
+#: includes/class-encountrix-admin.php:325
 msgid "Maximum 10 guild IDs allowed."
 msgstr "Maximum 10 guild IDs allowed."
 
-#: includes/class-wow-raid-progress-admin.php:326
+#: includes/class-encountrix-admin.php:326
 msgid "Realm name is too long (max 50 characters)."
 msgstr "Realm name is too long (max 50 characters)."
 
-#: includes/class-wow-raid-progress-admin.php:327
+#: includes/class-encountrix-admin.php:327
 msgid "Cache time must be between 0 and 1440 minutes."
 msgstr "Cache time must be between 0 and 1440 minutes."
 
-#: includes/class-wow-raid-progress-admin.php:328
+#: includes/class-encountrix-admin.php:328
 msgid "Results limit must be between 1 and 100."
 msgstr "Results limit must be between 1 and 100."
 
-#: includes/class-wow-raid-progress-admin.php:329
+#: includes/class-encountrix-admin.php:329
 msgid "Please fix the following errors:"
 msgstr "Please fix the following errors:"
 
-#: includes/class-wow-raid-progress-admin.php:330
+#: includes/class-encountrix-admin.php:330
 msgid "Dismiss this notice."
 msgstr "Dismiss this notice."
 
-#: includes/class-wow-raid-progress-admin.php:331
+#: includes/class-encountrix-admin.php:331
 msgid "Log cleared"
 msgstr "Log cleared"
 
-#: includes/class-wow-raid-progress-admin.php:332
+#: includes/class-encountrix-admin.php:332
 msgid "No log entries"
 msgstr "No log entries"
 
-#: includes/class-wow-raid-progress-admin.php:333
+#: includes/class-encountrix-admin.php:333
 msgid "Could not load realms. You can still type a realm name manually."
 msgstr "Could not load realms. You can still type a realm name manually."
 
-#: includes/class-wow-raid-progress-admin.php:334
+#: includes/class-encountrix-admin.php:334
 msgid "No realms found for this region."
 msgstr "No realms found for this region."
 
-#: includes/class-wow-raid-progress-admin.php:335
+#: includes/class-encountrix-admin.php:335
 msgid "No realms match your search."
 msgstr "No realms match your search."
 
-#: includes/class-wow-raid-progress-admin.php:336
+#: includes/class-encountrix-admin.php:336
 msgid "Copied!"
 msgstr "Copied!"
 
-#: includes/class-wow-raid-progress-admin.php:337
+#: includes/class-encountrix-admin.php:337
 msgid "Press Ctrl+C to copy"
 msgstr "Press Ctrl+C to copy"
 
-#: includes/class-wow-raid-progress-admin.php:338
+#: includes/class-encountrix-admin.php:338
 msgid "For KR/TW regions, you may need to enter the realm name manually."
 msgstr "For KR/TW regions, you may need to enter the realm name manually."
 
-#: includes/class-wow-raid-progress-admin.php:349
-#: includes/class-wow-raid-progress-admin.php:383
-#: includes/class-wow-raid-progress-admin.php:474
-#: includes/class-wow-raid-progress-admin.php:499
-#: includes/class-wow-raid-progress-admin.php:549
-#: includes/class-wow-raid-progress-admin.php:581
-#: includes/class-wow-raid-progress-admin.php:611
-#: includes/class-wow-raid-progress-admin.php:629
-#: includes/class-wow-raid-progress-admin.php:648
+#: includes/class-encountrix-admin.php:349
+#: includes/class-encountrix-admin.php:383
+#: includes/class-encountrix-admin.php:474
+#: includes/class-encountrix-admin.php:499
+#: includes/class-encountrix-admin.php:549
+#: includes/class-encountrix-admin.php:581
+#: includes/class-encountrix-admin.php:611
+#: includes/class-encountrix-admin.php:629
+#: includes/class-encountrix-admin.php:648
 msgid "Security check failed"
 msgstr "Security check failed"
 
-#: includes/class-wow-raid-progress-admin.php:355
-#: includes/class-wow-raid-progress-admin.php:389
-#: includes/class-wow-raid-progress-admin.php:480
-#: includes/class-wow-raid-progress-admin.php:555
-#: includes/class-wow-raid-progress-admin.php:616
-#: includes/class-wow-raid-progress-admin.php:634
-#: includes/class-wow-raid-progress-admin.php:653
+#: includes/class-encountrix-admin.php:355
+#: includes/class-encountrix-admin.php:389
+#: includes/class-encountrix-admin.php:480
+#: includes/class-encountrix-admin.php:555
+#: includes/class-encountrix-admin.php:616
+#: includes/class-encountrix-admin.php:634
+#: includes/class-encountrix-admin.php:653
 msgid "Permission denied"
 msgstr "Permission denied"
 
-#: includes/class-wow-raid-progress-admin.php:374
+#: includes/class-encountrix-admin.php:374
 msgid "Cache cleared successfully"
 msgstr "Cache cleared successfully"
 
-#: includes/class-wow-raid-progress-admin.php:397
+#: includes/class-encountrix-admin.php:397
 msgid "No raid selected in settings"
 msgstr "No raid selected in settings"
 
-#: includes/class-wow-raid-progress-admin.php:406
+#: includes/class-encountrix-admin.php:406
 msgid "Could not fetch raid data"
 msgstr "Could not fetch raid data"
 
-#: includes/class-wow-raid-progress-admin.php:420
+#: includes/class-encountrix-admin.php:420
 #, php-format
 msgid "Could not find raid: %s"
 msgstr "Could not find raid: %s"
 
-#: includes/class-wow-raid-progress-admin.php:440
+#: includes/class-encountrix-admin.php:440
 #, php-format
 msgid "SUCCESS: Imported icon for %s (ID: %d)"
 msgstr "SUCCESS: Imported icon for %s (ID: %d)"
 
-#: includes/class-wow-raid-progress-admin.php:443
+#: includes/class-encountrix-admin.php:443
 #, php-format
 msgid "INFO: Icon for %s already exists"
 msgstr "INFO: Icon for %s already exists"
 
-#: includes/class-wow-raid-progress-admin.php:446
+#: includes/class-encountrix-admin.php:446
 #, php-format
 msgid "ERROR: Failed to import icon for %s"
 msgstr "ERROR: Failed to import icon for %s"
 
-#: includes/class-wow-raid-progress-admin.php:457
+#: includes/class-encountrix-admin.php:457
 #, php-format
 msgid "Summary: %d imported, %d skipped, %d errors"
 msgstr "Summary: %d imported, %d skipped, %d errors"
 
-#: includes/class-wow-raid-progress-admin.php:488
+#: includes/class-encountrix-admin.php:488
 #, php-format
 msgid "Successfully deleted %d icon(s) from the media library"
 msgstr "Successfully deleted %d icon(s) from the media library"
 
-#: includes/class-wow-raid-progress-admin.php:508
+#: includes/class-encountrix-admin.php:508
 msgid "Invalid expansion ID"
 msgstr "Invalid expansion ID"
 
-#: includes/class-wow-raid-progress-admin.php:524
+#: includes/class-encountrix-admin.php:524
 msgid "Could not fetch raids"
 msgstr "Could not fetch raids"
 
-#: includes/class-wow-raid-progress-admin.php:590
+#: includes/class-encountrix-admin.php:590
 msgid "Invalid region specified"
 msgstr "Invalid region specified"
 
-#: includes/class-wow-raid-progress-admin.php:598
+#: includes/class-encountrix-admin.php:598
 msgid "Could not fetch realms. Check Blizzard API settings."
 msgstr "Could not fetch realms. Check Blizzard API settings."
 
-#: includes/class-wow-raid-progress-admin.php:640
+#: includes/class-encountrix-admin.php:640
 msgid "Debug log cleared"
 msgstr "Debug log cleared"
 
-#: includes/class-wow-raid-progress-admin.php:689
+#: includes/class-encountrix-admin.php:689
 msgid "You do not have sufficient permissions to access this page."
 msgstr "You do not have sufficient permissions to access this page."
 
-#: includes/class-wow-raid-progress-api.php:179
+#: includes/class-encountrix-api.php:179
 msgid "Data is being updated in the background. Please check back shortly."
 msgstr "Data is being updated in the background. Please check back shortly."
 
-#: includes/class-wow-raid-progress-api.php:185
+#: includes/class-encountrix-api.php:185
 msgid "Raid name is required."
 msgstr "Raid name is required."
 
-#: includes/class-wow-raid-progress-api.php:189
+#: includes/class-encountrix-api.php:189
 msgid "Invalid difficulty specified."
 msgstr "Invalid difficulty specified."
 
-#: includes/class-wow-raid-progress-api.php:263
+#: includes/class-encountrix-api.php:263
 msgid "Raider.io API key not configured."
 msgstr "Raider.io API key not configured."
 
-#: includes/class-wow-raid-progress-api.php:288
-#: includes/class-wow-raid-progress-api.php:436
+#: includes/class-encountrix-api.php:288
+#: includes/class-encountrix-api.php:436
 msgid "API rate limit exceeded. Please try again in a moment."
 msgstr "API rate limit exceeded. Please try again in a moment."
 
-#: includes/class-wow-raid-progress-api.php:308
+#: includes/class-encountrix-api.php:308
 #, php-format
 msgid "Failed to connect to Raider.io API: %s"
 msgstr "Failed to connect to Raider.io API: %s"
 
-#: includes/class-wow-raid-progress-api.php:322
+#: includes/class-encountrix-api.php:322
 #, php-format
 msgid "Raider.io API error (HTTP %d): %s"
 msgstr "Raider.io API error (HTTP %d): %s"
 
-#: includes/class-wow-raid-progress-api.php:330
+#: includes/class-encountrix-api.php:330
 msgid "Failed to parse API response."
 msgstr "Failed to parse API response."
 
-#: includes/class-wow-raid-progress-api.php:335
+#: includes/class-encountrix-api.php:335
 msgid "Invalid API response structure."
 msgstr "Invalid API response structure."
 
-#: includes/class-wow-raid-progress-api.php:401
+#: includes/class-encountrix-api.php:401
 #, php-format
 msgid "An unexpected error occurred: %s"
 msgstr "An unexpected error occurred: %s"
 
-#: includes/class-wow-raid-progress-api.php:425
+#: includes/class-encountrix-api.php:425
 msgid "API key not configured"
 msgstr "API key not configured"
 
-#: includes/class-wow-raid-progress-api.php:453
+#: includes/class-encountrix-api.php:453
 msgid "Failed to fetch static raid data"
 msgstr "Failed to fetch static raid data"
 
-#: includes/class-wow-raid-progress-api.php:461
+#: includes/class-encountrix-api.php:461
 msgid "Failed to parse static data"
 msgstr "Failed to parse static data"
 
-#: includes/class-wow-raid-progress-api.php:1178
+#: includes/class-encountrix-api.php:1178
 #, php-format
 msgid "API authentication failed. Please check your API key. Details: %s"
 msgstr "API authentication failed. Please check your API key. Details: %s"
 
-#: includes/class-wow-raid-progress-api.php:1179
+#: includes/class-encountrix-api.php:1179
 msgid "Invalid or expired API key"
 msgstr "Invalid or expired API key"
 
-#: includes/class-wow-raid-progress-api.php:1183
+#: includes/class-encountrix-api.php:1183
 #, php-format
 msgid "Access forbidden. Please verify API key permissions. Details: %s"
 msgstr "Access forbidden. Please verify API key permissions. Details: %s"
 
-#: includes/class-wow-raid-progress-api.php:1184
+#: includes/class-encountrix-api.php:1184
 msgid "Insufficient permissions"
 msgstr "Insufficient permissions"
 
-#: includes/class-wow-raid-progress-api.php:1188
+#: includes/class-encountrix-api.php:1188
 #, php-format
 msgid "Resource not found. Please check raid name and parameters. Details: %s"
 msgstr "Resource not found. Please check raid name and parameters. Details: %s"
 
-#: includes/class-wow-raid-progress-api.php:1189
+#: includes/class-encountrix-api.php:1189
 msgid "The requested raid or guild was not found"
 msgstr "The requested raid or guild was not found"
 
-#: includes/class-wow-raid-progress-api.php:1192
+#: includes/class-encountrix-api.php:1192
 msgid "API rate limit exceeded. Please try again in a few minutes."
 msgstr "API rate limit exceeded. Please try again in a few minutes."
 
-#: includes/class-wow-raid-progress-api.php:1197
+#: includes/class-encountrix-api.php:1197
 #, php-format
 msgid ""
 "API server error. The service may be temporarily unavailable. Details: %s"
 msgstr ""
 "API server error. The service may be temporarily unavailable. Details: %s"
 
-#: includes/class-wow-raid-progress-api.php:1198
+#: includes/class-encountrix-api.php:1198
 msgid "Please try again later"
 msgstr "Please try again later"
 
-#: includes/class-wow-raid-progress-api.php:1202
+#: includes/class-encountrix-api.php:1202
 #, php-format
 msgid "API Error (HTTP %d): %s"
 msgstr "API Error (HTTP %d): %s"
 
-#: includes/class-wow-raid-progress-api.php:1204
+#: includes/class-encountrix-api.php:1204
 msgid "Unknown error occurred"
 msgstr "Unknown error occurred"
 
-#: includes/class-wow-raid-progress-widget.php:62
+#: includes/class-encountrix-widget.php:62
 msgid ""
 "No raid specified. Please configure a default raid in the plugin settings or "
 "specify one in the shortcode."
@@ -392,7 +392,7 @@ msgstr ""
 "No raid specified. Please configure a default raid in the plugin settings or "
 "specify one in the shortcode."
 
-#: includes/class-wow-raid-progress-widget.php:66
+#: includes/class-encountrix-widget.php:66
 msgid ""
 "No region specified. Please configure a default region in the plugin "
 "settings or specify one in the shortcode."
@@ -400,76 +400,78 @@ msgstr ""
 "No region specified. Please configure a default region in the plugin "
 "settings or specify one in the shortcode."
 
-#: includes/class-wow-raid-progress-widget.php:92
+#: includes/class-encountrix-widget.php:92
 #, php-format
 msgid "Error fetching raid information: %s"
 msgstr "Error fetching raid information: %s"
 
-#: includes/class-wow-raid-progress-widget.php:103
+#: includes/class-encountrix-widget.php:103
 #, php-format
 msgid "Raid \"%s\" not found. Please check the raid name."
 msgstr "Raid \"%s\" not found. Please check the raid name."
 
-#: includes/class-wow-raid-progress-widget.php:162
+#: includes/class-encountrix-widget.php:162
 msgid "Boss artwork © Blizzard Entertainment"
 msgstr "Boss artwork © Blizzard Entertainment"
 
-#: includes/class-wow-raid-progress-widget.php:273
-#: includes/class-wow-raid-progress-widget.php:309
+#: includes/class-encountrix-widget.php:273
+#: includes/class-encountrix-widget.php:309
 #, php-format
 msgid "Error loading %s data: %s"
 msgstr "Error loading %s data: %s"
 
-#: includes/class-wow-raid-progress-widget.php:365
+#: includes/class-encountrix-widget.php:365
 msgid "Data and media © Blizzard Entertainment"
 msgstr "Data and media © Blizzard Entertainment"
 
-#: includes/class-wow-raid-progress-widget.php:392
+#: includes/class-encountrix-widget.php:392
 #, php-format
 msgid "Invalid guild ID: %s"
 msgstr "Invalid guild ID: %s"
 
-#: includes/class-wow-raid-progress-widget.php:433
+#: includes/class-encountrix-widget.php:433
 #, php-format
 msgid "Error loading %s data for guild %s: %s"
 msgstr "Error loading %s data for guild %s: %s"
 
-#: includes/class-wow-raid-progress-widget.php:470
+#: includes/class-encountrix-widget.php:470
 msgid "No raid data available for this guild."
 msgstr "No raid data available for this guild."
 
-#: includes/class-wow-raid-progress-widget.php:517
+#: includes/class-encountrix-widget.php
 #, php-format
-msgid ""
-"No data found for your guild in this raid."
-msgstr ""
-"No %s data found for your guild in this raid."
+msgid "No data found for guild %s in this raid."
+msgstr "No data found for guild %s in this raid."
 
-#: includes/class-wow-raid-progress-widget.php:538
+#: includes/class-encountrix-widget.php
+msgid "No data found for your guild in this raid."
+msgstr "No data found for your guild in this raid."
+
+#: includes/class-encountrix-widget.php:538
 msgid "Realm:"
 msgstr "Realm:"
 
-#: includes/class-wow-raid-progress-widget.php:540
+#: includes/class-encountrix-widget.php:540
 msgid "World:"
 msgstr "World:"
 
-#: includes/class-wow-raid-progress-widget.php:554
+#: includes/class-encountrix-widget.php:554
 msgid "Bosses"
 msgstr "Bosses"
 
-#: includes/class-wow-raid-progress-widget.php:602
+#: includes/class-encountrix-widget.php:602
 msgid "Defeated"
 msgstr "Defeated"
 
-#: includes/class-wow-raid-progress-widget.php:605
+#: includes/class-encountrix-widget.php:605
 msgid "Pulls:"
 msgstr "Pulls:"
 
-#: includes/class-wow-raid-progress-widget.php:609
+#: includes/class-encountrix-widget.php:609
 msgid "Best:"
 msgstr "Best:"
 
-#: includes/class-wow-raid-progress-widget.php:613
+#: includes/class-encountrix-widget.php:613
 msgid "Not Started"
 msgstr "Not Started"
 

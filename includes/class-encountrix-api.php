@@ -1,12 +1,12 @@
 <?php
 
 /**
- * WoW Raid Progress API Handler
+ * Encountrix API Handler
  *
  * Handles all API interactions with Raider.io and Blizzard APIs
  * Includes caching, rate limiting, and icon management
  *
- * @package WoWRaidProgress
+ * @package Encountrix
  * @since 5.0.0
  */
 
@@ -14,17 +14,17 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-class WoWRaidProgressAPI {
+class EncountrixApi {
 
 	private string $api_base_url = 'https://raider.io/api/v1/raiding/raid-rankings';
 	private string $static_data_url = 'https://raider.io/api/v1/raiding/static-data';
-	private string $cache_prefix = 'wow_raid_progress_';
-	private string $static_cache_prefix = 'wow_raid_static_';
-	private string $blizzard_cache_prefix = 'wow_blizzard_';
+	private string $cache_prefix = 'encountrix_';
+	private string $static_cache_prefix = 'encountrix_static_';
+	private string $blizzard_cache_prefix = 'encountrix_blizzard_';
 	private int $http_timeout = 8;
 
 	// Rate limiting configuration
-	private string $rate_limit_key = 'wow_raid_api_rate_limit';
+	private string $rate_limit_key = 'encountrix_api_rate_limit';
 	private int $max_requests_per_minute = 30;
 	private int $icon_retry_interval = 1800; // 30 minutes
 
@@ -35,7 +35,7 @@ class WoWRaidProgressAPI {
 	 */
 	private function base_headers(): array {
 		return [
-			'User-Agent' => 'WoWRaidProgress/' . (defined('WOW_RAID_PROGRESS_VERSION') ? WOW_RAID_PROGRESS_VERSION : 'dev') .
+			'User-Agent' => 'Encountrix/' . (defined('ENCOUNTRIX_VERSION') ? ENCOUNTRIX_VERSION : 'dev') .
 				' WordPress/' . get_bloginfo('version') . ' (' . home_url() . ')'
 		];
 	}
@@ -90,9 +90,7 @@ class WoWRaidProgressAPI {
 	];
 
 	/**
-	 * Helper to delete transients by prefix using prepared statements.
-	 *
-	 * FIX #1: Replaces all raw LIKE queries in this class.
+	 * Delete transients by option name prefix using prepared statements.
 	 *
 	 * @param array<string> $prefixes Option name prefixes (without trailing %).
 	 */
@@ -167,7 +165,7 @@ class WoWRaidProgressAPI {
 
 		try {
 			// Check if cron mode is enabled
-			if (function_exists('wow_raid_progress_should_use_cron') && wow_raid_progress_should_use_cron() && !defined('DOING_CRON')) {
+			if (function_exists('encountrix_should_use_cron') && encountrix_should_use_cron() && !defined('DOING_CRON')) {
 				$request_key = md5(serialize([
 					'raid' => $raid,
 					'difficulty' => $difficulty,
@@ -188,17 +186,17 @@ class WoWRaidProgressAPI {
 
 				return [
 					'raidRankings' => [],
-					'message' => __('Data is being updated in the background. Please check back shortly.', 'wow-raid-progress')
+					'message' => __('Data is being updated in the background. Please check back shortly.', 'encountrix')
 				];
 			}
 
 			// Input validation
 			if (empty($raid)) {
-				return new WP_Error('invalid_raid', __('Raid name is required.', 'wow-raid-progress'));
+				return new WP_Error('invalid_raid', __('Raid name is required.', 'encountrix'));
 			}
 
 			if (!in_array($difficulty, ['normal', 'heroic', 'mythic'], true)) {
-				return new WP_Error('invalid_difficulty', __('Invalid difficulty specified.', 'wow-raid-progress'));
+				return new WP_Error('invalid_difficulty', __('Invalid difficulty specified.', 'encountrix'));
 			}
 
 			// Sanitize inputs
@@ -233,7 +231,7 @@ class WoWRaidProgressAPI {
 			}
 
 			// Check if this exact request is currently in progress
-			$in_progress_key = 'wow_request_lock_' . $request_key;
+			$in_progress_key = 'encountrix_request_lock_' . $request_key;
 			$in_progress = get_transient($in_progress_key);
 
 			if ($in_progress !== false) {
@@ -267,10 +265,10 @@ class WoWRaidProgressAPI {
 			}
 
 			// Check API key
-			$api_key = get_option('wow_raid_progress_api_key');
+			$api_key = get_option('encountrix_api_key');
 			if (empty($api_key)) {
 				delete_transient($in_progress_key);
-				return new WP_Error('no_api_key', __('Raider.io API key not configured.', 'wow-raid-progress'));
+				return new WP_Error('no_api_key', __('Raider.io API key not configured.', 'encountrix'));
 			}
 
 			// Build API request
@@ -295,7 +293,7 @@ class WoWRaidProgressAPI {
 			// Rate limiting check
 			if (!$this->wait_for_rate_limit(5)) {
 				delete_transient($in_progress_key);
-				$error_msg = __('API rate limit exceeded. Please try again in a moment.', 'wow-raid-progress');
+				$error_msg = __('API rate limit exceeded. Please try again in a moment.', 'encountrix');
 				set_transient($error_cache_key, $error_msg, 60);
 				$this->debug_log("Rate limit exceeded for: $raid/$difficulty/$region");
 				return new WP_Error('rate_limit', $error_msg);
@@ -316,7 +314,7 @@ class WoWRaidProgressAPI {
 				$msg = $response->get_error_message();
 				set_transient($error_cache_key, $msg, 120);
 				$this->debug_log("API request failed: $msg");
-				return new WP_Error('api_request_failed', sprintf(__('Failed to connect to Raider.io API: %s', 'wow-raid-progress'), $msg));
+				return new WP_Error('api_request_failed', sprintf(__('Failed to connect to Raider.io API: %s', 'encountrix'), $msg));
 			}
 
 			$response_code = wp_remote_retrieve_response_code($response);
@@ -330,7 +328,7 @@ class WoWRaidProgressAPI {
 
 				return new WP_Error(
 					'api_http_error',
-					sprintf(__('Raider.io API error (HTTP %d): %s', 'wow-raid-progress'), $response_code, $error_message)
+					sprintf(__('Raider.io API error (HTTP %d): %s', 'encountrix'), $response_code, $error_message)
 				);
 			}
 
@@ -338,12 +336,12 @@ class WoWRaidProgressAPI {
 			$data = json_decode($body, true);
 			if (json_last_error() !== JSON_ERROR_NONE) {
 				$this->debug_log('JSON parse error: ' . json_last_error_msg());
-				return new WP_Error('json_parse_error', __('Failed to parse API response.', 'wow-raid-progress'));
+				return new WP_Error('json_parse_error', __('Failed to parse API response.', 'encountrix'));
 			}
 
 			// Validate response structure
 			if (!isset($data['raidRankings'])) {
-				return new WP_Error('invalid_response', __('Invalid API response structure.', 'wow-raid-progress'));
+				return new WP_Error('invalid_response', __('Invalid API response structure.', 'encountrix'));
 			}
 
 			// Fetch world ranking if needed
@@ -389,7 +387,7 @@ class WoWRaidProgressAPI {
 				}
 			}
 
-			// FIX #2: Single transient write (was duplicated — first write was immediately overwritten)
+			// Enforce a minimum cache duration of 5 minutes.
 			$actual_cache_time = max($cache_minutes, 5);
 			set_transient($cache_key, $data, $actual_cache_time * MINUTE_IN_SECONDS);
 			$this->debug_log("Cached API response for $actual_cache_time minutes: $raid/$difficulty/$region (key: $request_key)");
@@ -400,7 +398,7 @@ class WoWRaidProgressAPI {
 				delete_transient($in_progress_key);
 			}
 			$this->debug_log('Exception in fetch_raid_data: ' . $e->getMessage());
-			return new WP_Error('unexpected_error', sprintf(__('An unexpected error occurred: %s', 'wow-raid-progress'), $e->getMessage()));
+			return new WP_Error('unexpected_error', sprintf(__('An unexpected error occurred: %s', 'encountrix'), $e->getMessage()));
 		}
 	}
 
@@ -420,9 +418,9 @@ class WoWRaidProgressAPI {
 				return $cached_data;
 			}
 
-			$api_key = get_option('wow_raid_progress_api_key');
+			$api_key = get_option('encountrix_api_key');
 			if (empty($api_key)) {
-				return new WP_Error('no_api_key', __('API key not configured', 'wow-raid-progress'));
+				return new WP_Error('no_api_key', __('API key not configured', 'encountrix'));
 			}
 
 			$url = add_query_arg([
@@ -432,7 +430,7 @@ class WoWRaidProgressAPI {
 
 			if (!$this->wait_for_rate_limit(10)) {
 				$this->debug_log("Rate limit timeout for static data fetch");
-				return new WP_Error('rate_limit', __('API rate limit exceeded. Please try again in a moment.', 'wow-raid-progress'));
+				return new WP_Error('rate_limit', __('API rate limit exceeded. Please try again in a moment.', 'encountrix'));
 			}
 
 			$this->debug_log("Fetching static data for expansion $expansion_id");
@@ -449,7 +447,7 @@ class WoWRaidProgressAPI {
 
 			if (wp_remote_retrieve_response_code($response) !== 200) {
 				$this->debug_log("Failed to fetch static data: HTTP " . wp_remote_retrieve_response_code($response));
-				return new WP_Error('api_error', __('Failed to fetch static raid data', 'wow-raid-progress'));
+				return new WP_Error('api_error', __('Failed to fetch static raid data', 'encountrix'));
 			}
 
 			$body = wp_remote_retrieve_body($response);
@@ -457,7 +455,7 @@ class WoWRaidProgressAPI {
 
 			if (json_last_error() !== JSON_ERROR_NONE) {
 				$this->debug_log("JSON parse error for static data: " . json_last_error_msg());
-				return new WP_Error('json_error', __('Failed to parse static data', 'wow-raid-progress'));
+				return new WP_Error('json_error', __('Failed to parse static data', 'encountrix'));
 			}
 
 			set_transient($cache_key, $data, $cache_duration * MINUTE_IN_SECONDS);
@@ -478,7 +476,7 @@ class WoWRaidProgressAPI {
 	public function get_blizzard_token(?string $region = null): string|false {
 		try {
 			if (!$region) {
-				$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+				$region = get_option('encountrix_blizzard_region', 'eu');
 			}
 
 			$cache_key = $this->blizzard_cache_prefix . 'oauth_token_' . $region;
@@ -488,8 +486,8 @@ class WoWRaidProgressAPI {
 				return $cached_token;
 			}
 
-			$client_id = get_option('wow_raid_progress_blizzard_client_id');
-			$client_secret = get_option('wow_raid_progress_blizzard_client_secret');
+			$client_id = get_option('encountrix_blizzard_client_id');
+			$client_secret = get_option('encountrix_blizzard_client_secret');
 
 			if (empty($client_id) || empty($client_secret)) {
 				$this->debug_log("Blizzard API credentials not configured");
@@ -559,7 +557,7 @@ class WoWRaidProgressAPI {
 				return $cached_map;
 			}
 
-			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+			$region = get_option('encountrix_blizzard_region', 'eu');
 			$token = $this->get_blizzard_token($region);
 			if (!$token) {
 				$this->debug_log("Cannot get achievement map: no Blizzard token");
@@ -690,8 +688,8 @@ class WoWRaidProgressAPI {
 		$boss_slug = sanitize_key($boss_slug);
 		$raid_slug = sanitize_key($raid_slug);
 
-		$lock_key = 'wow_icon_lock_' . $raid_slug . '_' . $boss_slug;
-		$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
+		$lock_key = 'encountrix_icon_lock_' . $raid_slug . '_' . $boss_slug;
+		$cache_key = 'encountrix_icon_id_' . $raid_slug . '_' . $boss_slug;
 
 		// Check if another process is downloading this icon
 		if (get_transient($lock_key) !== false) {
@@ -728,9 +726,9 @@ class WoWRaidProgressAPI {
 			 INNER JOIN {$wpdb->postmeta} pm2 ON p.ID = pm2.post_id
 			 WHERE p.post_type = 'attachment'
 			 AND p.post_status = 'inherit'
-			 AND pm1.meta_key = '_wow_raid_progress_boss'
+			 AND pm1.meta_key = '_encountrix_boss'
 			 AND pm1.meta_value = %s
-			 AND pm2.meta_key = '_wow_raid_progress_raid'
+			 AND pm2.meta_key = '_encountrix_raid'
 			 AND pm2.meta_value = %s
 			 LIMIT 1",
 			$boss_slug,
@@ -757,9 +755,9 @@ class WoWRaidProgressAPI {
 
 		if ($attachment_id && get_post($attachment_id)) {
 			$attachment_id = (int) $attachment_id;
-			update_post_meta($attachment_id, '_wow_raid_progress_icon', 'boss');
-			update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
-			update_post_meta($attachment_id, '_wow_raid_progress_boss', $boss_slug);
+			update_post_meta($attachment_id, '_encountrix_icon', 'boss');
+			update_post_meta($attachment_id, '_encountrix_raid', $raid_slug);
+			update_post_meta($attachment_id, '_encountrix_boss', $boss_slug);
 
 			set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
 			$this->debug_log("Found existing icon by filename for $boss_slug: attachment ID $attachment_id");
@@ -767,7 +765,7 @@ class WoWRaidProgressAPI {
 		}
 
 		// Check if we should attempt download
-		$failure_key = 'wow_icon_fail_' . $raid_slug . '_' . $boss_slug;
+		$failure_key = 'encountrix_icon_fail_' . $raid_slug . '_' . $boss_slug;
 		if (get_transient($failure_key) !== false) {
 			$this->debug_log("Skipping download for $boss_slug (recent failure)");
 			set_transient($cache_key, 0, 300);
@@ -776,8 +774,8 @@ class WoWRaidProgressAPI {
 
 		// Attempt download if we have the necessary data
 		if ($boss_name !== null && $expansion_id !== null) {
-			$client_id = get_option('wow_raid_progress_blizzard_client_id');
-			$client_secret = get_option('wow_raid_progress_blizzard_client_secret');
+			$client_id = get_option('encountrix_blizzard_client_id');
+			$client_secret = get_option('encountrix_blizzard_client_secret');
 
 			if (!empty($client_id) && !empty($client_secret)) {
 				set_transient($lock_key, 1, 60);
@@ -806,9 +804,13 @@ class WoWRaidProgressAPI {
 	}
 
 	/**
-	 * FIX #8: Batch-load all boss icon IDs for a raid in a single query.
+	 * Batch-load all boss icon attachment IDs for a given raid.
 	 *
-	 * @return array<string, int> Map of boss_slug => attachment_id
+	 * Uses a single query to retrieve every boss icon associated with
+	 * the raid, avoiding N+1 lookups in render loops.
+	 *
+	 * @param string $raid_slug Sanitized raid slug.
+	 * @return array<string, int> Map of boss_slug => attachment_id.
 	 */
 	public function get_all_boss_icon_ids(string $raid_slug): array {
 		global $wpdb;
@@ -822,8 +824,8 @@ class WoWRaidProgressAPI {
 			   ON pm_boss.post_id = pm_raid.post_id
 			 INNER JOIN {$wpdb->posts} p
 			   ON p.ID = pm_boss.post_id
-			 WHERE pm_boss.meta_key = '_wow_raid_progress_boss'
-			   AND pm_raid.meta_key = '_wow_raid_progress_raid'
+			 WHERE pm_boss.meta_key = '_encountrix_boss'
+			   AND pm_raid.meta_key = '_encountrix_raid'
 			   AND pm_raid.meta_value = %s
 			   AND p.post_type = 'attachment'
 			   AND p.post_status = 'inherit'",
@@ -838,12 +840,17 @@ class WoWRaidProgressAPI {
 	}
 
 	/**
-	 * Import single boss icon from Blizzard API
+	 * Import a single boss icon from the Blizzard API.
 	 *
-	 * FIX #4: Returns true for "already exists" (not the numeric ID),
-	 * so callers can distinguish new imports from skips.
+	 * Returns the new attachment ID on a fresh import, true when an
+	 * existing attachment was found (no download needed), or false
+	 * on failure.
 	 *
-	 * @return int|true|false New attachment ID, true if already exists, false on failure
+	 * @param string   $boss_slug    Boss identifier slug.
+	 * @param string   $boss_name    Human-readable boss name.
+	 * @param string   $raid_slug    Raid identifier slug.
+	 * @param int      $expansion_id Expansion numeric ID.
+	 * @return int|true|false New attachment ID, true if already exists, false on failure.
 	 */
 	public function import_single_boss_icon(string $boss_slug, string $boss_name, string $raid_slug, int $expansion_id): int|bool {
 		try {
@@ -859,9 +866,9 @@ class WoWRaidProgressAPI {
 				 INNER JOIN {$wpdb->postmeta} pm2 ON p.ID = pm2.post_id
 				 WHERE p.post_type = 'attachment'
 				 AND p.post_status = 'inherit'
-				 AND pm1.meta_key = '_wow_raid_progress_boss'
+				 AND pm1.meta_key = '_encountrix_boss'
 				 AND pm1.meta_value = %s
-				 AND pm2.meta_key = '_wow_raid_progress_raid'
+				 AND pm2.meta_key = '_encountrix_raid'
 				 AND pm2.meta_value = %s
 				 LIMIT 1",
 				$boss_slug,
@@ -870,9 +877,9 @@ class WoWRaidProgressAPI {
 
 			if ($existing_id && get_post($existing_id)) {
 				$this->debug_log("Icon already exists for $boss_slug: attachment ID $existing_id");
-				$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
+				$cache_key = 'encountrix_icon_id_' . $raid_slug . '_' . $boss_slug;
 				set_transient($cache_key, (int) $existing_id, 30 * DAY_IN_SECONDS);
-				return true; // FIX #4: Signal "already existed"
+				return true; // Already exists; skip download.
 			}
 
 			// Also check by filename
@@ -888,14 +895,14 @@ class WoWRaidProgressAPI {
 
 			if ($existing_id && get_post($existing_id)) {
 				$existing_id = (int) $existing_id;
-				update_post_meta($existing_id, '_wow_raid_progress_icon', 'boss');
-				update_post_meta($existing_id, '_wow_raid_progress_raid', $raid_slug);
-				update_post_meta($existing_id, '_wow_raid_progress_boss', $boss_slug);
+				update_post_meta($existing_id, '_encountrix_icon', 'boss');
+				update_post_meta($existing_id, '_encountrix_raid', $raid_slug);
+				update_post_meta($existing_id, '_encountrix_boss', $boss_slug);
 
 				$this->debug_log("Found existing icon by filename for $boss_slug: attachment ID $existing_id");
-				$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
+				$cache_key = 'encountrix_icon_id_' . $raid_slug . '_' . $boss_slug;
 				set_transient($cache_key, $existing_id, 30 * DAY_IN_SECONDS);
-				return true; // FIX #4: Signal "already existed"
+				return true; // Already exists; skip download.
 			}
 
 			// Get achievement map
@@ -908,7 +915,7 @@ class WoWRaidProgressAPI {
 			$achievement_id = $achievement_map[$boss_slug];
 			$this->debug_log("Downloading icon for $boss_slug using achievement ID $achievement_id");
 
-			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+			$region = get_option('encountrix_blizzard_region', 'eu');
 			$token = $this->get_blizzard_token($region);
 			if (!$token) {
 				return false;
@@ -973,12 +980,12 @@ class WoWRaidProgressAPI {
 			}
 
 			// Add ALL metadata immediately
-			update_post_meta($attachment_id, '_wow_raid_progress_icon', 'boss');
-			update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
-			update_post_meta($attachment_id, '_wow_raid_progress_boss', $boss_slug);
-			update_post_meta($attachment_id, '_wow_raid_progress_expansion', $expansion_id);
+			update_post_meta($attachment_id, '_encountrix_icon', 'boss');
+			update_post_meta($attachment_id, '_encountrix_raid', $raid_slug);
+			update_post_meta($attachment_id, '_encountrix_boss', $boss_slug);
+			update_post_meta($attachment_id, '_encountrix_expansion', $expansion_id);
 
-			$cache_key = 'wow_icon_id_' . $raid_slug . '_' . $boss_slug;
+			$cache_key = 'encountrix_icon_id_' . $raid_slug . '_' . $boss_slug;
 			set_transient($cache_key, $attachment_id, 30 * DAY_IN_SECONDS);
 
 			$this->debug_log("Successfully imported NEW icon for $boss_slug: attachment ID $attachment_id");
@@ -990,11 +997,12 @@ class WoWRaidProgressAPI {
 	}
 
 	/**
-	 * Delete all plugin-imported icons
+	 * Delete all plugin-imported icon attachments.
 	 *
-	 * FIX #3: Removed dangerously broad regex that matched any `word_word` attachment.
-	 * Now only deletes attachments that have plugin metadata.
-	 * FIX #1: All SQL uses prepared statements.
+	 * Only removes attachments that carry Encountrix plugin metadata,
+	 * then clears all related transient caches.
+	 *
+	 * @return int Number of attachments deleted.
 	 */
 	public function delete_all_icons(): int {
 		global $wpdb;
@@ -1006,10 +1014,10 @@ class WoWRaidProgressAPI {
 			"SELECT DISTINCT post_id
 			 FROM {$wpdb->postmeta}
 			 WHERE meta_key IN (
-				 '_wow_raid_progress_icon',
-				 '_wow_raid_progress_raid',
-				 '_wow_raid_progress_boss',
-				 '_wow_raid_progress_expansion'
+				 '_encountrix_icon',
+				 '_encountrix_raid',
+				 '_encountrix_boss',
+				 '_encountrix_expansion'
 			 )"
 		);
 
@@ -1026,12 +1034,12 @@ class WoWRaidProgressAPI {
 
 		// Clear all icon-related caches
 		$this->delete_transients_by_prefix([
-			'_transient_wow_icon_',
-			'_transient_timeout_wow_icon_',
-			'_transient_wow_blizzard_',
-			'_transient_timeout_wow_blizzard_',
-			'_transient_wow_request_lock_',
-			'_transient_timeout_wow_request_lock_',
+			'_transient_encountrix_icon_',
+			'_transient_timeout_encountrix_icon_',
+			'_transient_encountrix_blizzard_',
+			'_transient_timeout_encountrix_blizzard_',
+			'_transient_encountrix_request_lock_',
+			'_transient_timeout_encountrix_request_lock_',
 		]);
 
 		$this->debug_log("Deleted $deleted icon attachments and cleared all caches");
@@ -1055,26 +1063,26 @@ class WoWRaidProgressAPI {
 
 		return match (true) {
 			$code === 401 => sprintf(
-				__('API authentication failed. Please check your API key. Details: %s', 'wow-raid-progress'),
-				$error_detail ?: __('Invalid or expired API key', 'wow-raid-progress')
+				__('API authentication failed. Please check your API key. Details: %s', 'encountrix'),
+				$error_detail ?: __('Invalid or expired API key', 'encountrix')
 			),
 			$code === 403 => sprintf(
-				__('Access forbidden. Please verify API key permissions. Details: %s', 'wow-raid-progress'),
-				$error_detail ?: __('Insufficient permissions', 'wow-raid-progress')
+				__('Access forbidden. Please verify API key permissions. Details: %s', 'encountrix'),
+				$error_detail ?: __('Insufficient permissions', 'encountrix')
 			),
 			$code === 404 => sprintf(
-				__('Resource not found. Please check raid name and parameters. Details: %s', 'wow-raid-progress'),
-				$error_detail ?: __('The requested raid or guild was not found', 'wow-raid-progress')
+				__('Resource not found. Please check raid name and parameters. Details: %s', 'encountrix'),
+				$error_detail ?: __('The requested raid or guild was not found', 'encountrix')
 			),
-			$code === 429 => __('API rate limit exceeded. Please try again in a few minutes.', 'wow-raid-progress'),
+			$code === 429 => __('API rate limit exceeded. Please try again in a few minutes.', 'encountrix'),
 			$code >= 500 && $code <= 503 => sprintf(
-				__('API server error. The service may be temporarily unavailable. Details: %s', 'wow-raid-progress'),
-				$error_detail ?: __('Please try again later', 'wow-raid-progress')
+				__('API server error. The service may be temporarily unavailable. Details: %s', 'encountrix'),
+				$error_detail ?: __('Please try again later', 'encountrix')
 			),
 			default => sprintf(
-				__('API Error (HTTP %d): %s', 'wow-raid-progress'),
+				__('API Error (HTTP %d): %s', 'encountrix'),
 				$code,
-				$error_detail ?: __('Unknown error occurred', 'wow-raid-progress')
+				$error_detail ?: __('Unknown error occurred', 'encountrix')
 			),
 		};
 	}
@@ -1222,8 +1230,8 @@ class WoWRaidProgressAPI {
 			'post_status' => 'any',
 			'posts_per_page' => 1,
 			'meta_query' => [
-				['key' => '_wow_raid_progress_icon', 'value' => 'raid'],
-				['key' => '_wow_raid_progress_raid', 'value' => $raid_slug],
+				['key' => '_encountrix_icon', 'value' => 'raid'],
+				['key' => '_encountrix_raid', 'value' => $raid_slug],
 			],
 			'fields' => 'ids',
 			'no_found_rows' => true,
@@ -1237,8 +1245,8 @@ class WoWRaidProgressAPI {
 			}
 		}
 
-		$client_id = get_option('wow_raid_progress_blizzard_client_id');
-		$client_secret = get_option('wow_raid_progress_blizzard_client_secret');
+		$client_id = get_option('encountrix_blizzard_client_id');
+		$client_secret = get_option('encountrix_blizzard_client_secret');
 
 		if (!empty($client_id) && !empty($client_secret)) {
 			$achievement_id = $this->get_raid_achievement_id($raid_slug, $expansion_id);
@@ -1265,7 +1273,7 @@ class WoWRaidProgressAPI {
 				return (int) $cached_id;
 			}
 
-			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+			$region = get_option('encountrix_blizzard_region', 'eu');
 			$token = $this->get_blizzard_token($region);
 			if (!$token) {
 				return false;
@@ -1341,7 +1349,7 @@ class WoWRaidProgressAPI {
 	 */
 	private function download_raid_icon(string $raid_slug, int $achievement_id, int $expansion_id): int|false {
 		try {
-			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+			$region = get_option('encountrix_blizzard_region', 'eu');
 			$token = $this->get_blizzard_token($region);
 			if (!$token) {
 				return false;
@@ -1416,8 +1424,8 @@ class WoWRaidProgressAPI {
 				return false;
 			}
 
-			update_post_meta($attachment_id, '_wow_raid_progress_icon', 'raid');
-			update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
+			update_post_meta($attachment_id, '_encountrix_icon', 'raid');
+			update_post_meta($attachment_id, '_encountrix_raid', $raid_slug);
 
 			return (int) $attachment_id;
 		} catch (\Exception $e) {
@@ -1437,7 +1445,7 @@ class WoWRaidProgressAPI {
 				return (int) $cached_id;
 			}
 
-			$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+			$region = get_option('encountrix_blizzard_region', 'eu');
 			$token = $this->get_blizzard_token($region);
 			if (!$token) {
 				return false;
@@ -1546,8 +1554,8 @@ class WoWRaidProgressAPI {
 				'post_status' => 'any',
 				'posts_per_page' => 1,
 				'meta_query' => [
-					['key' => '_wow_raid_progress_icon', 'value' => 'raid_bg'],
-					['key' => '_wow_raid_progress_raid', 'value' => $raid_slug],
+					['key' => '_encountrix_icon', 'value' => 'raid_bg'],
+					['key' => '_encountrix_raid', 'value' => $raid_slug],
 				],
 				'fields' => 'ids',
 				'no_found_rows' => true,
@@ -1583,7 +1591,7 @@ class WoWRaidProgressAPI {
 	 * Download raid background image from Blizzard API
 	 */
 	private function download_journal_instance_image(string $raid_slug, int $journal_id, int $expansion_id): int|false {
-		$region = get_option('wow_raid_progress_blizzard_region', 'eu');
+		$region = get_option('encountrix_blizzard_region', 'eu');
 		$token = $this->get_blizzard_token($region);
 		if (!$token) {
 			return false;
@@ -1658,8 +1666,8 @@ class WoWRaidProgressAPI {
 			return false;
 		}
 
-		update_post_meta($attachment_id, '_wow_raid_progress_icon', 'raid_bg');
-		update_post_meta($attachment_id, '_wow_raid_progress_raid', $raid_slug);
+		update_post_meta($attachment_id, '_encountrix_icon', 'raid_bg');
+		update_post_meta($attachment_id, '_encountrix_raid', $raid_slug);
 
 		return (int) $attachment_id;
 	}
@@ -1686,16 +1694,16 @@ class WoWRaidProgressAPI {
 	 * Log debug message if debug mode is enabled
 	 */
 	public function debug_log(string $message): void {
-		$enabled = get_option('wow_raid_progress_debug_mode', 'false');
+		$enabled = get_option('encountrix_debug_mode', 'false');
 
-		if ($enabled === 'true' || (defined('WOW_RAID_PROGRESS_DEBUG') && WOW_RAID_PROGRESS_DEBUG)) {
-			$log = get_transient('wow_raid_debug_log') ?: [];
+		if ($enabled === 'true' || (defined('ENCOUNTRIX_DEBUG') && ENCOUNTRIX_DEBUG)) {
+			$log = get_transient('encountrix_debug_log') ?: [];
 			$log[] = date('H:i:s') . ' - ' . $message;
 			$log = array_slice($log, -100);
-			set_transient('wow_raid_debug_log', $log, HOUR_IN_SECONDS);
+			set_transient('encountrix_debug_log', $log, HOUR_IN_SECONDS);
 
 			if (defined('WP_DEBUG') && WP_DEBUG) {
-				error_log('WoW Raid Progress: ' . $message);
+				error_log('Encountrix: ' . $message);
 			}
 		}
 	}
