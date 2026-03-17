@@ -1,70 +1,90 @@
 <?php
 
 /**
- * Widget and shortcode handler class
+ * Encountrix widget and shortcode rendering.
  *
- * FIX #8: Uses batch icon loading via get_all_boss_icon_ids() instead of
- *         per-boss get_boss_icon_id() calls (eliminates N+1 queries).
+ * Handles the [encountrix] shortcode output, including raid progress display,
+ * boss icon rendering (with batch-loaded icons to avoid N+1 queries), and
+ * multi-guild / multi-difficulty layouts.
+ *
+ * @package Encountrix
+ * @since   1.0.0
  */
 
 if (!defined('ABSPATH')) {
 	exit;
 }
 
-class WoWRaidProgressWidget {
+class EncountrixWidget {
 
-	private WoWRaidProgressAPI $api;
+	/**
+	 * API instance used for data fetching.
+	 *
+	 * @var EncountrixApi
+	 */
+	private EncountrixApi $api;
 
-	public function __construct(WoWRaidProgressAPI $api) {
+	/**
+	 * Constructor.
+	 *
+	 * @param EncountrixApi $api API handler instance.
+	 */
+	public function __construct(EncountrixApi $api) {
 		$this->api = $api;
 	}
 
 	/**
-	 * Render shortcode
+	 * Render the [encountrix] shortcode.
+	 *
+	 * Enqueues front-end assets, resolves shortcode attributes against saved
+	 * defaults, and returns the complete HTML output for raid progress.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string Rendered HTML.
 	 */
 	public function render_shortcode(array $atts): string {
 
-		if (defined('WOW_RAID_PROGRESS_PLUGIN_URL')) {
+		if (defined('ENCOUNTRIX_PLUGIN_URL')) {
 			wp_enqueue_style(
-				'wow-raid-progress',
-				WOW_RAID_PROGRESS_PLUGIN_URL . 'assets/css/wow-raid-progress.css',
+				'encountrix',
+				ENCOUNTRIX_PLUGIN_URL . 'assets/css/encountrix.css',
 				[],
-				defined('WOW_RAID_PROGRESS_VERSION') ? WOW_RAID_PROGRESS_VERSION : null
+				defined('ENCOUNTRIX_VERSION') ? ENCOUNTRIX_VERSION : null
 			);
 			wp_enqueue_script(
-				'wow-raid-progress',
-				WOW_RAID_PROGRESS_PLUGIN_URL . 'assets/js/wow-raid-progress.js',
+				'encountrix',
+				ENCOUNTRIX_PLUGIN_URL . 'assets/js/encountrix.js',
 				['jquery'],
-				defined('WOW_RAID_PROGRESS_VERSION') ? WOW_RAID_PROGRESS_VERSION : null,
+				defined('ENCOUNTRIX_VERSION') ? ENCOUNTRIX_VERSION : null,
 				true
 			);
 		}
 
 		// Get default values from settings
 		$defaults = [
-			'raid' => get_option('wow_raid_progress_raid', ''),
-			'difficulty' => get_option('wow_raid_progress_difficulty', 'highest'),
-			'region' => get_option('wow_raid_progress_region', 'eu'),
-			'realm' => get_option('wow_raid_progress_realm', ''),
-			'guilds' => get_option('wow_raid_progress_guild_ids', ''),
-			'cache' => get_option('wow_raid_progress_cache_time', 60),
-			'show_icons' => get_option('wow_raid_progress_show_icons', 'true'),
-			'show_killed' => get_option('wow_raid_progress_show_killed', 'false'),
-			'use_blizzard_icons' => get_option('wow_raid_progress_use_blizzard_icons', 'true'),
-			'show_raid_name' => get_option('wow_raid_progress_show_raid_name', 'false'),
-			'show_raid_icon' => get_option('wow_raid_progress_show_raid_icon', 'false'),
-			'limit' => get_option('wow_raid_progress_limit', 50),
+			'raid' => get_option('encountrix_raid', ''),
+			'difficulty' => get_option('encountrix_difficulty', 'highest'),
+			'region' => get_option('encountrix_region', 'eu'),
+			'realm' => get_option('encountrix_realm', ''),
+			'guilds' => get_option('encountrix_guild_ids', ''),
+			'cache' => get_option('encountrix_cache_time', 60),
+			'show_icons' => get_option('encountrix_show_icons', 'true'),
+			'show_killed' => get_option('encountrix_show_killed', 'false'),
+			'use_blizzard_icons' => get_option('encountrix_use_blizzard_icons', 'true'),
+			'show_raid_name' => get_option('encountrix_show_raid_name', 'false'),
+			'show_raid_icon' => get_option('encountrix_show_raid_icon', 'false'),
+			'limit' => get_option('encountrix_limit', 50),
 			'page' => 0
 		];
 
-		$atts = shortcode_atts($defaults, $atts, 'wow_raid_progress');
+		$atts = shortcode_atts($defaults, $atts, 'encountrix');
 
 		if (empty($atts['raid'])) {
-			return $this->render_error(__('No raid specified. Please configure a default raid in the plugin settings or specify one in the shortcode.', 'wow-raid-progress'));
+			return $this->render_error(__('No raid specified. Please configure a default raid in the plugin settings or specify one in the shortcode.', 'encountrix'));
 		}
 
 		if (empty($atts['region'])) {
-			return $this->render_error(__('No region specified. Please configure a default region in the plugin settings or specify one in the shortcode.', 'wow-raid-progress'));
+			return $this->render_error(__('No region specified. Please configure a default region in the plugin settings or specify one in the shortcode.', 'encountrix'));
 		}
 
 		// Sanitize inputs
@@ -82,13 +102,13 @@ class WoWRaidProgressWidget {
 		$limit = max(1, min(100, absint($atts['limit'])));
 		$page = max(0, absint($atts['page']));
 
-		$expansion_id = get_option('wow_raid_progress_expansion', 10);
+		$expansion_id = get_option('encountrix_expansion', 10);
 
 		$static_data = $this->api->fetch_static_raid_data_by_expansion($expansion_id, $cache_minutes);
 		if (is_wp_error($static_data)) {
 			return $this->render_error(
 				sprintf(
-					__('Error fetching raid information: %s', 'wow-raid-progress'),
+					__('Error fetching raid information: %s', 'encountrix'),
 					$static_data->get_error_message()
 				)
 			);
@@ -98,13 +118,13 @@ class WoWRaidProgressWidget {
 		if (!$raid_info) {
 			return $this->render_error(
 				sprintf(
-					__('Raid "%s" not found. Please check the raid name.', 'wow-raid-progress'),
+					__('Raid "%s" not found. Please check the raid name.', 'encountrix'),
 					esc_html($raid_slug)
 				)
 			);
 		}
 
-		// FIX #8: Batch-load all boss icons for this raid in one query
+		// Batch-load all boss icons for this raid in a single query.
 		$icon_map = [];
 		if ($show_icons && $use_blizzard_icons) {
 			$icon_map = $this->api->get_all_boss_icon_ids($raid_slug);
@@ -124,7 +144,7 @@ class WoWRaidProgressWidget {
 			);
 		}
 
-		$output = '<div class="wow-raid-progress-container">';
+		$output = '<div class="encountrix-container">';
 
 		if ($show_raid_name || $show_raid_icon) {
 			$output .= $this->render_raid_header($raid_info, $show_raid_name, $show_raid_icon, $use_blizzard_icons, $expansion_id);
@@ -139,8 +159,8 @@ class WoWRaidProgressWidget {
 		}
 
 		if ($use_blizzard_icons) {
-			$output .= '<div class="wow-raid-attribution">';
-			$output .= '<small>' . __('Boss artwork © Blizzard Entertainment', 'wow-raid-progress') . '</small>';
+			$output .= '<div class="encountrix-attribution">';
+			$output .= '<small>' . __('Boss artwork © Blizzard Entertainment', 'encountrix') . '</small>';
 			$output .= '</div>';
 		}
 
@@ -150,7 +170,14 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Render raid header
+	 * Render the raid header with optional hero image.
+	 *
+	 * @param array  $raid_info          Raid static data (name, slug, encounters).
+	 * @param bool   $show_raid_name     Whether to display the raid name.
+	 * @param bool   $show_raid_icon     Whether to display the raid background image.
+	 * @param bool   $use_blizzard_icons Whether to fetch Blizzard media assets.
+	 * @param int    $expansion_id       Current expansion ID.
+	 * @return string Rendered HTML.
 	 */
 	private function render_raid_header(
 		array $raid_info,
@@ -174,17 +201,17 @@ class WoWRaidProgressWidget {
 			}
 		}
 
-		$output = '<div class="wow-raid-header-container">';
+		$output = '<div class="encountrix-header-container">';
 
 		if ($bg_image_url) {
-			$output .= '<div class="wow-raid-header-hero" style="background-image: url(' . esc_url($bg_image_url) . ');">';
-			$output .= '<div class="wow-raid-header-overlay">';
-			$output .= '<h2 class="wow-raid-header-title">' . esc_html($raid_name) . '</h2>';
+			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url($bg_image_url) . ');">';
+			$output .= '<div class="encountrix-header-overlay">';
+			$output .= '<h2 class="encountrix-header-title">' . esc_html($raid_name) . '</h2>';
 			$output .= '</div>';
 			$output .= '</div>';
 		} else {
-			$output .= '<div class="wow-raid-header-simple">';
-			$output .= '<h2 class="wow-raid-header-title">' . esc_html($raid_name) . '</h2>';
+			$output .= '<div class="encountrix-header-simple">';
+			$output .= '<h2 class="encountrix-header-title">' . esc_html($raid_name) . '</h2>';
 			$output .= '</div>';
 		}
 
@@ -194,9 +221,25 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Render general rankings (no specific guild)
+	 * Render general rankings when no specific guild is selected.
 	 *
-	 * @param array<string, int> $icon_map Pre-loaded boss icon map
+	 * @param array              $raid_info          Raid static data.
+	 * @param string             $raid_slug          Raid slug identifier.
+	 * @param string             $difficulty         Requested difficulty.
+	 * @param string             $region             Region code (e.g. "eu", "us").
+	 * @param string             $realm              Realm slug.
+	 * @param string             $guilds             Comma-separated guild IDs (empty for open rankings).
+	 * @param int                $cache_minutes      Cache TTL in minutes.
+	 * @param int                $limit              Maximum results per page.
+	 * @param int                $page               Zero-based page offset.
+	 * @param bool               $show_icons         Whether to show boss icons.
+	 * @param bool               $show_killed        Whether to include defeated bosses.
+	 * @param bool               $use_blizzard_icons Whether to use Blizzard media.
+	 * @param bool               $show_raid_name     Whether to display the raid name.
+	 * @param bool               $show_raid_icon     Whether to display the raid image.
+	 * @param int                $expansion_id       Current expansion ID.
+	 * @param array<string, int> $icon_map           Pre-loaded boss slug to attachment ID map.
+	 * @return string Rendered HTML.
 	 */
 	private function render_rankings(
 		array $raid_info,
@@ -224,19 +267,19 @@ class WoWRaidProgressWidget {
 			}
 		}
 
-		$output = '<div class="wow-raid-progress">';
+		$output = '<div class="encountrix">';
 
 		if ($bg_image_url && $show_raid_name) {
-			$output .= '<div class="wow-raid-header-hero" style="background-image: url(' . esc_url($bg_image_url) . ');">';
-			$output .= '<div class="wow-raid-header-overlay">';
-			$output .= '<h2 class="wow-raid-header-title" data-text="' . esc_attr($raid_info['name']) . '">';
+			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url($bg_image_url) . ');">';
+			$output .= '<div class="encountrix-header-overlay">';
+			$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr($raid_info['name']) . '">';
 			$output .= '<span>' . esc_html($raid_info['name']) . '</span>';
 			$output .= '</h2>';
 			$output .= '</div>';
 			$output .= '</div>';
 		} elseif ($show_raid_name) {
-			$output .= '<div class="wow-raid-header-simple">';
-			$output .= '<h2 class="wow-raid-header-title">' . esc_html($raid_info['name']) . '</h2>';
+			$output .= '<div class="encountrix-header-simple">';
+			$output .= '<h2 class="encountrix-header-title">' . esc_html($raid_info['name']) . '</h2>';
 			$output .= '</div>';
 		}
 
@@ -253,7 +296,7 @@ class WoWRaidProgressWidget {
 			if (is_wp_error($data)) {
 				if (!$this->is_rate_limit_error($data)) {
 					$output .= $this->render_error_inline(
-						sprintf(__('Error loading %s data: %s', 'wow-raid-progress'), ucfirst($target), $data->get_error_message())
+						sprintf(__('Error loading %s data: %s', 'encountrix'), ucfirst($target), $data->get_error_message())
 					);
 				}
 			} else {
@@ -275,7 +318,7 @@ class WoWRaidProgressWidget {
 				if (is_wp_error($data)) {
 					if (!$this->is_rate_limit_error($data)) {
 						$output .= $this->render_error_inline(
-							sprintf(__('Error loading %s data: %s', 'wow-raid-progress'), ucfirst($diff), $data->get_error_message())
+							sprintf(__('Error loading %s data: %s', 'encountrix'), ucfirst($diff), $data->get_error_message())
 						);
 					}
 					continue;
@@ -294,7 +337,7 @@ class WoWRaidProgressWidget {
 		}
 
 		if ($use_blizzard_icons) {
-			$output .= '<div class="wow-raid-attribution"><small>' . __('Data and media © Blizzard Entertainment', 'wow-raid-progress') . '</small></div>';
+			$output .= '<div class="encountrix-attribution"><small>' . __('Data and media © Blizzard Entertainment', 'encountrix') . '</small></div>';
 		}
 
 		$output .= '</div>';
@@ -302,9 +345,24 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Render progress for a specific guild
+	 * Render raid progress for a specific guild.
 	 *
-	 * @param array<string, int> $icon_map Pre-loaded boss icon map
+	 * Fetches data for all difficulties and renders the appropriate section(s)
+	 * based on the requested difficulty setting.
+	 *
+	 * @param array              $raid_info          Raid static data.
+	 * @param string             $raid_slug          Raid slug identifier.
+	 * @param string             $difficulty         Requested difficulty.
+	 * @param string             $region             Region code.
+	 * @param string             $realm              Realm slug.
+	 * @param string             $guild_id           Numeric guild ID.
+	 * @param int                $cache_minutes      Cache TTL in minutes.
+	 * @param bool               $show_icons         Whether to show boss icons.
+	 * @param bool               $show_killed        Whether to include defeated bosses.
+	 * @param bool               $use_blizzard_icons Whether to use Blizzard media.
+	 * @param int                $expansion_id       Current expansion ID.
+	 * @param array<string, int> $icon_map           Pre-loaded boss slug to attachment ID map.
+	 * @return string Rendered HTML.
 	 */
 	private function render_guild_progress(
 		array $raid_info,
@@ -323,7 +381,7 @@ class WoWRaidProgressWidget {
 
 		if (!preg_match('/^\d+$/', $guild_id)) {
 			return $this->render_error_inline(
-				sprintf(__('Invalid guild ID: %s', 'wow-raid-progress'), esc_html($guild_id))
+				sprintf(__('Invalid guild ID: %s', 'encountrix'), esc_html($guild_id))
 			);
 		}
 
@@ -354,7 +412,7 @@ class WoWRaidProgressWidget {
 				$this->api->debug_log('Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message());
 				$output .= $this->render_error_inline(
 					sprintf(
-						__('Error loading %s data for guild %s: %s', 'wow-raid-progress'),
+						__('Error loading %s data for guild %s: %s', 'encountrix'),
 						ucfirst($diff),
 						$guild_id,
 						$data->get_error_message()
@@ -368,7 +426,7 @@ class WoWRaidProgressWidget {
 					(is_array($data) ? $data : ['raidRankings' => []]),
 					$diff, $raid_info, $all_difficulties_data,
 					$show_icons, $show_killed, $use_blizzard_icons,
-					$expansion_id, $icon_map
+					$expansion_id, $icon_map, $guild_id
 				);
 				continue;
 			}
@@ -376,23 +434,34 @@ class WoWRaidProgressWidget {
 			$output .= $this->render_difficulty_section(
 				$data, $diff, $raid_info, $all_difficulties_data,
 				$show_icons, $show_killed, $use_blizzard_icons,
-				$expansion_id, $icon_map
+				$expansion_id, $icon_map, $guild_id
 			);
 		}
 
 		if ($output === '') {
-			$output = $this->render_error_inline(__('No raid data available for this guild.', 'wow-raid-progress'));
+			$output = $this->render_error_inline(__('No raid data available for this guild.', 'encountrix'));
 		}
 
 		return $output;
 	}
 
 	/**
-	 * Render difficulty section
+	 * Render a single difficulty section with boss list and progress bar.
 	 *
-	 * FIX #8: Uses pre-loaded $icon_map instead of per-boss get_boss_icon_id() calls.
+	 * Uses a pre-loaded icon map for batch icon resolution, falling back to
+	 * individual lookups only when a boss is missing from the batch result.
 	 *
-	 * @param array<string, int> $icon_map Pre-loaded boss_slug => attachment_id map
+	 * @param array              $data                 Raid ranking data for this difficulty.
+	 * @param string             $difficulty            Difficulty key (normal, heroic, mythic).
+	 * @param array              $raid_info             Raid static data.
+	 * @param array              $all_difficulties_data All fetched difficulty data for fallback.
+	 * @param bool               $show_icons            Whether to show boss icons.
+	 * @param bool               $show_killed           Whether to include defeated bosses.
+	 * @param bool               $use_blizzard_icons    Whether to use Blizzard media.
+	 * @param int                $expansion_id          Current expansion ID.
+	 * @param array<string, int> $icon_map              Pre-loaded boss slug to attachment ID map.
+	 * @param string             $guild_id              Optional guild ID for guild-specific view.
+	 * @return string Rendered HTML.
 	 */
 	private function render_difficulty_section(
 		array $data,
@@ -403,7 +472,8 @@ class WoWRaidProgressWidget {
 		bool $show_killed,
 		bool $use_blizzard_icons,
 		int $expansion_id,
-		array $icon_map = []
+		array $icon_map = [],
+		string $guild_id = ''
 	): string {
 
 		$all_bosses = $raid_info['encounters'] ?? [];
@@ -433,49 +503,69 @@ class WoWRaidProgressWidget {
 		}
 
 		if (empty($guild_info)) {
+			// Attempt to find a guild name from any difficulty for the error message.
+			$guild_display_name = '';
+			foreach ($all_difficulties_data as $diff_data) {
+				if (!is_wp_error($diff_data) && !empty($diff_data['raidRankings'][0]['guild']['name'])) {
+					$guild_display_name = $diff_data['raidRankings'][0]['guild']['name'];
+					break;
+				}
+			}
+
+			if (empty($guild_display_name) && $guild_id !== '') {
+				$guild_display_name = $guild_id;
+			}
+
+			if ($guild_display_name !== '') {
+				return $this->render_error_inline(
+					sprintf(
+						/* translators: %s: guild name or ID */
+						__('No data found for guild %s in this raid.', 'encountrix'),
+						esc_html($guild_display_name)
+					)
+				);
+			}
+
 			return $this->render_error_inline(
-				sprintf(
-					__('No data found for your guild in this raid.', 'wow-raid-progress'),
-					ucfirst($difficulty)
-				)
+				__('No data found for your guild in this raid.', 'encountrix')
 			);
 		}
 
 		ob_start();
 ?>
-		<div class="wow-raid-section">
-			<div class="wow-raid-header">
-				<h3 class="wow-raid-title">
+		<div class="encountrix-section">
+			<div class="encountrix-header">
+				<h3 class="encountrix-title">
 					<?php echo esc_html($guild_info['name']); ?>
-					<span class="wow-difficulty-badge <?php echo esc_attr($difficulty); ?>">
+					<span class="encountrix-difficulty-badge <?php echo esc_attr($difficulty); ?>">
 						<?php echo esc_html(ucfirst($difficulty)); ?>
 					</span>
 				</h3>
-				<div class="wow-raid-meta">
-					<span class="wow-realm"><?php echo esc_html($guild_info['realm']['name']); ?></span>
-					<span class="wow-region"><?php echo esc_html(strtoupper($guild_info['region']['short_name'])); ?></span>
+				<div class="encountrix-meta">
+					<span class="encountrix-realm"><?php echo esc_html($guild_info['realm']['name']); ?></span>
+					<span class="encountrix-region"><?php echo esc_html(strtoupper($guild_info['region']['short_name'])); ?></span>
 				</div>
-				<div class="wow-raid-ranks">
-					<span class="wow-rank realm"><?php esc_html_e('Realm:', 'wow-raid-progress'); ?> <strong>#<?php echo esc_html($rank); ?></strong></span>
+				<div class="encountrix-ranks">
+					<span class="encountrix-rank realm"><?php esc_html_e('Realm:', 'encountrix'); ?> <strong>#<?php echo esc_html($rank); ?></strong></span>
 					<?php if (!empty($world_rank)): ?>
-						<span class="wow-rank world"><?php esc_html_e('World:', 'wow-raid-progress'); ?> <strong>#<?php echo esc_html($world_rank); ?></strong></span>
+						<span class="encountrix-rank world"><?php esc_html_e('World:', 'encountrix'); ?> <strong>#<?php echo esc_html($world_rank); ?></strong></span>
 					<?php endif; ?>
 				</div>
 			</div>
-			<div class="wow-raid-progress">
+			<div class="encountrix">
 				<?php
 				$progress_percent = count($all_bosses) > 0 ?
 					(count($encounters_defeated) / count($all_bosses)) * 100 : 0;
 				?>
-				<div class="wow-progress-bar">
-					<div class="wow-progress-fill <?php echo esc_attr($difficulty); ?>"
+				<div class="encountrix-progress-bar">
+					<div class="encountrix-progress-fill <?php echo esc_attr($difficulty); ?>"
 						style="width: <?php echo esc_attr($progress_percent); ?>%"></div>
-					<div class="wow-progress-text">
+					<div class="encountrix-progress-text">
 						<?php echo esc_html(count($encounters_defeated) . '/' . count($all_bosses)); ?>
-						<?php esc_html_e('Bosses', 'wow-raid-progress'); ?>
+						<?php esc_html_e('Bosses', 'encountrix'); ?>
 					</div>
 				</div>
-				<div class="wow-boss-list">
+				<div class="encountrix-boss-list">
 					<?php
 					$defeated_slugs = array_column($encounters_defeated, 'slug');
 					foreach ($all_bosses as $boss):
@@ -487,15 +577,14 @@ class WoWRaidProgressWidget {
 
 						$status_class = $is_defeated ? 'defeated' : (isset($pulled_encounters[$boss['slug']]) ? 'in-progress' : 'not-started');
 					?>
-						<div class="wow-boss-item <?php echo esc_attr($status_class); ?>">
+						<div class="encountrix-boss-item <?php echo esc_attr($status_class); ?>">
 							<?php if ($show_icons): ?>
-								<div class="wow-boss-icon wow-boss-portrait">
+								<div class="encountrix-boss-icon encountrix-boss-portrait">
 									<?php
 									if ($use_blizzard_icons) {
-										// FIX #8: Use pre-loaded icon map instead of per-boss query
 										$attachment_id = $icon_map[$boss['slug']] ?? null;
 
-										// Fall back to individual lookup only if not in batch map
+										// Fall back to individual lookup if not in the batch map.
 										if (!$attachment_id) {
 											$attachment_id = $this->api->get_boss_icon_id(
 												$boss['slug'],
@@ -521,22 +610,22 @@ class WoWRaidProgressWidget {
 									?>
 								</div>
 							<?php endif; ?>
-							<div class="wow-boss-info">
-								<div class="wow-boss-name"><?php echo esc_html($boss['name']); ?></div>
-								<div class="wow-boss-stats">
+							<div class="encountrix-boss-info">
+								<div class="encountrix-boss-name"><?php echo esc_html($boss['name']); ?></div>
+								<div class="encountrix-boss-stats">
 									<?php if ($is_defeated): ?>
-										<span class="wow-defeated-label"><?php esc_html_e('Defeated', 'wow-raid-progress'); ?></span>
+										<span class="encountrix-defeated-label"><?php esc_html_e('Defeated', 'encountrix'); ?></span>
 									<?php elseif (isset($pulled_encounters[$boss['slug']])): ?>
-										<span class="wow-pulls">
-											<?php esc_html_e('Pulls:', 'wow-raid-progress'); ?>
+										<span class="encountrix-pulls">
+											<?php esc_html_e('Pulls:', 'encountrix'); ?>
 											<?php echo esc_html($pulled_encounters[$boss['slug']]['numPulls']); ?>
 										</span>
-										<span class="wow-percent">
-											<?php esc_html_e('Best:', 'wow-raid-progress'); ?>
+										<span class="encountrix-percent">
+											<?php esc_html_e('Best:', 'encountrix'); ?>
 											<?php echo esc_html(number_format($pulled_encounters[$boss['slug']]['bestPercent'], 1)); ?>%
 										</span>
 									<?php else: ?>
-										<span class="wow-not-started"><?php esc_html_e('Not Started', 'wow-raid-progress'); ?></span>
+										<span class="encountrix-not-started"><?php esc_html_e('Not Started', 'encountrix'); ?></span>
 									<?php endif; ?>
 								</div>
 							</div>
@@ -550,7 +639,14 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Find highest progress difficulty
+	 * Determine which difficulty has the most meaningful progress.
+	 *
+	 * Promotes to the next tier when all bosses on the current tier are cleared,
+	 * and prefers a tier that still has active (partial) progress.
+	 *
+	 * @param array $all_difficulties_data Fetched data keyed by difficulty.
+	 * @param array $raid_info             Raid static data including encounters.
+	 * @return string Difficulty key (normal, heroic, or mythic).
 	 */
 	private function find_highest_progress_difficulty(array $all_difficulties_data, array $raid_info): string {
 		$total_bosses = count($raid_info['encounters']);
@@ -600,7 +696,14 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Find fallback data from lower difficulties
+	 * Find fallback ranking data from a lower difficulty.
+	 *
+	 * Walks down from the current difficulty to retrieve guild metadata
+	 * (name, realm, rank) when the requested tier has no data.
+	 *
+	 * @param array  $all_difficulties_data All fetched difficulty data.
+	 * @param string $current_difficulty    The difficulty that lacked data.
+	 * @return array|null Ranking data array or null if nothing found.
 	 */
 	private function find_fallback_data(array $all_difficulties_data, string $current_difficulty): ?array {
 		$fallback_order = [
@@ -624,7 +727,10 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Validate difficulty setting
+	 * Validate and sanitize a difficulty value.
+	 *
+	 * @param string $difficulty Raw difficulty input.
+	 * @return string Sanitized difficulty key; defaults to 'normal' if invalid.
 	 */
 	private function validate_difficulty(string $difficulty): string {
 		$valid = ['all', 'normal', 'heroic', 'mythic', 'highest'];
@@ -633,7 +739,11 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Find raid info in static data
+	 * Look up a raid by slug in the static expansion data.
+	 *
+	 * @param array  $static_data Static raid data from the API.
+	 * @param string $raid_slug   The raid slug to search for.
+	 * @return array|null Raid data array or null if not found.
 	 */
 	private function find_raid_info(array $static_data, string $raid_slug): ?array {
 		if (!isset($static_data['raids'])) {
@@ -650,29 +760,36 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Render error message
+	 * Render a block-level error message.
+	 *
+	 * @param string $message Error text to display.
+	 * @return string HTML div with the error.
 	 */
 	private function render_error(string $message): string {
 		return sprintf(
-			'<div class="wow-raid-error">%s</div>',
+			'<div class="encountrix-error">%s</div>',
 			esc_html($message)
 		);
 	}
 
 	/**
-	 * Render inline error message
+	 * Render an inline error message within a section.
+	 *
+	 * @param string $message Error text to display.
+	 * @return string HTML div with the inline error.
 	 */
 	private function render_error_inline(string $message): string {
 		return sprintf(
-			'<div class="wow-raid-error-inline">%s</div>',
+			'<div class="encountrix-error-inline">%s</div>',
 			esc_html($message)
 		);
 	}
 
 	/**
-	 * Difficulty fallback order
+	 * Return the fallback order for a given difficulty.
 	 *
-	 * @return array<string>
+	 * @param string $difficulty Starting difficulty.
+	 * @return array<string> Ordered list of difficulties to try.
 	 */
 	private function difficulty_fallback_order(string $difficulty): array {
 		return match ($difficulty) {
@@ -683,9 +800,20 @@ class WoWRaidProgressWidget {
 	}
 
 	/**
-	 * Try requested difficulty, then fall back to lower ones until data appears
+	 * Fetch raid data for the requested difficulty, falling back to lower tiers.
 	 *
-	 * @return array{0: array|WP_Error, 1: string, 2: array}
+	 * Iterates through the fallback order and returns the first difficulty
+	 * that contains ranking data. If none succeed, the first result is returned.
+	 *
+	 * @param string $raid_slug     Raid slug identifier.
+	 * @param string $difficulty    Requested difficulty.
+	 * @param string $region        Region code.
+	 * @param string $realm         Realm slug.
+	 * @param string $guilds        Comma-separated guild IDs.
+	 * @param int    $cache_minutes Cache TTL in minutes.
+	 * @param int    $limit         Maximum results per page.
+	 * @param int    $page          Zero-based page offset.
+	 * @return array{0: array|WP_Error, 1: string, 2: array} Data, used difficulty, all attempts.
 	 */
 	private function fetch_with_fallback(
 		string $raid_slug,
@@ -710,6 +838,12 @@ class WoWRaidProgressWidget {
 		return [$first, $first_diff, $results];
 	}
 
+	/**
+	 * Check whether a WP_Error represents an API rate-limit response.
+	 *
+	 * @param mixed $err Value to inspect (typically a WP_Error).
+	 * @return bool True if the error indicates a 429 / rate-limit condition.
+	 */
 	private function is_rate_limit_error(mixed $err): bool {
 		if (!is_wp_error($err)) return false;
 		$msg = $err->get_error_message();

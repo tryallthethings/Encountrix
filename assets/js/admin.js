@@ -1,5 +1,5 @@
 /**
- * WoW Raid Progress - Admin JavaScript
+ * Encountrix - Admin JavaScript
  * Version: 5.0.1
  */
 
@@ -22,7 +22,7 @@
 
 		// Tab switching functionality
 		function initTabs() {
-			$('.wow-raid-tabs .nav-tab').on('click', function (e) {
+			$('.encountrix-tabs .nav-tab').on('click', function (e) {
 				e.preventDefault();
 
 				var targetId = $(this).attr('href');
@@ -34,7 +34,7 @@
 				}
 
 				// Update active tab
-				$('.wow-raid-tabs .nav-tab').removeClass('nav-tab-active');
+				$('.encountrix-tabs .nav-tab').removeClass('nav-tab-active');
 				$(this).addClass('nav-tab-active');
 
 				// Show target content
@@ -43,46 +43,46 @@
 
 				// Save active tab to localStorage
 				if (typeof (Storage) !== 'undefined') {
-					localStorage.setItem('wow_raid_active_tab', targetId);
+					localStorage.setItem('encountrix_active_tab', targetId);
 				}
 			});
 
 			// Restore last active tab
 			if (typeof (Storage) !== 'undefined') {
-				var lastTab = localStorage.getItem('wow_raid_active_tab');
+				var lastTab = localStorage.getItem('encountrix_active_tab');
 				if (lastTab && $(lastTab).length) {
-					$('.wow-raid-tabs .nav-tab[href="' + lastTab + '"]').trigger('click');
+					$('.encountrix-tabs .nav-tab[href="' + lastTab + '"]').trigger('click');
 				}
 			}
 		}
 
 		// Load raids when expansion changes
-		$('#wow_raid_progress_expansion').on('change', function () {
+		$('#encountrix_expansion').on('change', function () {
 			loadRaidsForExpansion();
 		});
 
 		// Load raids for current expansion
 		function loadRaidsForExpansion() {
-			var expansionId = $('#wow_raid_progress_expansion').val();
-			var currentRaid = $('#wow_raid_progress_raid').data('current-value') ||
-				$('#wow_raid_progress_raid').val();
+			var expansionId = $('#encountrix_expansion').val();
+			var currentRaid = $('#encountrix_raid').data('current-value') ||
+				$('#encountrix_raid').val();
 
 			if (!expansionId) {
 				console.error('No expansion ID selected');
 				return;
 			}
 
-			var $raidSelect = $('#wow_raid_progress_raid');
+			var $raidSelect = $('#encountrix_raid');
 			$raidSelect.prop('disabled', true);
-			$raidSelect.html('<option value="">' + wow_raid_admin.strings.loading + '</option>');
+			$raidSelect.html('<option value="">' + encountrix_admin.strings.loading + '</option>');
 
 			$.ajax({
-				url: wow_raid_admin.ajax_url,
+				url: encountrix_admin.ajax_url,
 				type: 'POST',
 				data: {
-					action: 'wow_raid_get_raids',
+					action: 'encountrix_get_raids',
 					expansion_id: expansionId,
-					nonce: wow_raid_admin.nonce
+					nonce: encountrix_admin.nonce
 				},
 				success: function (response) {
 					if (response.success && response.data) {
@@ -98,13 +98,13 @@
 						$raidSelect.prop('disabled', false);
 						adjustSelectWidth($raidSelect);
 					} else {
-						$raidSelect.html('<option value="">' + wow_raid_admin.strings.error_loading_raids + '</option>');
-						showNotice(response.data || wow_raid_admin.strings.failed_load_raids, 'error');
+						$raidSelect.html('<option value="">' + encountrix_admin.strings.error_loading_raids + '</option>');
+						showNotice(response.data || encountrix_admin.strings.failed_load_raids, 'error');
 					}
 				},
 				error: function (xhr, status, error) {
-					$raidSelect.html('<option value="">' + wow_raid_admin.strings.error_loading_raids + '</option>');
-					showNotice(wow_raid_admin.strings.failed_load_raids + ': ' + error, 'error');
+					$raidSelect.html('<option value="">' + encountrix_admin.strings.error_loading_raids + '</option>');
+					showNotice(encountrix_admin.strings.failed_load_raids + ': ' + error, 'error');
 				}
 			});
 		}
@@ -116,25 +116,25 @@
 				var originalText = $btn.text();
 
 				$btn.prop('disabled', true);
-				$btn.text(wow_raid_admin.strings.loading);
+				$btn.text(encountrix_admin.strings.loading);
 
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_refresh_raids',
-						nonce: wow_raid_admin.nonce
+						action: 'encountrix_refresh_raids',
+						nonce: encountrix_admin.nonce
 					},
 					success: function (response) {
 						if (response.success) {
 							loadRaidsForExpansion();
-							showNotice(wow_raid_admin.strings.raids_refreshed_success, 'success');
+							showNotice(encountrix_admin.strings.raids_refreshed_success, 'success');
 						} else {
-							showNotice(wow_raid_admin.strings.failed_refresh_raids + ': ' + (response.data || wow_raid_admin.strings.unknown_error), 'error');
+							showNotice(encountrix_admin.strings.failed_refresh_raids + ': ' + (response.data || encountrix_admin.strings.unknown_error), 'error');
 						}
 					},
 					error: function (xhr, status, error) {
-						showNotice(wow_raid_admin.strings.failed_refresh_raids + ': ' + error, 'error');
+						showNotice(encountrix_admin.strings.failed_refresh_raids + ': ' + error, 'error');
 					},
 					complete: function () {
 						$btn.prop('disabled', false);
@@ -148,24 +148,24 @@
 		function initIconImport() {
 			$('#import-icons-btn').on('click', function () {
 				// Check if Blizzard API is configured
-				var clientId = $('#wow_raid_progress_blizzard_client_id').val();
-				var clientSecret = $('#wow_raid_progress_blizzard_client_secret').val();
+				var clientId = $('#encountrix_blizzard_client_id').val();
+				var clientSecret = $('#encountrix_blizzard_client_secret').val();
 
 				if (!clientId || !clientSecret) {
-					showNotice(wow_raid_admin.strings.configure_blizzard_api_first, 'error');
+					showNotice(encountrix_admin.strings.configure_blizzard_api_first, 'error');
 					$('.nav-tab[href="#blizzard"]').trigger('click');
 					return;
 				}
 
 				// Check if a raid is selected
-				var selectedRaid = $('#wow_raid_progress_raid').val();
+				var selectedRaid = $('#encountrix_raid').val();
 				if (!selectedRaid) {
-					showNotice(wow_raid_admin.strings.select_raid_first, 'error');
+					showNotice(encountrix_admin.strings.select_raid_first, 'error');
 					$('.nav-tab[href="#general"]').trigger('click');
 					return;
 				}
 
-				if (!confirm(wow_raid_admin.strings.confirm_import)) {
+				if (!confirm(encountrix_admin.strings.confirm_import)) {
 					return;
 				}
 
@@ -174,23 +174,23 @@
 				var originalText = $btn.text();
 
 				$btn.prop('disabled', true);
-				$btn.text(wow_raid_admin.strings.importing);
+				$btn.text(encountrix_admin.strings.importing);
 				$status.show().removeClass('notice-success notice-error');
-				$status.html('<strong>' + wow_raid_admin.strings.starting_import + '</strong>');
+				$status.html('<strong>' + encountrix_admin.strings.starting_import + '</strong>');
 
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_import_icons',
-						nonce: wow_raid_admin.nonce
+						action: 'encountrix_import_icons',
+						nonce: encountrix_admin.nonce
 					},
 					success: function (response) {
 						$btn.prop('disabled', false);
 						$btn.text(originalText);
 
 						if (response.success && response.data.log) {
-							var logHtml = '<strong>' + wow_raid_admin.strings.import_complete + '</strong><br>';
+							var logHtml = '<strong>' + encountrix_admin.strings.import_complete + '</strong><br>';
 
 							$.each(response.data.log, function (index, entry) {
 								var className = 'log-entry';
@@ -209,8 +209,8 @@
 							$status.addClass('notice-success').html(logHtml);
 						} else {
 							$status.addClass('notice-error').html(
-								'<strong>' + wow_raid_admin.strings.error + '</strong> ' +
-								(response.data || wow_raid_admin.strings.unknown_error)
+								'<strong>' + encountrix_admin.strings.error + '</strong> ' +
+								(response.data || encountrix_admin.strings.unknown_error)
 							);
 						}
 					},
@@ -218,7 +218,7 @@
 						$btn.prop('disabled', false);
 						$btn.text(originalText);
 						$status.addClass('notice-error').html(
-							'<strong>' + wow_raid_admin.strings.error + '</strong> ' + error
+							'<strong>' + encountrix_admin.strings.error + '</strong> ' + error
 						);
 					}
 				});
@@ -228,7 +228,7 @@
 		// Icon delete functionality
 		function initIconDelete() {
 			$('#delete-icons-btn').on('click', function () {
-				if (!confirm(wow_raid_admin.strings.confirm_delete_icons)) {
+				if (!confirm(encountrix_admin.strings.confirm_delete_icons)) {
 					return;
 				}
 
@@ -237,24 +237,24 @@
 				var originalText = $btn.text();
 
 				$btn.prop('disabled', true);
-				$btn.text(wow_raid_admin.strings.deleting);
+				$btn.text(encountrix_admin.strings.deleting);
 
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_delete_icons',
-						nonce: wow_raid_admin.nonce
+						action: 'encountrix_delete_icons',
+						nonce: encountrix_admin.nonce
 					},
 					success: function (response) {
 						if (response.success) {
 							$message.text(response.data).fadeIn().delay(5000).fadeOut();
 						} else {
-							showNotice(wow_raid_admin.strings.failed_delete_icons + ': ' + (response.data || wow_raid_admin.strings.unknown_error), 'error');
+							showNotice(encountrix_admin.strings.failed_delete_icons + ': ' + (response.data || encountrix_admin.strings.unknown_error), 'error');
 						}
 					},
 					error: function (xhr, status, error) {
-						showNotice(wow_raid_admin.strings.failed_delete_icons + ': ' + error, 'error');
+						showNotice(encountrix_admin.strings.failed_delete_icons + ': ' + error, 'error');
 					},
 					complete: function () {
 						$btn.prop('disabled', false);
@@ -267,7 +267,7 @@
 		// Cache clear functionality
 		function initCacheClear() {
 			$('#clear-cache-btn').on('click', function () {
-				if (!confirm(wow_raid_admin.strings.confirm_clear)) {
+				if (!confirm(encountrix_admin.strings.confirm_clear)) {
 					return;
 				}
 
@@ -277,21 +277,21 @@
 				$btn.prop('disabled', true);
 
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_clear_cache',
-						nonce: wow_raid_admin.nonce
+						action: 'encountrix_clear_cache',
+						nonce: encountrix_admin.nonce
 					},
 					success: function (response) {
 						if (response.success) {
 							$message.fadeIn().delay(3000).fadeOut();
 						} else {
-							showNotice(wow_raid_admin.strings.failed_clear_cache + ': ' + (response.data || wow_raid_admin.strings.unknown_error), 'error');
+							showNotice(encountrix_admin.strings.failed_clear_cache + ': ' + (response.data || encountrix_admin.strings.unknown_error), 'error');
 						}
 					},
 					error: function (xhr, status, error) {
-						showNotice(wow_raid_admin.strings.failed_clear_cache + ': ' + error, 'error');
+						showNotice(encountrix_admin.strings.failed_clear_cache + ': ' + error, 'error');
 					},
 					complete: function () {
 						$btn.prop('disabled', false);
@@ -307,16 +307,16 @@
 				var errors = [];
 
 				// Validate API key
-				var apiKey = $('#wow_raid_progress_api_key').val();
+				var apiKey = $('#encountrix_api_key').val();
 				if (!apiKey) {
-					if (!confirm(wow_raid_admin.strings.no_api_key_continue)) {
+					if (!confirm(encountrix_admin.strings.no_api_key_continue)) {
 						e.preventDefault();
 						return false;
 					}
 				}
 
 				// Validate guild IDs format
-				var guildIds = $('#wow_raid_progress_guild_ids').val();
+				var guildIds = $('#encountrix_guild_ids').val();
 				if (guildIds) {
 					var guilds = guildIds.split(',');
 					var invalidGuilds = [];
@@ -329,39 +329,39 @@
 					});
 
 					if (invalidGuilds.length > 0) {
-						errors.push(wow_raid_admin.strings.invalid_guild_ids + ' ' + invalidGuilds.join(', ') + '. ' + wow_raid_admin.strings.guild_ids_numeric);
+						errors.push(encountrix_admin.strings.invalid_guild_ids + ' ' + invalidGuilds.join(', ') + '. ' + encountrix_admin.strings.guild_ids_numeric);
 						isValid = false;
 					}
 
 					if (guilds.length > 10) {
-						errors.push(wow_raid_admin.strings.max_guild_ids);
+						errors.push(encountrix_admin.strings.max_guild_ids);
 						isValid = false;
 					}
 				}
 
 				// Validate realm name
-				var realm = $('#wow_raid_progress_realm').val();
+				var realm = $('#encountrix_realm').val();
 				if (realm && realm.length > 50) {
-					errors.push(wow_raid_admin.strings.realm_too_long);
+					errors.push(encountrix_admin.strings.realm_too_long);
 					isValid = false;
 				}
 
 				// Validate cache time
-				var $cacheField = $('#wow_raid_progress_cache_time');
+				var $cacheField = $('#encountrix_cache_time');
 				if ($cacheField.length) {
 					var cacheTime = parseInt($cacheField.val());
 					if (isNaN(cacheTime) || cacheTime < 0 || cacheTime > 1440) {
-						errors.push(wow_raid_admin.strings.cache_time_invalid);
+						errors.push(encountrix_admin.strings.cache_time_invalid);
 						isValid = false;
 					}
 				}
 
 				// Validate limit
-				var $limitField = $('#wow_raid_progress_limit');
+				var $limitField = $('#encountrix_limit');
 				if ($limitField.length) {
 					var limit = parseInt($limitField.val());
 					if (isNaN(limit) || limit < 1 || limit > 100) {
-						errors.push(wow_raid_admin.strings.limit_invalid);
+						errors.push(encountrix_admin.strings.limit_invalid);
 						isValid = false;
 					}
 				}
@@ -369,7 +369,7 @@
 				// Show errors if any
 				if (!isValid) {
 					e.preventDefault();
-					var errorMsg = wow_raid_admin.strings.please_fix_errors + '\n\n' + errors.join('\n');
+					var errorMsg = encountrix_admin.strings.please_fix_errors + '\n\n' + errors.join('\n');
 					alert(errorMsg);
 					return false;
 				}
@@ -403,10 +403,10 @@
 			var $notice = $('<div class="notice ' + noticeClass + ' is-dismissible">' +
 				'<p>' + escapeHtml(message) + '</p>' +
 				'<button type="button" class="notice-dismiss">' +
-				'<span class="screen-reader-text">' + wow_raid_admin.strings.dismiss_notice + '</span>' +
+				'<span class="screen-reader-text">' + encountrix_admin.strings.dismiss_notice + '</span>' +
 				'</button></div>');
 
-			$('.wow-raid-progress-admin h1').after($notice);
+			$('.encountrix-admin h1').after($notice);
 
 			// Auto-dismiss after 5 seconds for success messages
 			if (type === 'success') {
@@ -468,8 +468,8 @@
 		}
 
 		function initRealmSelector() {
-			var $regionSelect = $('#wow_raid_progress_region');
-			var $realmInput = $('#wow_raid_progress_realm');
+			var $regionSelect = $('#encountrix_region');
+			var $realmInput = $('#encountrix_realm');
 			var $dropdown = $('#realm-dropdown');
 			var $realmList = $('#realm-list');
 			var realmsData = [];
@@ -499,13 +499,13 @@
 
 			// Hide dropdown on click outside
 			$(document).on('click', function (e) {
-				if (!$(e.target).closest('.wow-realm-selector').length) {
+				if (!$(e.target).closest('.encountrix-realm-selector').length) {
 					$dropdown.hide();
 				}
 			});
 
 			// Select realm on click
-			$(document).on('click', '.wow-realm-item', function () {
+			$(document).on('click', '.encountrix-realm-item', function () {
 				var slug = $(this).data('slug');
 				var name = $(this).data('name');
 				$realmInput.val(slug);
@@ -514,8 +514,8 @@
 
 			// Keyboard navigation
 			$realmInput.on('keydown', function (e) {
-				var $items = $('.wow-realm-item:visible');
-				var $active = $('.wow-realm-item.active');
+				var $items = $('.encountrix-realm-item:visible');
+				var $active = $('.encountrix-realm-item.active');
 
 				if (e.key === 'ArrowDown') {
 					e.preventDefault();
@@ -556,16 +556,16 @@
 			});
 
 			function loadRealmsForRegion(region) {
-				$realmList.html('<div class="wow-realm-loading">' + wow_raid_admin.strings.loading + '</div>');
+				$realmList.html('<div class="encountrix-realm-loading">' + encountrix_admin.strings.loading + '</div>');
 				$dropdown.show();
 
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_get_realms',
+						action: 'encountrix_get_realms',
 						region: region,
-						nonce: wow_raid_admin.nonce
+						nonce: encountrix_admin.nonce
 					},
 					success: function (response) {
 						if (response.success && response.data && response.data.length > 0) {
@@ -585,11 +585,11 @@
 						} else {
 							// For KR/TW regions, provide helpful message
 							realmsData = [];
-							var message = wow_raid_admin.strings.error_loading_realms;
+							var message = encountrix_admin.strings.error_loading_realms;
 							if (region === 'kr' || region === 'tw') {
-								message += ' ' + wow_raid_admin.strings.asian_region_note;
+								message += ' ' + encountrix_admin.strings.asian_region_note;
 							}
-							$realmList.html('<div class="wow-realm-error">' + message + '</div>');
+							$realmList.html('<div class="encountrix-realm-error">' + message + '</div>');
 
 							// Still allow manual input
 							$realmInput.prop('disabled', false);
@@ -597,14 +597,14 @@
 					},
 					error: function (xhr, status, error) {
 						realmsData = [];
-						var message = wow_raid_admin.strings.error_loading_realms;
+						var message = encountrix_admin.strings.error_loading_realms;
 
 						// Add specific message for Asian regions
 						if (region === 'kr' || region === 'tw') {
-							message += ' ' + wow_raid_admin.strings.asian_region_note;
+							message += ' ' + encountrix_admin.strings.asian_region_note;
 						}
 
-						$realmList.html('<div class="wow-realm-error">' + message + '</div>');
+						$realmList.html('<div class="encountrix-realm-error">' + message + '</div>');
 
 						// Log error for debugging
 						console.error('Failed to load realms for region ' + region + ':', error);
@@ -620,15 +620,15 @@
 
 			function renderRealms(realms) {
 				if (realms.length === 0) {
-					$realmList.html('<div class="wow-realm-empty">' +
-						wow_raid_admin.strings.no_realms_found +
+					$realmList.html('<div class="encountrix-realm-empty">' +
+						encountrix_admin.strings.no_realms_found +
 						'</div>');
 					return;
 				}
 
 				var html = '';
 				realms.forEach(function (realm) {
-					html += '<div class="wow-realm-item" data-slug="' + escapeHtml(realm.slug) +
+					html += '<div class="encountrix-realm-item" data-slug="' + escapeHtml(realm.slug) +
 						'" data-name="' + escapeHtml(realm.name) + '">' +
 						'<span class="realm-name">' + escapeHtml(realm.name) + '</span>' +
 						'<span class="realm-slug">' + escapeHtml(realm.slug) + '</span>' +
@@ -641,11 +641,11 @@
 				query = query.toLowerCase();
 
 				if (query === '') {
-					$('.wow-realm-item').show();
+					$('.encountrix-realm-item').show();
 					return;
 				}
 
-				$('.wow-realm-item').each(function () {
+				$('.encountrix-realm-item').each(function () {
 					var $item = $(this);
 					var name = $item.data('name').toLowerCase();
 					var slug = $item.data('slug').toLowerCase();
@@ -658,19 +658,19 @@
 				});
 
 				// Show message if no results
-				if ($('.wow-realm-item:visible').length === 0) {
-					if ($('.wow-realm-no-results').length === 0) {
-						$realmList.append('<div class="wow-realm-no-results">' +
-							wow_raid_admin.strings.no_matching_realms +
+				if ($('.encountrix-realm-item:visible').length === 0) {
+					if ($('.encountrix-realm-no-results').length === 0) {
+						$realmList.append('<div class="encountrix-realm-no-results">' +
+							encountrix_admin.strings.no_matching_realms +
 							'</div>');
 					}
 				} else {
-					$('.wow-realm-no-results').remove();
+					$('.encountrix-realm-no-results').remove();
 				}
 			}
 
 			function scrollToActive() {
-				var $active = $('.wow-realm-item.active');
+				var $active = $('.encountrix-realm-item.active');
 				if ($active.length) {
 					var container = $realmList[0];
 					var activeTop = $active.position().top;
@@ -713,7 +713,7 @@
 				// Update button feedback
 				if (success) {
 					var originalText = $btn.find('.copy-text').text();
-					$btn.find('.copy-text').text(wow_raid_admin.strings.copied);
+					$btn.find('.copy-text').text(encountrix_admin.strings.copied);
 					$btn.addClass('success');
 
 					setTimeout(function () {
@@ -723,7 +723,7 @@
 				} else {
 					// Fallback: select the text
 					selectText($code[0]);
-					showNotice(wow_raid_admin.strings.press_ctrl_c, 'info');
+					showNotice(encountrix_admin.strings.press_ctrl_c, 'info');
 				}
 			});
 
@@ -756,14 +756,14 @@
 			// Clear debug log
 			$('#clear-debug-log').on('click', function () {
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_clear_debug_log',
-						nonce: wow_raid_admin.nonce
+						action: 'encountrix_clear_debug_log',
+						nonce: encountrix_admin.nonce
 					},
 					success: function () {
-						$('.debug-log-content').html(wow_raid_admin.strings.log_cleared);
+						$('.debug-log-content').html(encountrix_admin.strings.log_cleared);
 					}
 				});
 			});
@@ -774,11 +774,11 @@
 				$btn.prop('disabled', true);
 
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_test_blizzard_api',
-						nonce: wow_raid_admin.nonce
+						action: 'encountrix_test_blizzard_api',
+						nonce: encountrix_admin.nonce
 					},
 					success: function (response) {
 						loadDebugLog();
@@ -792,16 +792,16 @@
 			// Load debug log
 			function loadDebugLog() {
 				$.ajax({
-					url: wow_raid_admin.ajax_url,
+					url: encountrix_admin.ajax_url,
 					type: 'POST',
 					data: {
-						action: 'wow_raid_get_debug_log',
-						nonce: wow_raid_admin.nonce
+						action: 'encountrix_get_debug_log',
+						nonce: encountrix_admin.nonce
 					},
 					success: function (response) {
 						if (response.success && response.data) {
 							var html = response.data.join('<br>');
-							$('.debug-log-content').html(html || wow_raid_admin.strings.no_log_entries);
+							$('.debug-log-content').html(html || encountrix_admin.strings.no_log_entries);
 						}
 					}
 				});
@@ -820,18 +820,18 @@
 		});
 
 		// Store current raid value
-		var currentRaidValue = $('#wow_raid_progress_raid').val();
+		var currentRaidValue = $('#encountrix_raid').val();
 		if (currentRaidValue) {
-			$('#wow_raid_progress_raid').data('current-value', currentRaidValue);
+			$('#encountrix_raid').data('current-value', currentRaidValue);
 		}
 
 		// Add tooltips for help icons
-		$('.wow-raid-help').on('mouseenter', function () {
+		$('.encountrix-help').on('mouseenter', function () {
 			var $this = $(this);
 			var helpText = $this.data('help');
 
 			if (helpText) {
-				var $tooltip = $('<div class="wow-raid-tooltip">' + helpText + '</div>');
+				var $tooltip = $('<div class="encountrix-tooltip">' + helpText + '</div>');
 				$('body').append($tooltip);
 
 				var offset = $this.offset();
@@ -860,7 +860,7 @@
 		});
 
 		// Add keyboard navigation for tabs
-		$('.wow-raid-tabs .nav-tab').on('keydown', function (e) {
+		$('.encountrix-tabs .nav-tab').on('keydown', function (e) {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
 				$(this).trigger('click');
@@ -876,7 +876,7 @@
 		// Warn before leaving with unsaved changes
 		$(window).on('beforeunload', function () {
 			if (settingsChanged) {
-				return wow_raid_admin.strings.unsaved_changes;
+				return encountrix_admin.strings.unsaved_changes;
 			}
 		});
 

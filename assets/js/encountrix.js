@@ -1,5 +1,5 @@
 /**
- * WoW Raid Progress - Frontend JavaScript
+ * Encountrix - Frontend JavaScript
  * Version: 5.0.0
  */
 
@@ -29,20 +29,20 @@
 		 * Initialize boss item hover effects
 		 */
 		function initBossHoverEffects() {
-			$('.wow-boss-item').on('mouseenter', function () {
+			$('.encountrix-boss-item').on('mouseenter', function () {
 				$(this).addClass('hover');
 			}).on('mouseleave', function () {
 				$(this).removeClass('hover');
 			});
 
 			// Add click handler for mobile devices
-			$('.wow-boss-item').on('click', function (e) {
+			$('.encountrix-boss-item').on('click', function (e) {
 				if ($(window).width() <= 768) {
 					e.preventDefault();
 					var $this = $(this);
 
 					// Remove active from others
-					$('.wow-boss-item').not($this).removeClass('active');
+					$('.encountrix-boss-item').not($this).removeClass('active');
 
 					// Toggle active on this item
 					$this.toggleClass('active');
@@ -54,7 +54,7 @@
 		 * Initialize lazy loading for boss icons
 		 */
 		function initLazyLoading() {
-			var lazyImages = $('.wow-boss-icon img[data-src]');
+			var lazyImages = $('.encountrix-boss-icon img[data-src]');
 
 			if (lazyImages.length === 0) {
 				return;
@@ -90,14 +90,14 @@
 		 */
 		function initTooltips() {
 			// Add tooltip container if it doesn't exist
-			if ($('#wow-raid-tooltip').length === 0) {
-				$('body').append('<div id="wow-raid-tooltip" class="wow-raid-tooltip"></div>');
+			if ($('#encountrix-tooltip').length === 0) {
+				$('body').append('<div id="encountrix-tooltip" class="encountrix-tooltip"></div>');
 			}
 
-			var $tooltip = $('#wow-raid-tooltip');
+			var $tooltip = $('#encountrix-tooltip');
 
 			// Tooltip for pulls
-			$('.wow-pulls').on('mouseenter', function () {
+			$('.encountrix-pulls').on('mouseenter', function () {
 				var $this = $(this);
 				var text = 'Number of attempts on this boss';
 				showTooltip($this, text, $tooltip);
@@ -106,7 +106,7 @@
 			});
 
 			// Tooltip for best percentage
-			$('.wow-percent').on('mouseenter', function () {
+			$('.encountrix-percent').on('mouseenter', function () {
 				var $this = $(this);
 				var percent = $this.text().match(/[\d.]+/);
 				if (percent) {
@@ -119,7 +119,7 @@
 			});
 
 			// Tooltip for world rank
-			$('.wow-rank:contains("World")').on('mouseenter', function () {
+			$('.encountrix-rank:contains("World")').on('mouseenter', function () {
 				var $this = $(this);
 				var text = 'Global ranking across all regions';
 				showTooltip($this, text, $tooltip);
@@ -175,7 +175,7 @@
 		 * Auto-refresh functionality (optional)
 		 */
 		function initAutoRefresh() {
-			var $containers = $('.wow-raid-progress-container[data-refresh]');
+			var $containers = $('.encountrix-container[data-refresh]');
 
 			$containers.each(function () {
 				var $container = $(this);
@@ -206,12 +206,12 @@
 			$container.addClass('loading');
 
 			$.ajax({
-				url: wow_raid_ajax.ajax_url,
+				url: encountrix_ajax.ajax_url,
 				type: 'POST',
 				data: {
-					action: 'wow_raid_refresh_widget',
+					action: 'encountrix_refresh_widget',
 					attrs: shortcodeAttrs,
-					nonce: wow_raid_ajax.nonce
+					nonce: encountrix_ajax.nonce
 				},
 				success: function (response) {
 					if (response.success && response.data) {
@@ -236,7 +236,7 @@
 		 */
 		function handleResponsive() {
 			var $window = $(window);
-			var $containers = $('.wow-raid-progress-container');
+			var $containers = $('.encountrix-container');
 
 			function checkWidth() {
 				if ($window.width() <= 768) {
@@ -275,8 +275,8 @@
 		 */
 		function initAccessibility() {
 			// Add ARIA labels
-			$('.wow-progress-bar').attr('role', 'progressbar');
-			$('.wow-progress-fill').each(function () {
+			$('.encountrix-progress-bar').attr('role', 'progressbar');
+			$('.encountrix-progress-fill').each(function () {
 				var $fill = $(this);
 				var width = parseInt($fill.css('width'), 10);
 				var maxWidth = $fill.parent().width();
@@ -291,7 +291,7 @@
 			});
 
 			// Add keyboard navigation
-			$('.wow-boss-item').attr('tabindex', '0').on('keypress', function (e) {
+			$('.encountrix-boss-item').attr('tabindex', '0').on('keypress', function (e) {
 				if (e.which === 13 || e.which === 32) { // Enter or Space
 					e.preventDefault();
 					$(this).trigger('click');
@@ -306,7 +306,7 @@
 		 * Adjust raid title font size to fit container
 		 */
 		function adjustRaidTitleSize() {
-			$('.wow-raid-header-title[data-text]').each(function () {
+			$('.encountrix-header-title[data-text]').each(function () {
 				var $title = $(this);
 				var $span = $title.find('span');
 				var containerWidth = $title.width();
@@ -358,19 +358,19 @@
 		 * Print optimization
 		 */
 		window.addEventListener('beforeprint', function () {
-			$('.wow-raid-progress-container').addClass('print-mode');
+			$('.encountrix-container').addClass('print-mode');
 			// Expand all collapsed sections
-			$('.wow-boss-item').addClass('expanded');
+			$('.encountrix-boss-item').addClass('expanded');
 		});
 
 		window.addEventListener('afterprint', function () {
-			$('.wow-raid-progress-container').removeClass('print-mode');
-			$('.wow-boss-item').removeClass('expanded');
+			$('.encountrix-container').removeClass('print-mode');
+			$('.encountrix-boss-item').removeClass('expanded');
 		});
 	});
 
 	// Public API for external use
-	window.WoWRaidProgress = {
+	window.Encountrix = {
 		refresh: function (selector) {
 			var $container = $(selector);
 			if ($container.length) {
@@ -394,7 +394,7 @@
 (function () {
 	var style = document.createElement('style');
 	style.textContent = `
-        .wow-raid-tooltip {
+        .encountrix-tooltip {
             position: absolute;
             background: rgba(0, 0, 0, 0.9);
             color: #fff;
@@ -409,13 +409,13 @@
             display: none;
         }
 
-        .wow-raid-progress-container.loading {
+        .encountrix-container.loading {
             position: relative;
             opacity: 0.6;
             pointer-events: none;
         }
 
-        .wow-raid-progress-container.loading::after {
+        .encountrix-container.loading::after {
             content: '';
             position: absolute;
             top: 50%;
@@ -433,15 +433,15 @@
             to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        .wow-raid-progress-container.mobile-view .wow-boss-item {
+        .encountrix-container.mobile-view .encountrix-boss-item {
             padding: 12px;
         }
 
-        .wow-raid-progress-container.mobile-view .wow-boss-item.active {
+        .encountrix-container.mobile-view .encountrix-boss-item.active {
             background: rgba(255, 255, 255, 0.1);
         }
 
-        .wow-raid-progress-container.print-mode {
+        .encountrix-container.print-mode {
             background: white !important;
             color: black !important;
         }
