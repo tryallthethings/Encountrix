@@ -1,0 +1,19 @@
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+	level: 8
+	paths:
+		- encountrix.php
+		- includes
+	bootstrapFiles:
+		- vendor/szepeviktor/phpstan-wordpress/bootstrap.php
+	tmpDir: var/phpstan
+	inferPrivatePropertyTypeFromConstructor: true
+	checkMissingIterableValueType: true
+	checkGenericClassInNonGenericObjectType: true
+	reportUnmatchedIgnoredErrors: true
+	ignoreErrors:
+		# WordPress hook callbacks are often dynamically invoked.
+		- '#Function add_action invoked with [0-9]+ parameters, [0-9]+ required#'
+		- '#Function add_filter invoked with [0-9]+ parameters, [0-9]+ required#'

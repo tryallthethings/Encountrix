@@ -7,8 +7,10 @@
  * Version: 5.1.0
  * Author: Tryallthethings
  * License: GPL v2 or later
- * Text Domain: wow-raid-progress
+ * Text Domain: encountrix
  * Domain Path: /languages
+ * Requires at least: 6.4
+ * Tested up to: 6.4
  * Requires PHP: 8.0
  */
 
