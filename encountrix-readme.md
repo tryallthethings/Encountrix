@@ -335,7 +335,7 @@ GPL v2 or later - See LICENSE file
 
 ---
 
-**Version:** 5.0.0  
-**Requires WordPress:** 5.0+  
-**Requires PHP:** 7.2+  
+**Version:** 5.1.0  
+**Requires WordPress:** 6.4+  
+**Requires PHP:** 8.0  
 **Tested up to:** WordPress 6.4
