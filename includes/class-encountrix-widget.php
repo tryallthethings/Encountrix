@@ -228,7 +228,9 @@ class EncountrixWidget {
 			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url( $bg_image_url ) . ');">';
 			if ( $show_raid_name ) {
 				$output .= '<div class="encountrix-header-overlay">';
-				$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_name ) . '</h2>';
+				$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr( $raid_name ) . '">';
+				$output .= '<span>' . esc_html( $raid_name ) . '</span>';
+				$output .= '</h2>';
 				$output .= '</div>';
 			}
 			$output .= '</div>';
@@ -282,30 +284,10 @@ class EncountrixWidget {
 		int $expansion_id,
 		array $icon_map
 	): string {
-		$bg_image_url = '';
-		if ( $show_raid_icon && $use_blizzard_icons ) {
-			$bg_image_id = $this->api->get_journal_instance_image_id( $raid_slug, $expansion_id );
-			if ( $bg_image_id ) {
-				$bg_image_url = wp_get_attachment_image_url( $bg_image_id, 'full' );
-			}
-		}
-
 		$output = '<div class="encountrix">';
 
-		if ( $bg_image_url ) {
-			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url( $bg_image_url ) . ');">';
-			if ( $show_raid_name ) {
-				$output .= '<div class="encountrix-header-overlay">';
-				$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr( $raid_info['name'] ) . '">';
-				$output .= '<span>' . esc_html( $raid_info['name'] ) . '</span>';
-				$output .= '</h2>';
-				$output .= '</div>';
-			}
-			$output .= '</div>';
-		} elseif ( $show_raid_name ) {
-			$output .= '<div class="encountrix-header-simple">';
-			$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_info['name'] ) . '</h2>';
-			$output .= '</div>';
+		if ( $show_raid_name || $show_raid_icon ) {
+			$output .= $this->render_raid_header( $raid_info, $show_raid_name, $show_raid_icon, $use_blizzard_icons, $expansion_id );
 		}
 
 		if ( $difficulty === 'highest' ) {
