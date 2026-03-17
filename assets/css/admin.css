@@ -76,7 +76,7 @@ body.settings_page_encountrix .notice-success#setting-error-settings_updated {
 	border-radius: 4px;
 	padding: 20px;
 	margin-bottom: 20px;
-	box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .encountrix-settings-section h2 {
@@ -319,7 +319,7 @@ body.settings_page_encountrix .notice-success#setting-error-settings_updated {
 .encountrix-admin input[type="number"]:focus {
 	border-color: #5b9dd9;
 	outline: none;
-	box-shadow: 0 0 2px rgb(30 140 190 / 80%);
+	box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
 }
 
 /* Loading State */
@@ -387,13 +387,14 @@ body.settings_page_encountrix .notice#setting-error-settings_updated {
 	background: #fff;
 	border: 1px solid #ddd;
 	border-radius: 4px;
-	box-shadow: 0 2px 5px rgb(0 0 0 / 10%);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 	z-index: 1000;
 }
 
 .encountrix-realm-list {
 	max-height: 200px;
-	overflow: hidden auto;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .encountrix-realm-item {
@@ -486,7 +487,6 @@ body.settings_page_encountrix .notice#setting-error-settings_updated {
 
 .copy-shortcode.success .dashicons::before {
 	content: "\f147";
-
 	/* Checkmark */
 }
 
@@ -509,14 +509,14 @@ body.settings_page_encountrix .notice#setting-error-settings_updated {
 }
 
 /* Responsive Design */
-@media screen and (width <= 782px) {
+@media screen and (max-width: 782px) {
 	.encountrix-admin {
 		margin: 10px;
 	}
 
 	.encountrix-tabs .nav-tab {
 		display: block;
-		margin: 0 0 5px;
+		margin: 0 0 5px 0;
 		width: 100%;
 	}
 
@@ -580,7 +580,7 @@ body.settings_page_encountrix .notice#setting-error-settings_updated {
 
 #import-status .log-entry {
 	padding: 5px 0;
-	border-bottom: 1px solid rgb(0 0 0 / 5%);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 	font-size: 12px;
 }
 

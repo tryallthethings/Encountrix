@@ -91,24 +91,24 @@ class Encountrix {
 	 */
 	private function define_hooks(): void {
 		// Admin hooks.
-		add_action( 'admin_menu', array( $this->admin, 'add_admin_menu' ) );
-		add_action( 'admin_init', array( $this->admin, 'register_settings' ) );
-		add_action( 'admin_enqueue_scripts', array( $this->admin, 'enqueue_admin_assets' ) );
+		add_action( 'admin_menu', [ $this->admin, 'add_admin_menu' ] );
+		add_action( 'admin_init', [ $this->admin, 'register_settings' ] );
+		add_action( 'admin_enqueue_scripts', [ $this->admin, 'enqueue_admin_assets' ] );
 
 		// AJAX hooks.
-		add_action( 'wp_ajax_encountrix_clear_cache', array( $this->admin, 'ajax_clear_cache' ) );
-		add_action( 'wp_ajax_encountrix_import_icons', array( $this->admin, 'ajax_import_icons' ) );
-		add_action( 'wp_ajax_encountrix_delete_icons', array( $this->admin, 'ajax_delete_icons' ) );
-		add_action( 'wp_ajax_encountrix_get_raids', array( $this->admin, 'ajax_get_raids' ) );
-		add_action( 'wp_ajax_encountrix_refresh_raids', array( $this->admin, 'ajax_refresh_raids' ) );
-		add_action( 'wp_ajax_encountrix_get_realms', array( $this->admin, 'ajax_get_realms' ) );
-		add_action( 'wp_ajax_encountrix_get_debug_log', array( $this->admin, 'ajax_get_debug_log' ) );
-		add_action( 'wp_ajax_encountrix_clear_debug_log', array( $this->admin, 'ajax_clear_debug_log' ) );
-		add_action( 'wp_ajax_encountrix_test_blizzard_api', array( $this->admin, 'ajax_test_blizzard_api' ) );
+		add_action( 'wp_ajax_encountrix_clear_cache', [ $this->admin, 'ajax_clear_cache' ] );
+		add_action( 'wp_ajax_encountrix_import_icons', [ $this->admin, 'ajax_import_icons' ] );
+		add_action( 'wp_ajax_encountrix_delete_icons', [ $this->admin, 'ajax_delete_icons' ] );
+		add_action( 'wp_ajax_encountrix_get_raids', [ $this->admin, 'ajax_get_raids' ] );
+		add_action( 'wp_ajax_encountrix_refresh_raids', [ $this->admin, 'ajax_refresh_raids' ] );
+		add_action( 'wp_ajax_encountrix_get_realms', [ $this->admin, 'ajax_get_realms' ] );
+		add_action( 'wp_ajax_encountrix_get_debug_log', [ $this->admin, 'ajax_get_debug_log' ] );
+		add_action( 'wp_ajax_encountrix_clear_debug_log', [ $this->admin, 'ajax_clear_debug_log' ] );
+		add_action( 'wp_ajax_encountrix_test_blizzard_api', [ $this->admin, 'ajax_test_blizzard_api' ] );
 
 		// Front-end hooks.
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ) );
-		add_shortcode( 'encountrix', array( $this->widget, 'render_shortcode' ) );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_frontend_assets' ] );
+		add_shortcode( 'encountrix', [ $this->widget, 'render_shortcode' ] );
 	}
 
 	/**
@@ -137,26 +137,22 @@ class Encountrix {
 			wp_enqueue_style(
 				'encountrix',
 				ENCOUNTRIX_PLUGIN_URL . 'assets/css/encountrix.css',
-				array(),
+				[],
 				$this->version
 			);
 
 			wp_enqueue_script(
 				'encountrix',
 				ENCOUNTRIX_PLUGIN_URL . 'assets/js/encountrix.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				$this->version,
 				true
 			);
 
-			wp_localize_script(
-				'encountrix',
-				'encountrix_ajax',
-				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
-					'nonce'    => wp_create_nonce( 'encountrix_frontend_nonce' ),
-				)
-			);
+			wp_localize_script( 'encountrix', 'encountrix_ajax', [
+				'ajax_url' => admin_url( 'admin-ajax.php' ),
+				'nonce'    => wp_create_nonce( 'encountrix_frontend_nonce' ),
+			] );
 		}
 	}
 
