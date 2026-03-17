@@ -646,7 +646,12 @@ class EncountrixAdmin {
 			return;
 		}
 
-		$region = isset($_POST['region']) ? sanitize_text_field($_POST['region']) : 'eu';
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(__('Permission denied', 'encountrix'));
+			return;
+		}
+
+		$region = isset($_POST['region']) ? sanitize_text_field(wp_unslash($_POST['region'])) : 'eu';
 
 		// Validate region
 		$valid_regions = ['us', 'eu', 'kr', 'tw'];

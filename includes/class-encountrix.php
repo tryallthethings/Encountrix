@@ -28,35 +28,35 @@ class Encountrix {
 	 *
 	 * @var string
 	 */
-	private $version;
+	private string $version;
 
 	/**
 	 * Unique plugin identifier used for handles and option prefixes.
 	 *
 	 * @var string
 	 */
-	private $plugin_name;
+	private string $plugin_name;
 
 	/**
 	 * Admin-facing functionality.
 	 *
 	 * @var EncountrixAdmin
 	 */
-	private $admin;
+	private EncountrixAdmin $admin;
 
 	/**
 	 * Blizzard API integration layer.
 	 *
 	 * @var EncountrixApi
 	 */
-	private $api;
+	private EncountrixApi $api;
 
 	/**
 	 * Front-end widget and shortcode renderer.
 	 *
 	 * @var EncountrixWidget
 	 */
-	private $widget;
+	private EncountrixWidget $widget;
 
 	/**
 	 * Initialise properties and load dependent classes.
@@ -76,7 +76,7 @@ class Encountrix {
 	 *
 	 * @return void
 	 */
-	private function load_dependencies() {
+	private function load_dependencies(): void {
 		$this->api    = new EncountrixApi();
 		$this->admin  = new EncountrixAdmin( $this->plugin_name, $this->version, $this->api );
 		$this->widget = new EncountrixWidget( $this->api );
@@ -89,7 +89,7 @@ class Encountrix {
 	 *
 	 * @return void
 	 */
-	private function define_hooks() {
+	private function define_hooks(): void {
 		// Admin hooks.
 		add_action( 'admin_menu', [ $this->admin, 'add_admin_menu' ] );
 		add_action( 'admin_init', [ $this->admin, 'register_settings' ] );
@@ -118,7 +118,7 @@ class Encountrix {
 	 *
 	 * @return void
 	 */
-	public function run() {
+	public function run(): void {
 		$this->define_hooks();
 	}
 
@@ -132,7 +132,7 @@ class Encountrix {
 	 *
 	 * @return void
 	 */
-	public function enqueue_frontend_assets() {
+	public function enqueue_frontend_assets(): void {
 		if ( $this->should_load_assets() ) {
 			wp_enqueue_style(
 				'encountrix',
@@ -166,7 +166,7 @@ class Encountrix {
 	 *
 	 * @return bool True if assets are required, false otherwise.
 	 */
-	private function should_load_assets() {
+	private function should_load_assets(): bool {
 		global $post;
 
 		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'encountrix' ) ) {

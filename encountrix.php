@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('ENCOUNTRIX_VERSION', '5.0.1');
+define('ENCOUNTRIX_VERSION', '5.1.0');
 define('ENCOUNTRIX_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ENCOUNTRIX_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('ENCOUNTRIX_PLUGIN_BASENAME', plugin_basename(__FILE__));
