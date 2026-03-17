@@ -130,10 +130,7 @@
 .encountrix-progress-fill::after {
 	content: '';
 	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
+	inset: 0;
 	background: linear-gradient(90deg,
 			transparent,
 			rgba(255, 255, 255, 0.2) 50%,
@@ -382,7 +379,7 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	margin: 0 0 12px 0;
+	margin: 0 0 12px;
 	font-size: 18px;
 	font-weight: 600;
 }
@@ -404,7 +401,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin: 0 0 10px 0;
+	margin: 0 0 10px;
 	font-size: 20px;
 	font-weight: 600;
 	color: #fff;
@@ -432,7 +429,8 @@ input[list="realm-list"]:focus {
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
-	margin: -20px -20px 20px -20px;
+	margin: -20px -20px 20px;
+
 	/* Negative margins to break out of container padding */
 	border-radius: 8px 8px 0 0;
 	overflow: hidden;
@@ -443,7 +441,7 @@ input[list="realm-list"]:focus {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	padding: 20px 20px;
+	padding: 20px;
 	background: linear-gradient(to top,
 			rgba(0, 0, 0, 0.95) 0%,
 			rgba(0, 0, 0, 0.7) 50%,
@@ -459,10 +457,13 @@ input[list="realm-list"]:focus {
 	letter-spacing: 0.5px;
 	line-height: 1.2;
 	word-wrap: break-word;
+
 	/* Break long words */
 	overflow-wrap: break-word;
+
 	/* Modern property */
 	hyphens: manual;
+
 	/* Prevent auto-hyphenation */
 	width: 100%;
 }
@@ -470,6 +471,7 @@ input[list="realm-list"]:focus {
 .encountrix-header-title span {
 	display: inline-block;
 	font-size: clamp(20px, 4vw, 32px);
+
 	/* Responsive font size */
 	font-weight: 700;
 }

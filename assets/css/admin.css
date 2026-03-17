@@ -393,8 +393,7 @@ body.settings_page_encountrix .notice#setting-error-settings_updated {
 
 .encountrix-realm-list {
 	max-height: 200px;
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: hidden auto;
 }
 
 .encountrix-realm-item {
@@ -487,6 +486,7 @@ body.settings_page_encountrix .notice#setting-error-settings_updated {
 
 .copy-shortcode.success .dashicons::before {
 	content: "\f147";
+
 	/* Checkmark */
 }
 
@@ -516,7 +516,7 @@ body.settings_page_encountrix .notice#setting-error-settings_updated {
 
 	.encountrix-tabs .nav-tab {
 		display: block;
-		margin: 0 0 5px 0;
+		margin: 0 0 5px;
 		width: 100%;
 	}
 
