@@ -344,7 +344,31 @@ class EncountrixAdmin {
 		if ( ! is_array( $value ) ) {
 			return array();
 		}
-		return $value;
+		return $this->sanitize_array_recursive( $value );
+	}
+
+	/**
+	 * Recursively sanitize an array's values.
+	 *
+	 * @param array $arr Input array.
+	 * @return array Sanitized array with keys preserved.
+	 */
+	private function sanitize_array_recursive( array $arr ): array {
+		$sanitized = array();
+		foreach ( $arr as $key => $val ) {
+			if ( is_array( $val ) ) {
+				$sanitized[ $key ] = $this->sanitize_array_recursive( $val );
+			} elseif ( is_int( $val ) ) {
+				$sanitized[ $key ] = intval( $val );
+			} elseif ( is_float( $val ) ) {
+				$sanitized[ $key ] = floatval( $val );
+			} elseif ( is_bool( $val ) ) {
+				$sanitized[ $key ] = $val;
+			} elseif ( is_string( $val ) ) {
+				$sanitized[ $key ] = sanitize_text_field( $val );
+			}
+		}
+		return $sanitized;
 	}
 
 	/**
@@ -858,7 +882,9 @@ class EncountrixAdmin {
 		}
 
 		// Show custom success message
-		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] === 'true' ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check on settings-updated flag set by WP core.
+		$settings_updated = isset( $_GET['settings-updated'] ) ? sanitize_text_field( wp_unslash( $_GET['settings-updated'] ) ) : '';
+		if ( 'true' === $settings_updated ) {
 			echo '<div class="encountrix-success-message">';
 			echo '<strong>' . esc_html__( 'Settings saved successfully!', 'encountrix' ) . '</strong>';
 			echo '</div>';

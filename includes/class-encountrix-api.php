@@ -445,7 +445,8 @@ class EncountrixApi {
 					$world_url = add_query_arg( $world_params, $this->api_base_url );
 
 					if ( $this->wait_for_rate_limit( 5 ) ) {
-						$this->debug_log( "Fetching world ranking from: $world_url" );
+						$sanitized_world_url = remove_query_arg( 'access_key', $world_url );
+						$this->debug_log( "Fetching world ranking from: $sanitized_world_url" );
 
 						$world_response = wp_remote_get(
 							$world_url,
@@ -459,7 +460,9 @@ class EncountrixApi {
 							$world_data = json_decode( wp_remote_retrieve_body( $world_response ), true );
 							if ( ! empty( $world_data['raidRankings'][0]['rank'] ) ) {
 								$data['worldRanking'] = $world_data['raidRankings'][0]['rank'];
-								set_transient( $world_cache_key, $data['worldRanking'], $cache_minutes * MINUTE_IN_SECONDS );
+								if ( $cache_minutes > 0 ) {
+									set_transient( $world_cache_key, $data['worldRanking'], $cache_minutes * MINUTE_IN_SECONDS );
+								}
 								$this->debug_log( 'World ranking obtained: ' . $data['worldRanking'] );
 							}
 						}
@@ -467,10 +470,12 @@ class EncountrixApi {
 				}
 			}
 
-			// Enforce a minimum cache duration of 5 minutes.
-			$actual_cache_time = max( $cache_minutes, 5 );
-			set_transient( $cache_key, $data, $actual_cache_time * MINUTE_IN_SECONDS );
-			$this->debug_log( "Cached API response for $actual_cache_time minutes: $raid/$difficulty/$region (key: $request_key)" );
+			// Only cache when caching is enabled.
+			if ( $cache_minutes > 0 ) {
+				$actual_cache_time = max( $cache_minutes, 5 );
+				set_transient( $cache_key, $data, $actual_cache_time * MINUTE_IN_SECONDS );
+				$this->debug_log( "Cached API response for $actual_cache_time minutes: $raid/$difficulty/$region (key: $request_key)" );
+			}
 
 			return $data;
 		} catch ( \Exception $e ) {

@@ -114,6 +114,11 @@ function encountrix_uninstall(): void {
 			'_transient_timeout_encountrix_',
 		)
 	);
+
+	// Drop the cache table created by the plugin.
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'encountrix_cache';
+	$wpdb->query( "DROP TABLE IF EXISTS $table_name" );
 }
 
 /**
@@ -217,11 +222,6 @@ function encountrix_background_update(): void {
 		return;
 	}
 
-	$guild_ids = get_option( 'encountrix_guild_ids', '' );
-	if ( empty( $guild_ids ) ) {
-		return;
-	}
-
 	$api    = new EncountrixApi();
 	$raid   = get_option( 'encountrix_raid', '' );
 	$region = get_option( 'encountrix_region', 'eu' );
@@ -231,21 +231,40 @@ function encountrix_background_update(): void {
 		return;
 	}
 
-	// Update each difficulty with longer cache time
+	// Always warm the realm-level (no guild) cache.
 	foreach ( array( 'normal', 'heroic', 'mythic' ) as $difficulty ) {
 		$api->fetch_raid_data(
 			$raid,
 			$difficulty,
 			$region,
 			$realm,
-			$guild_ids,
-			1440, // Cache for 24 hours
+			'',
+			1440,
 			50,
 			0
 		);
-
-		// Wait between requests to avoid rate limiting
 		sleep( 2 );
+	}
+
+	// Warm per-guild caches, one guild at a time to match render_shortcode keys.
+	$guild_ids_raw = get_option( 'encountrix_guild_ids', '' );
+	if ( ! empty( $guild_ids_raw ) ) {
+		$guild_list = array_filter( array_map( 'trim', explode( ',', $guild_ids_raw ) ) );
+		foreach ( $guild_list as $guild_id ) {
+			foreach ( array( 'normal', 'heroic', 'mythic' ) as $difficulty ) {
+				$api->fetch_raid_data(
+					$raid,
+					$difficulty,
+					$region,
+					$realm,
+					$guild_id,
+					1440,
+					50,
+					0
+				);
+				sleep( 2 );
+			}
+		}
 	}
 }
 add_action( 'encountrix_update_data', 'encountrix_background_update' );

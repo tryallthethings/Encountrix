@@ -226,11 +226,13 @@ class EncountrixWidget {
 
 		if ( $bg_image_url ) {
 			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url( $bg_image_url ) . ');">';
-			$output .= '<div class="encountrix-header-overlay">';
-			$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_name ) . '</h2>';
+			if ( $show_raid_name ) {
+				$output .= '<div class="encountrix-header-overlay">';
+				$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_name ) . '</h2>';
+				$output .= '</div>';
+			}
 			$output .= '</div>';
-			$output .= '</div>';
-		} else {
+		} elseif ( $show_raid_name ) {
 			$output .= '<div class="encountrix-header-simple">';
 			$output .= '<h2 class="encountrix-header-title">' . esc_html( $raid_name ) . '</h2>';
 			$output .= '</div>';
@@ -290,13 +292,15 @@ class EncountrixWidget {
 
 		$output = '<div class="encountrix">';
 
-		if ( $bg_image_url && $show_raid_name ) {
+		if ( $bg_image_url ) {
 			$output .= '<div class="encountrix-header-hero" style="background-image: url(' . esc_url( $bg_image_url ) . ');">';
-			$output .= '<div class="encountrix-header-overlay">';
-			$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr( $raid_info['name'] ) . '">';
-			$output .= '<span>' . esc_html( $raid_info['name'] ) . '</span>';
-			$output .= '</h2>';
-			$output .= '</div>';
+			if ( $show_raid_name ) {
+				$output .= '<div class="encountrix-header-overlay">';
+				$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr( $raid_info['name'] ) . '">';
+				$output .= '<span>' . esc_html( $raid_info['name'] ) . '</span>';
+				$output .= '</h2>';
+				$output .= '</div>';
+			}
 			$output .= '</div>';
 		} elseif ( $show_raid_name ) {
 			$output .= '<div class="encountrix-header-simple">';
