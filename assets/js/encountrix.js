@@ -330,13 +330,23 @@
 		function adjustRaidTitleSize() {
 			$('.encountrix-header-title[data-text]').each(function () {
 				const $title = $(this);
-				const $span = $title.find('span');
+				const $span = $title.find('.encountrix-header-title-text');
 				const containerWidth = $title.width();
 				const text = $title.data('text');
+				const textLength = typeof text === 'string' ? text.trim().length : 0;
 
-				// Reset to maximum size
-				const maxSize = 32;
+				// Start slightly smaller for longer tier names and tighten further only if needed.
+				let maxSize = 30;
 				const minSize = 18;
+
+				if (textLength > 20) {
+					maxSize = 28;
+				}
+
+				if (textLength > 28) {
+					maxSize = 26;
+				}
+
 				let currentSize = maxSize;
 
 				$span.css('font-size', currentSize + 'px');
