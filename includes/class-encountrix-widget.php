@@ -444,9 +444,9 @@ class EncountrixWidget {
 				$this->api->debug_log( 'Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message() );
 				$output .= $this->render_error_inline(
 					sprintf(
-						__( 'Error loading %1$s data for guild %2$s: %3$s', 'encountrix' ),
+						/* translators: %1$s: difficulty name, %2$s: error message */
+						__( 'Error loading %1$s data: %2$s', 'encountrix' ),
 						ucfirst( $diff ),
-						$guild_id,
 						$data->get_error_message()
 					)
 				);
@@ -557,14 +557,10 @@ class EncountrixWidget {
 				}
 			}
 
-			if ( empty( $guild_display_name ) && $guild_id !== '' ) {
-				$guild_display_name = $guild_id;
-			}
-
 			if ( $guild_display_name !== '' ) {
 				return $this->render_error_inline(
 					sprintf(
-						/* translators: %s: guild name or ID */
+						/* translators: %s: guild name */
 						__( 'No data found for guild %s in this raid.', 'encountrix' ),
 						esc_html( $guild_display_name )
 					)
