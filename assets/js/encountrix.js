@@ -331,6 +331,11 @@
 			$('.encountrix-header-title[data-text]').each(function () {
 				const $title = $(this);
 				const $span = $title.find('.encountrix-header-title-text');
+
+				if (!$span.length || !$span[0]) {
+					return;
+				}
+
 				const containerWidth = $title.width();
 				const text = $title.data('text');
 				const textLength = typeof text === 'string' ? text.trim().length : 0;
