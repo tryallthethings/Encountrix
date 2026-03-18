@@ -444,9 +444,9 @@ class EncountrixWidget {
 				$this->api->debug_log( 'Raid data error for guild ' . $guild_id . ' (' . $diff . '): ' . $data->get_error_message() );
 				$output .= $this->render_error_inline(
 					sprintf(
-						__( 'Error loading %1$s data for guild %2$s: %3$s', 'encountrix' ),
+						/* translators: %1$s: difficulty name, %2$s: error message */
+						__( 'Error loading %1$s data: %2$s', 'encountrix' ),
 						ucfirst( $diff ),
-						$guild_id,
 						$data->get_error_message()
 					)
 				);

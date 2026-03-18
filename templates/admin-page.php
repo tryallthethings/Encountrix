@@ -125,7 +125,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								value="<?php echo esc_attr( $blizzard_client_secret ); ?>"
 								class="regular-text" />
 							<p class="description">
-								<?php _e( 'Found in your Battle.net application details under "Client Secret". Stored securely in your database.', 'encountrix' ); ?>
+								<?php _e( 'Found in your Battle.net application details under "Client Secret". Saved in the WordPress options table.', 'encountrix' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -221,13 +221,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 										name="encountrix_realm"
 										value="<?php echo esc_attr( $realm ); ?>"
 										class="regular-text"
-										placeholder="<?php esc_attr_e( 'Type to search realms...', 'encountrix' ); ?>"
+										placeholder="<?php echo $has_blizzard_api ? esc_attr__( 'Type to search realms...', 'encountrix' ) : esc_attr__( 'Enter realm slug (e.g., eredar)', 'encountrix' ); ?>"
 										autocomplete="off" />
-									<div class="encountrix-realm-dropdown" id="realm-dropdown" style="display: none;">
-										<div class="encountrix-realm-list" id="realm-list">
-											<!-- Populated via JavaScript -->
+									<?php if ( $has_blizzard_api ) : ?>
+										<div class="encountrix-realm-dropdown" id="realm-dropdown" style="display: none;">
+											<div class="encountrix-realm-list" id="realm-list">
+												<!-- Populated via JavaScript -->
+											</div>
 										</div>
-									</div>
+									<?php endif; ?>
 								</div>
 								<p class="description">
 									<?php if ( $has_blizzard_api ) : ?>

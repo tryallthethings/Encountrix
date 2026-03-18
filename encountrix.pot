@@ -421,9 +421,9 @@ msgstr ""
 msgid "Invalid guild ID: %s"
 msgstr ""
 
-#: includes/class-encountrix-widget.php:433
+#: includes/class-encountrix-widget.php
 #, php-format
-msgid "Error loading %s data for guild %s: %s"
+msgid "Error loading %1$s data: %2$s"
 msgstr ""
 
 #: includes/class-encountrix-widget.php:470
@@ -554,7 +554,7 @@ msgstr ""
 #: templates/admin-page.php
 msgid ""
 "Found in your Battle.net application details under \"Client Secret\". "
-"Stored securely in your database."
+"Saved in the WordPress options table."
 msgstr ""
 
 #: templates/admin-page.php
@@ -622,6 +622,10 @@ msgstr ""
 
 #: templates/admin-page.php
 msgid "Type to search realms..."
+msgstr ""
+
+#: templates/admin-page.php
+msgid "Enter realm slug (e.g., eredar)"
 msgstr ""
 
 #: templates/admin-page.php

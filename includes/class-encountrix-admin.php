@@ -23,6 +23,74 @@ class EncountrixAdmin {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 		$this->api         = $api;
+
+		add_action( 'update_option_encountrix_api_key', array( $this, 'validate_raiderio_key_on_save' ), 10, 2 );
+		add_action( 'update_option_encountrix_blizzard_client_id', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
+		add_action( 'update_option_encountrix_blizzard_client_secret', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
+	}
+
+	/**
+	 * Validate the Raider.io API key when it is saved and persist the result.
+	 *
+	 * Makes a lightweight static-data request to confirm the key is accepted.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param string $old_value Previous key value.
+	 * @param string $new_value Newly saved key value.
+	 * @return void
+	 */
+	public function validate_raiderio_key_on_save( string $old_value, string $new_value ): void {
+		if ( empty( $new_value ) ) {
+			update_option( 'encountrix_raiderio_key_valid', false );
+			return;
+		}
+
+		$url = add_query_arg(
+			array(
+				'access_key'   => $new_value,
+				'expansion_id' => 10,
+			),
+			'https://raider.io/api/v1/raiding/static-data'
+		);
+
+		$response = wp_remote_get(
+			$url,
+			array(
+				'timeout'   => 10,
+				'sslverify' => true,
+			)
+		);
+
+		$valid = ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response );
+		update_option( 'encountrix_raiderio_key_valid', $valid );
+	}
+
+	/**
+	 * Validate Blizzard API credentials when either is saved and persist the result.
+	 *
+	 * Attempts an OAuth token fetch to confirm the client ID / secret pair works.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @return void
+	 */
+	public function validate_blizzard_credentials_on_save(): void {
+		$client_id     = get_option( 'encountrix_blizzard_client_id', '' );
+		$client_secret = get_option( 'encountrix_blizzard_client_secret', '' );
+
+		if ( empty( $client_id ) || empty( $client_secret ) ) {
+			update_option( 'encountrix_blizzard_credentials_valid', false );
+			return;
+		}
+
+		// Clear any cached token so we test the new credentials.
+		$region    = get_option( 'encountrix_blizzard_region', 'eu' );
+		$cache_key = 'encountrix_blizzard_oauth_token_' . $region;
+		delete_transient( $cache_key );
+
+		$valid = false !== $this->api->get_blizzard_token( $region );
+		update_option( 'encountrix_blizzard_credentials_valid', $valid );
 	}
 
 	/**
@@ -913,9 +981,9 @@ class EncountrixAdmin {
 		// Get expansions
 		$expansions = $this->api->get_expansions();
 
-		// API key availability flags for conditional UI rendering.
-		$has_raiderio_key = ! empty( $api_key );
-		$has_blizzard_api = ! empty( $blizzard_client_id ) && ! empty( $blizzard_client_secret );
+		// Persisted validation flags — set when API keys are saved.
+		$has_raiderio_key = (bool) get_option( 'encountrix_raiderio_key_valid', false );
+		$has_blizzard_api = (bool) get_option( 'encountrix_blizzard_credentials_valid', false );
 
 		include ENCOUNTRIX_PLUGIN_DIR . 'templates/admin-page.php';
 	}

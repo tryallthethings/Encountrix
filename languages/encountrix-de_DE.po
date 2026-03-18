@@ -420,10 +420,10 @@ msgstr "Daten und Medien © Blizzard Entertainment"
 msgid "Invalid guild ID: %s"
 msgstr "Ungültige Gilden-ID: %s"
 
-#: includes/class-encountrix-widget.php:433
+#: includes/class-encountrix-widget.php
 #, php-format
-msgid "Error loading %s data for guild %s: %s"
-msgstr "Fehler beim Laden von %s-Daten für Gilde %s: %s"
+msgid "Error loading %1$s data: %2$s"
+msgstr "Fehler beim Laden von %1$s-Daten: %2$s"
 
 #: includes/class-encountrix-widget.php:470
 msgid "No raid data available for this guild."
@@ -553,8 +553,8 @@ msgstr "Client-Secret"
 #: templates/admin-page.php
 msgid ""
 "Found in your Battle.net application details under \"Client Secret\". "
-"Stored securely in your database."
-msgstr "Zu finden in deinen Battle.net-Anwendungsdetails unter \"Client-Secret\". Wird sicher in deiner Datenbank gespeichert."
+"Saved in the WordPress options table."
+msgstr "Zu finden in deinen Battle.net-Anwendungsdetails unter \"Client-Secret\". Gespeichert in der WordPress-Optionstabelle."
 
 #: templates/admin-page.php
 msgid "Debug Mode"
@@ -622,6 +622,10 @@ msgstr "Standard-Realm"
 #: templates/admin-page.php
 msgid "Type to search realms..."
 msgstr "Zum Suchen von Realms tippen ..."
+
+#: templates/admin-page.php
+msgid "Enter realm slug (e.g., eredar)"
+msgstr "Realm-Slug eingeben (z. B. eredar)"
 
 #: templates/admin-page.php
 msgid ""
