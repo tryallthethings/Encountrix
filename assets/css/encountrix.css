@@ -438,16 +438,16 @@ input[list="realm-list"]:focus {
 
 .encountrix-header-overlay {
 	position: absolute;
-	bottom: 0;
+	top: 0;
 	left: 0;
 	right: 0;
 	padding: 20px;
-	background: linear-gradient(to top,
-			rgba(0, 0, 0, 0.95) 0%,
-			rgba(0, 0, 0, 0.7) 50%,
-			rgba(0, 0, 0, 0.3) 100%);
+	background: linear-gradient(to bottom,
+			rgba(0, 0, 0, 0.92) 0%,
+			rgba(0, 0, 0, 0.7) 45%,
+			rgba(0, 0, 0, 0.15) 100%);
 	display: flex;
-	align-items: flex-end;
+	align-items: flex-start;
 }
 
 .encountrix-header-title {
@@ -466,11 +466,12 @@ input[list="realm-list"]:focus {
 
 	/* Prevent auto-hyphenation */
 	width: 100%;
+	max-width: min(100%, 26rem);
 }
 
-.encountrix-header-title span {
-	display: inline-block;
-	font-size: clamp(20px, 4vw, 32px);
+.encountrix-header-title-text {
+	display: block;
+	font-size: clamp(19px, 3.4vw, 30px);
 
 	/* Responsive font size */
 	font-weight: 700;
@@ -483,8 +484,8 @@ input[list="realm-list"]:focus {
 
 /* Fallback for very long titles */
 @media (max-width: 600px) {
-	.encountrix-header-title span {
-		font-size: clamp(18px, 3.5vw, 28px);
+	.encountrix-header-title-text {
+		font-size: clamp(17px, 3.2vw, 24px);
 	}
 }
 

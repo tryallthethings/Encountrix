@@ -229,7 +229,7 @@ class EncountrixWidget {
 			if ( $show_raid_name ) {
 				$output .= '<div class="encountrix-header-overlay">';
 				$output .= '<h2 class="encountrix-header-title" data-text="' . esc_attr( $raid_name ) . '">';
-				$output .= '<span>' . esc_html( $raid_name ) . '</span>';
+				$output .= '<span class="encountrix-header-title-text">' . esc_html( $raid_name ) . '</span>';
 				$output .= '</h2>';
 				$output .= '</div>';
 			}
