@@ -25,8 +25,14 @@ class EncountrixAdmin {
 		$this->api         = $api;
 
 		add_action( 'update_option_encountrix_api_key', array( $this, 'validate_raiderio_key_on_save' ), 10, 2 );
+		add_action( 'add_option_encountrix_api_key', array( $this, 'validate_raiderio_key_on_save' ), 10, 2 );
 		add_action( 'update_option_encountrix_blizzard_client_id', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
+		add_action( 'add_option_encountrix_blizzard_client_id', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
 		add_action( 'update_option_encountrix_blizzard_client_secret', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
+		add_action( 'add_option_encountrix_blizzard_client_secret', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
+		add_action( 'update_option_encountrix_blizzard_region', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
+		add_action( 'add_option_encountrix_blizzard_region', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
+	}
 	}
 
 	/**
