@@ -1020,10 +1020,10 @@ class EncountrixAdmin {
 		// Persisted validation flags — set when API keys are saved.
 		// On first load after upgrade, the validation options may not exist yet.
 		// In that case, run validation now so existing keys are recognised.
-		if ( false === get_option( 'encountrix_raiderio_key_valid' ) ) {
+		if ( null === get_option( 'encountrix_raiderio_key_valid', null ) ) {
 			$this->validate_raiderio_key( $api_key );
 		}
-		if ( false === get_option( 'encountrix_blizzard_credentials_valid' ) ) {
+		if ( null === get_option( 'encountrix_blizzard_credentials_valid', null ) ) {
 			$this->validate_blizzard_credentials_on_save();
 		}
 
