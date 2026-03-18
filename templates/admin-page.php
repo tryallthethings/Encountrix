@@ -162,6 +162,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								</td>
 							</tr>
 						<?php endif; ?>
+					<?php else : ?>
+						<input type="hidden" name="encountrix_debug_mode" value="<?php echo esc_attr( $debug_mode ); ?>" />
 					<?php endif; ?>
 				</table>
 			</div>
@@ -327,6 +329,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<p><?php _e( 'Enter and save a valid Raider.io API key above to configure guild, raid, display, and tool settings.', 'encountrix' ); ?></p>
 					</div>
 				</div>
+				<?php // Preserve existing values for hidden settings so they are not wiped on save. ?>
+				<input type="hidden" name="encountrix_guild_ids" value="<?php echo esc_attr( $guild_ids ); ?>" />
+				<input type="hidden" name="encountrix_region" value="<?php echo esc_attr( $region ); ?>" />
+				<input type="hidden" name="encountrix_realm" value="<?php echo esc_attr( $realm ); ?>" />
+				<input type="hidden" name="encountrix_expansion" value="<?php echo esc_attr( $expansion ); ?>" />
+				<input type="hidden" name="encountrix_raid" value="<?php echo esc_attr( $raid ); ?>" />
+				<input type="hidden" name="encountrix_difficulty" value="<?php echo esc_attr( $difficulty ); ?>" />
 			<?php endif; ?>
 
 			<p class="submit">
@@ -406,6 +415,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 									</p>
 								</td>
 							</tr>
+						<?php else : ?>
+							<input type="hidden" name="encountrix_show_raid_icon" value="<?php echo esc_attr( $show_raid_icon ); ?>" />
 						<?php endif; ?>
 						<tr>
 							<th scope="row">
@@ -448,6 +459,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 									</p>
 								</td>
 							</tr>
+						<?php else : ?>
+							<input type="hidden" name="encountrix_use_blizzard_icons" value="<?php echo esc_attr( $use_blizzard_icons ); ?>" />
 						<?php endif; ?>
 						<tr>
 							<th scope="row">
@@ -496,6 +509,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</button>
 				</p>
 			</div>
+		<?php else : ?>
+			<?php // Preserve display settings when the tab is hidden. ?>
+			<input type="hidden" name="encountrix_show_raid_name" value="<?php echo esc_attr( $show_raid_name ); ?>" />
+			<input type="hidden" name="encountrix_show_icons" value="<?php echo esc_attr( $show_icons ); ?>" />
+			<input type="hidden" name="encountrix_show_raid_icon" value="<?php echo esc_attr( $show_raid_icon ); ?>" />
+			<input type="hidden" name="encountrix_show_killed" value="<?php echo esc_attr( $show_killed ); ?>" />
+			<input type="hidden" name="encountrix_use_blizzard_icons" value="<?php echo esc_attr( $use_blizzard_icons ); ?>" />
+			<input type="hidden" name="encountrix_cache_time" value="<?php echo esc_attr( $cache_time ); ?>" />
+			<input type="hidden" name="encountrix_limit" value="<?php echo esc_attr( $limit ); ?>" />
 		<?php endif; ?>
 	</form>
 

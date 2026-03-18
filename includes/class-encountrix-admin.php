@@ -24,8 +24,9 @@ class EncountrixAdmin {
 		$this->version     = $version;
 		$this->api         = $api;
 
+		// Validate API keys whenever they are created or updated.
 		add_action( 'update_option_encountrix_api_key', array( $this, 'validate_raiderio_key_on_save' ), 10, 2 );
-		add_action( 'add_option_encountrix_api_key', array( $this, 'validate_raiderio_key_on_save' ), 10, 2 );
+		add_action( 'add_option_encountrix_api_key', array( $this, 'validate_raiderio_key_on_add' ), 10, 2 );
 		add_action( 'update_option_encountrix_blizzard_client_id', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
 		add_action( 'add_option_encountrix_blizzard_client_id', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
 		add_action( 'update_option_encountrix_blizzard_client_secret', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
@@ -33,28 +34,57 @@ class EncountrixAdmin {
 		add_action( 'update_option_encountrix_blizzard_region', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
 		add_action( 'add_option_encountrix_blizzard_region', array( $this, 'validate_blizzard_credentials_on_save' ), 10, 0 );
 	}
-	}
 
 	/**
-	 * Validate the Raider.io API key when it is saved and persist the result.
+	 * Validate the Raider.io API key when it is updated and persist the result.
 	 *
 	 * Makes a lightweight static-data request to confirm the key is accepted.
+	 * Handles the update_option action where the first arg is the old value
+	 * (which may be false if the option did not previously exist).
 	 *
 	 * @since 5.1.0
 	 *
-	 * @param string $old_value Previous key value.
-	 * @param string $new_value Newly saved key value.
+	 * @param mixed $old_value Previous key value (may be false).
+	 * @param mixed $new_value Newly saved key value.
 	 * @return void
 	 */
-	public function validate_raiderio_key_on_save( string $old_value, string $new_value ): void {
-		if ( empty( $new_value ) ) {
+	public function validate_raiderio_key_on_save( $old_value, $new_value ): void {
+		$this->validate_raiderio_key( (string) $new_value );
+	}
+
+	/**
+	 * Validate the Raider.io API key when it is first added.
+	 *
+	 * Handles the add_option action where the first arg is the option name
+	 * and the second is the value.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param string $option Option name.
+	 * @param mixed  $value  Newly saved key value.
+	 * @return void
+	 */
+	public function validate_raiderio_key_on_add( $option, $value ): void {
+		$this->validate_raiderio_key( (string) $value );
+	}
+
+	/**
+	 * Perform the actual Raider.io API key validation.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param string $key The API key to validate.
+	 * @return void
+	 */
+	private function validate_raiderio_key( string $key ): void {
+		if ( empty( $key ) ) {
 			update_option( 'encountrix_raiderio_key_valid', false );
 			return;
 		}
 
 		$url = add_query_arg(
 			array(
-				'access_key'   => $new_value,
+				'access_key'   => $key,
 				'expansion_id' => 10,
 			),
 			'https://raider.io/api/v1/raiding/static-data'
@@ -988,6 +1018,15 @@ class EncountrixAdmin {
 		$expansions = $this->api->get_expansions();
 
 		// Persisted validation flags — set when API keys are saved.
+		// On first load after upgrade, the validation options may not exist yet.
+		// In that case, run validation now so existing keys are recognised.
+		if ( false === get_option( 'encountrix_raiderio_key_valid' ) ) {
+			$this->validate_raiderio_key( $api_key );
+		}
+		if ( false === get_option( 'encountrix_blizzard_credentials_valid' ) ) {
+			$this->validate_blizzard_credentials_on_save();
+		}
+
 		$has_raiderio_key = (bool) get_option( 'encountrix_raiderio_key_valid', false );
 		$has_blizzard_api = (bool) get_option( 'encountrix_blizzard_credentials_valid', false );
 
