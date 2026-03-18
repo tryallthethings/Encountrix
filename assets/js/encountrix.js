@@ -337,7 +337,7 @@
 
 				// Start slightly smaller for longer tier names and tighten further only if needed.
 				let maxSize = 30;
-				const minSize = 18;
+				const minSize = 17;
 
 				if (textLength > 20) {
 					maxSize = 28;
